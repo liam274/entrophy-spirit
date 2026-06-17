@@ -1,4 +1,7 @@
 "use strict";
+/**
+ * @typedef {number} int
+ */
 const $ = document.querySelector.bind(document),
 	log = console.log.bind(console);
 class memory_node {
@@ -33,29 +36,20 @@ class memory_node {
  */
 class expandable_iter {
 	/**
-	 * @type {Array<type>}
+	 * @type {type[]}
 	 */
 	iterable = [];
 	/**
-	 * @param {Array<type>} iterable
+	 * @param {type[]} iterable
 	 */
 	constructor(iterable) {
 		this.iterable = iterable;
 	}
 	/**
-	 * @returns {type}
+	 * @returns {Generator<type, void, unknown>}
 	 */
-	[Symbol.iterator]() {
-		let index = 0;
-		return {
-			next() {
-				if (index < this.iterable.length) {
-					return { value: this.iterable[index++], done: false };
-				} else {
-					return { value: undefined, done: true };
-				}
-			},
-		};
+	*[Symbol.iterator]() {
+		yield* this.iterable;
 	}
 	/**
 	 * @param  {...type} items
@@ -75,11 +69,17 @@ const state = {
 	short_urge: 0.9,
 	long_urge: 0.5,
 	/**
+	 * @type {int}
+	 */
+	x: 10,
+	/**
+	 * @type {int}
+	 */
+	y: 10,
+	/**
 	 * @type {memory_node}
 	 */
-	current_thought: null,
-	x: 10,
-	y: 10,
+	current_thought: new memory_node(1, [], [], [10, 10]),
 	action: [["recall_memory", "walk"], ["run"]],
 	available_action: ["recall_memory", "walk", "run", "make_action"],
 	action_weigh: [1],
@@ -90,24 +90,29 @@ const state = {
 		let res = undefined;
 		for (const act of this.current_thought.actions) {
 			if (act in this.action) {
+				// @ts-ignore
 				res = this[act](res);
 			}
 		}
 	},
+	/**
+	 * @param {int} id
+	 * @returns {memory_node}
+	 */
 	recall_memory(id) {
 		return this.memory[
 			id ?? this.memory[Math.floor(Math.random() * this.memory.length)]
 		];
 	},
 	/**
-	 * @param {[string,string]} param0
+	 * @param {[int,int]} param0
 	 */
 	walk([x, y]) {
 		// eslint-disable-next-line no-magic-numbers
 		go((x - this.x) / 100, (y - this.y) / 100, 100);
 	},
 	/**
-	 * @param {[string,string]} param0
+	 * @param {[int,int]} param0
 	 */
 	run([x, y]) {
 		// eslint-disable-next-line no-magic-numbers
@@ -117,16 +122,14 @@ const state = {
 		/**
 		 * @type {expandable_iter<memory_node>}
 		 */
-		const iter = expandable_iter(this.current_thought.related);
+		const iter = new expandable_iter(this.current_thought.related);
 		for (const related of iter) {
-			iter.add(related.related);
+			iter.add(...related.related);
 		}
 	},
 };
-/**
- * @type {HTMLSpanElement}
- */
-const spirit = $("#spirit");
+
+const spirit = /** @type {HTMLSpanElement} */ ($("#spirit"));
 /**
  * walk to somewhere
  * @param {int} dx
