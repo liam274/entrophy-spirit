@@ -1,6 +1,6 @@
-/* eslint-disable no-undef */
-/* eslint-disable indent */
 "use strict";
+const $ = document.querySelector.bind(document),
+	log = console.log.bind(console);
 class memory_node {
 	/**
 	 * @type {int}
@@ -28,6 +28,44 @@ class memory_node {
 		this.content = content;
 	}
 }
+/**
+ * @template type
+ */
+class expandable_iter {
+	/**
+	 * @type {Array<type>}
+	 */
+	iterable = [];
+	/**
+	 * @param {Array<type>} iterable
+	 */
+	constructor(iterable) {
+		this.iterable = iterable;
+	}
+	/**
+	 * @returns {type}
+	 */
+	[Symbol.iterator]() {
+		let index = 0;
+		return {
+			next() {
+				if (index < this.iterable.length) {
+					return { value: this.iterable[index++], done: false };
+				} else {
+					return { value: undefined, done: true };
+				}
+			},
+		};
+	}
+	/**
+	 * @param  {...type} items
+	 */
+	add(...items) {
+		for (const item of items) {
+			this.iterable.push(item);
+		}
+	}
+}
 const state = {
 	dopamine: 0.5,
 	/**
@@ -36,24 +74,27 @@ const state = {
 	memory: [],
 	short_urge: 0.9,
 	long_urge: 0.5,
+	/**
+	 * @type {memory_node}
+	 */
 	current_thought: null,
 	x: 10,
 	y: 10,
 	action: [["recall_memory", "walk"], ["run"]],
-	available_action: ["recall_memory", "walk", "run"],
+	available_action: ["recall_memory", "walk", "run", "make_action"],
 	action_weigh: [1],
-	execute: function () {
+	execute() {
 		if (this.current_thought === null) {
 			return;
 		}
 		let res = undefined;
-		for (const act of this.current_thought) {
+		for (const act of this.current_thought.actions) {
 			if (act in this.action) {
 				res = this[act](res);
 			}
 		}
 	},
-	recall_memory: function (id) {
+	recall_memory(id) {
 		return this.memory[
 			id ?? this.memory[Math.floor(Math.random() * this.memory.length)]
 		];
@@ -61,20 +102,27 @@ const state = {
 	/**
 	 * @param {[string,string]} param0
 	 */
-	walk: function ([x, y]) {
+	walk([x, y]) {
 		// eslint-disable-next-line no-magic-numbers
 		go((x - this.x) / 100, (y - this.y) / 100, 100);
 	},
 	/**
 	 * @param {[string,string]} param0
 	 */
-	run: function ([x, y]) {
+	run([x, y]) {
 		// eslint-disable-next-line no-magic-numbers
 		go((x - this.x) / 30, (y - this.y) / 30, 30);
 	},
+	make_action() {
+		/**
+		 * @type {expandable_iter<memory_node>}
+		 */
+		const iter = expandable_iter(this.current_thought.related);
+		for (const related of iter) {
+			iter.add(related.related);
+		}
+	},
 };
-const $ = document.querySelector.bind(document),
-	log = console.log.bind(console);
 /**
  * @type {HTMLSpanElement}
  */
