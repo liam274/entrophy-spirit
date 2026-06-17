@@ -56,6 +56,10 @@ const state = {
 			id ?? this.memory[Math.floor(Math.random() * this.memory.length)]
 		];
 	},
+	walk: function ([x, y]) {
+		this.x = x;
+		this.y = y;
+	},
 };
 const $ = document.querySelector.bind(document),
 	log = console.log.bind(console);
