@@ -128,7 +128,6 @@ const state = {
 		}
 	},
 };
-
 const spirit = /** @type {HTMLSpanElement} */ ($("#spirit"));
 /**
  * walk to somewhere
