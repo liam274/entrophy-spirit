@@ -1,0 +1,17 @@
+body {
+	height: 100vh;
+	display: flex;
+	background-color: white;
+	margin: 0;
+}
+#spirit {
+	background-color: black;
+	width: 10px;
+	height: 10px;
+	border: none;
+	border-radius: 50%;
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	display: block;
+}
