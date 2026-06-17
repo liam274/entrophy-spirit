@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable indent */
 "use strict";
 class memory_node {
 	/**
@@ -44,9 +46,9 @@ const state = {
 		if (this.current_thought === null) {
 			return;
 		}
-		res = undefined;
+		let res = undefined;
 		for (const act of this.current_thought) {
-			if (act in action) {
+			if (act in this.action) {
 				res = this[act](res);
 			}
 		}
@@ -56,14 +58,44 @@ const state = {
 			id ?? this.memory[Math.floor(Math.random() * this.memory.length)]
 		];
 	},
+	/**
+	 * @param {[string,string]} param0
+	 */
 	walk: function ([x, y]) {
-		this.x = x;
-		this.y = y;
+		// eslint-disable-next-line no-magic-numbers
+		go((x - this.x) / 100, (y - this.y) / 100, 100);
+	},
+	/**
+	 * @param {[string,string]} param0
+	 */
+	run: function ([x, y]) {
+		// eslint-disable-next-line no-magic-numbers
+		go((x - this.x) / 30, (y - this.y) / 30, 30);
 	},
 };
 const $ = document.querySelector.bind(document),
 	log = console.log.bind(console);
+/**
+ * @type {HTMLSpanElement}
+ */
 const spirit = $("#spirit");
+/**
+ * walk to somewhere
+ * @param {int} dx
+ * @param {int} dy
+ * @param {int} step
+ */
+function go(dx, dy, step) {
+	let time = 0;
+	const id = setInterval(() => {
+		if (time === step) {
+			clearInterval(id);
+		}
+		spirit.style.left = `${(state.x += dx)}px`;
+		spirit.style.top = `${(state.y += dy)}px`;
+		time++;
+	}, 1);
+}
 /**
  * main loop
  * @returns null
