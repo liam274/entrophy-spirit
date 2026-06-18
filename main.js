@@ -78,7 +78,7 @@ const state = {
 	/**@type {int} */
 	y: 10,
 	/** @type {memory_node} */
-	current_thought: new memory_node(1, [], [], [10, 10], []),
+	current_thought: new memory_node(1, [], ["walk"], [10, 10], []),
 	/**@type {string[][]} */
 	action: [
 		["recall_memory", "walk"],
@@ -86,6 +86,8 @@ const state = {
 		["make_action"],
 		["talk"],
 		["make_memory"],
+		["draw"],
+		["erase"],
 	],
 	/**@type {Set<string>} */
 	available_action: new Set([
@@ -95,6 +97,8 @@ const state = {
 		"make_action",
 		"talk",
 		"make_memory",
+		"draw",
+		"erase",
 	]),
 	/**@type {int[]} */
 	action_weigh: [1, 1, 1],
@@ -208,6 +212,29 @@ const actions = {
 			nearby()
 		);
 		state.current_thought.related.push(now_memory);
+	},
+	/**
+	 * @param {{x: int, y: int}} param0
+	 */
+	draw({ x = state.x, y = state.y }) {
+		const pixel = $$("div");
+		pixel.classList.add("pixel");
+		pixel.style.backgroundColor = cursor_state.color;
+		for (const element of element_from_point({ x, y })) {
+			element.remove();
+		}
+		pixel.style.left = `${x}px`;
+		pixel.style.top = `${y}px`;
+		body.appendChild(pixel);
+	},
+	/**
+	 * @param {{x: int, y: int}} param0
+	 */
+	erase({ x = state.x, y = state.y }) {
+		for (const element of element_from_point({ x, y })) {
+			element.remove();
+			elements.splice(elements.indexOf(element), 1);
+		}
 	},
 };
 /** @type {HTMLElement[]} */
