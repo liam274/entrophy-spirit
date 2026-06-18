@@ -269,13 +269,34 @@ function go(dx, dy, step) {
 function nearby() {
 	/** @type {any[]} */
 	const result = [];
-	const pos = { x: state.x, y: state.y };
-	for (let x = -state.site; x <= state.site; x++) {
-		for (let y = -state.site; y <= state.site; y++) {
-			result.concat(element_from_point({ x: pos.x + x, y: pos.y + y }));
+	if (elements.length < 10000) {
+		for (const element of elements) {
+			if (distance(element) < state.site) {
+				result.push(element);
+			}
+		}
+	} else {
+		const pos = { x: state.x, y: state.y };
+		for (let x = -state.site; x <= state.site; x++) {
+			for (let y = -state.site; y <= state.site; y++) {
+				result.concat(
+					element_from_point({ x: pos.x + x, y: pos.y + y })
+				);
+			}
 		}
 	}
 	return result;
+}
+/**
+ * @param {HTMLElement} element
+ * @returns {float}
+ */
+function distance(element) {
+	const temp = getComputedStyle(element);
+	return Math.sqrt(
+		Math.pow(parseFloat(temp.left) - state.x, 2) +
+			Math.pow(parseFloat(temp.top) - state.y, 2)
+	);
 }
 const cursor_state = {
 	/** @type {int} */
