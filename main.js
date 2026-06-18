@@ -397,7 +397,7 @@ const cursor_state = {
 	/** @type {int} */
 	y: 0,
 	/** @type {string} */
-	mode: "",
+	mode: "click",
 	/** @type {string} */
 	color: "black",
 	/** @type {[int,int][]} */
@@ -418,7 +418,7 @@ $("#dump-all")?.addEventListener("click", () => {
 });
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {
-	if (mousedown) {
+	if (mousedown || cursor_state.mode === "click") {
 		return;
 	}
 	cursor_state.consume.push([
@@ -437,10 +437,11 @@ document.addEventListener("mousemove", (e) => {
 	]);
 });
 document.addEventListener("mouseup", () => {
-	if (!mousedown) {
+	if (!mousedown || cursor_state.mode === "click") {
 		return;
 	}
 	mousedown = false;
+	cursor_state.consume.length = 0;
 });
 /**
  *
