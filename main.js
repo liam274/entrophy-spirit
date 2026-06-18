@@ -191,6 +191,7 @@ const state = {
 	/**@type {int} */
 	max_sleep: 100,
 };
+state.memory.push(state.current_thought);
 /**@type {Object<string,CallableFunction>} */
 const actions = {
 	/**
@@ -293,6 +294,8 @@ const actions = {
 			nearby()
 		);
 		state.current_thought.related.push(now_memory);
+		state.memory.push(now_memory);
+		state.current_thought = now_memory;
 	},
 	/**
 	 * @param {{x: int, y: int}} param0
