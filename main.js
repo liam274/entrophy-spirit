@@ -4,9 +4,11 @@
  * @typedef {number} float
  */
 const $ = document.querySelector.bind(document),
-	log = console.log.bind(console);
+	log = console.log.bind(console),
+	$$ = document.createElement.bind(document);
 const spirit = /** @type {HTMLSpanElement} */ ($("#spirit")),
-	blackboard = /**@type {HTMLTextAreaElement} */ ($("#blackboard"));
+	blackboard = /**@type {HTMLTextAreaElement} */ ($("#blackboard")),
+	{ body } = document;
 class memory_node {
 	/** @type {int} */
 	weigh = 0;
@@ -15,7 +17,7 @@ class memory_node {
 	/** @type {string[]} */
 	actions = [];
 	/** @type {[int,int]} */
-	position = [state.x, state.y];
+	position = [0, 0];
 	/** @type {any[]} */
 	content = [];
 	/**
@@ -243,6 +245,83 @@ function distance(element) {
 	return Math.sqrt(
 		Math.pow(parseFloat(temp.left) - state.x, 2) +
 			Math.pow(parseFloat(temp.top) - state.y, 2)
+	);
+}
+const cursor_state = {
+	/** @type {int} */
+	x: 0,
+	/** @type {int} */
+	y: 0,
+	/** @type {string} */
+	mode: "",
+	/** @type {string} */
+	color: "black",
+};
+$("#pen")?.addEventListener("click", () => {
+	cursor_state.mode = "pen";
+});
+$("#eraser")?.addEventListener("click", () => {
+	cursor_state.mode = "eraser";
+});
+$("#dump-all")?.addEventListener("click", () => {
+	cursor_state.mode = "click";
+	elements.map((v) => {
+		v.remove();
+	});
+	elements.length = 0;
+});
+let mousedown = false;
+document.addEventListener("mousedown", (e) => {
+	cursor_state.x = e.clientX;
+	cursor_state.y = e.clientY;
+	mousedown = true;
+});
+document.addEventListener("mousemove", (e) => {
+	if (mousedown) {
+		cursor_state.x = e.clientX;
+		cursor_state.y = e.clientY;
+		switch (cursor_state.mode) {
+			case "pen": {
+				const pixel = $$("div");
+				pixel.classList.add("pixel");
+				pixel.style.backgroundColor = cursor_state.color;
+				for (const element of element_from_point(
+					cursor_state.x,
+					cursor_state.y
+				)) {
+					element.remove();
+				}
+				pixel.style.left = `${cursor_state.x}px`;
+				pixel.style.top = `${cursor_state.y}px`;
+				body.appendChild(pixel);
+				break;
+			}
+			case "eraser": {
+				for (const element of element_from_point(
+					cursor_state.x,
+					cursor_state.y
+				)) {
+					element.remove();
+				}
+				break;
+			}
+		}
+	}
+});
+document.addEventListener("mouseup", (e) => {
+	cursor_state.x = e.clientX;
+	cursor_state.y = e.clientY;
+	mousedown = false;
+});
+/**
+ * @param {int} x
+ * @param {int} y
+ * @returns {HTMLElement[]}
+ */
+function element_from_point(x, y) {
+	// @ts-ignore
+	return (document.elementsFromPoint(x, y) ?? []).filter((el) =>
+		el.classList.contains("pixel")
 	);
 }
 /**

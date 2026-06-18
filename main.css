@@ -47,8 +47,26 @@ body {
 .button {
 	width: 50px;
 	height: 50px;
-	border: 1px rgb(128, 128, 128);
+	border: 1px solid gray;
 	border-radius: 5px;
 	background-color: transparent;
 	cursor: pointer;
+	transition: linear all 0.1s;
+}
+.button:hover {
+	box-shadow: 2px 2px gray;
+	transform: translateX(-2px) translateY(-2px);
+}
+.button:active {
+	transform: none;
+	box-shadow: none;
+}
+.pixel {
+	height: 5px;
+	width: 5px;
+	border: none;
+	border-radius: 50%;
+	position: absolute;
+	left: 0;
+	top: 0;
 }
