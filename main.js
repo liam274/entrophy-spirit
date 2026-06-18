@@ -65,6 +65,33 @@ class expandable_iter {
 		}
 	}
 }
+/**
+ * @template type
+ */
+class cache {
+	/** @type {boolean} */
+	ok = true;
+	/**
+	 * @param {type} data
+	 */
+	constructor(data) {
+		this.data = data;
+	}
+	unset() {
+		this.ok = false;
+	}
+	/** @param {type} data */
+	set(data) {
+		this.data = data;
+		this.ok = true;
+	}
+	/**
+	 * @returns {type|undefined}
+	 */
+	get() {
+		return this.ok ? this.data : undefined;
+	}
+}
 const state = {
 	dopamine: 0.5,
 	/**
@@ -224,6 +251,7 @@ const actions = {
 	 * @param {{x: int, y: int}} param0
 	 */
 	draw({ x = state.x, y = state.y }) {
+		_cache.unset();
 		const pixel = $$("div");
 		pixel.classList.add("pixel");
 		pixel.style.backgroundColor = cursor_state.color;
@@ -238,6 +266,7 @@ const actions = {
 	 * @param {{x: int, y: int}} param0
 	 */
 	erase({ x = state.x, y = state.y }) {
+		_cache.unset();
 		for (const element of element_from_point({ x, y })) {
 			element.remove();
 			elements.splice(elements.indexOf(element), 1);
@@ -253,6 +282,10 @@ const elements = [];
  * @param {int} step
  */
 function go(dx, dy, step) {
+	if (dx === 0 && dy === 0) {
+		_cache.unset();
+		return;
+	}
 	let time = 0;
 	const id = setInterval(() => {
 		if (time === step) {
@@ -264,11 +297,18 @@ function go(dx, dy, step) {
 	}, 1);
 }
 /**
- * @returns {any[]}
+ * @type {cache<HTMLElement[]>}
+ */
+const _cache = new cache([]);
+/**
+ * @returns {HTMLElement[]}
  */
 function nearby() {
-	/** @type {any[]} */
+	/** @type {HTMLElement[]} */
 	const result = [];
+	if (_cache.ok) {
+		return _cache.data;
+	}
 	if (elements.length < 10000) {
 		for (const element of elements) {
 			if (distance(element) < state.site) {
@@ -285,6 +325,7 @@ function nearby() {
 			}
 		}
 	}
+	_cache.set(result);
 	return result;
 }
 /**
@@ -368,6 +409,7 @@ function main() {
 	spirit.style.top = `${state.y}px`;
 	state.execute();
 	if (cursor_state.consume.length) {
+		_cache.unset();
 		switch (cursor_state.mode) {
 			case "pen": {
 				const [x, y] = /** @type {[int,int]}*/ (
