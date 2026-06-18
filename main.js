@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 "use strict";
 /**
  * @typedef {number} int
@@ -130,14 +131,18 @@ const state = {
 		"sleep",
 	],
 	/**@type {int[]} */
-	action_weigh: [1, 1, 1, 1, 1, 1, 1, 1],
+	action_weigh: [1, 1, 1, 1, 1, 1, 1, 1, 1],
+	/**@type {int[]} */
+	action_energy: [0.5, 10, 20, 0.5, 1, 0, 1, 1, 0],
 	execute() {
 		let res = undefined,
 			tried = false;
 		for (const act of this.current_thought.actions) {
-			if (act in this.available_action) {
+			if (this.available_action.includes(act)) {
 				res = actions[act](res);
 				tried = true;
+				state.energy -=
+					this.action_energy[this.available_action.indexOf(act)];
 			}
 		}
 		if (!tried) {
@@ -149,11 +154,18 @@ const state = {
 		}
 		actions.make_memory();
 	},
+	/**@type {int} */
 	max_depth: 3,
+	/**@type {int} */
 	site: 40,
+	/**@type {int} */
 	general_weigh: 10,
 	/**@type {int} */
 	sleep: 0,
+	/**@type {int} */
+	energy: 100,
+	/**@type {int} */
+	max_sleep: 100,
 };
 /**@type {Object<string,CallableFunction>} */
 const actions = {
@@ -280,7 +292,7 @@ const actions = {
 		}
 	},
 	sleep() {
-		state.sleep += Math.floor(Math.random() * 10) * 1000;
+		state.sleep += Math.floor(Math.random() * state.max_sleep);
 	},
 };
 /** @type {HTMLElement[]} */
@@ -455,8 +467,9 @@ function main() {
 		}
 	}
 	setTimeout(() => {
+		state.energy += state.sleep;
 		state.sleep = 0;
 		requestAnimationFrame(main);
-	}, state.sleep);
+	}, state.sleep * 1000);
 }
 requestAnimationFrame(main);
