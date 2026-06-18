@@ -104,7 +104,7 @@ const state = {
 		}
 		let res = undefined;
 		for (const act of this.current_thought.actions) {
-			if (act in this.action) {
+			if (act in this.available_action) {
 				res = actions[act](res);
 			}
 		}
@@ -120,9 +120,15 @@ const actions = {
 	 * @returns {memory_node}
 	 */
 	recall_memory(id) {
-		return state.memory[
-			id ?? state.memory[Math.floor(Math.random() * state.memory.length)]
-		];
+		const result =
+			state.memory[
+				id ??
+					state.memory[
+						Math.floor(Math.random() * state.memory.length)
+					]
+			];
+		result.weigh++;
+		return result;
 	},
 	/**
 	 * @param {[int,int]} param0
@@ -256,6 +262,8 @@ const cursor_state = {
 	mode: "",
 	/** @type {string} */
 	color: "black",
+	/** @type {[int,int][]} */
+	consume: [],
 };
 $("#pen")?.addEventListener("click", () => {
 	cursor_state.mode = "pen";
@@ -272,55 +280,35 @@ $("#dump-all")?.addEventListener("click", () => {
 });
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {
+	if (mousedown) {
+		return;
+	}
 	cursor_state.x = e.clientX;
 	cursor_state.y = e.clientY;
 	mousedown = true;
 });
 document.addEventListener("mousemove", (e) => {
-	if (mousedown) {
-		cursor_state.x = e.clientX;
-		cursor_state.y = e.clientY;
-		switch (cursor_state.mode) {
-			case "pen": {
-				const pixel = $$("div");
-				pixel.classList.add("pixel");
-				pixel.style.backgroundColor = cursor_state.color;
-				for (const element of element_from_point(
-					cursor_state.x,
-					cursor_state.y
-				)) {
-					element.remove();
-				}
-				pixel.style.left = `${cursor_state.x}px`;
-				pixel.style.top = `${cursor_state.y}px`;
-				body.appendChild(pixel);
-				elements.push(pixel);
-				break;
-			}
-			case "eraser": {
-				for (const element of element_from_point(
-					cursor_state.x,
-					cursor_state.y
-				)) {
-					element.remove();
-					elements.splice(elements.indexOf(element), 1);
-				}
-				break;
-			}
-		}
+	if (!mousedown) {
+		return;
 	}
+	cursor_state.x = e.clientX;
+	cursor_state.y = e.clientY;
+	cursor_state.consume.push([cursor_state.x, cursor_state.y]);
 });
 document.addEventListener("mouseup", (e) => {
+	if (!mousedown) {
+		return;
+	}
 	cursor_state.x = e.clientX;
 	cursor_state.y = e.clientY;
 	mousedown = false;
 });
 /**
- * @param {int} x
- * @param {int} y
+ *
+ * @param {{x: int,y: int}} param0
  * @returns {HTMLElement[]}
  */
-function element_from_point(x, y) {
+function element_from_point({ x, y }) {
 	// @ts-ignore
 	return (document.elementsFromPoint(x, y) ?? []).filter((el) =>
 		el.classList.contains("pixel")
@@ -334,6 +322,33 @@ function main() {
 	spirit.style.left = `${state.x}px`;
 	spirit.style.top = `${state.y}px`;
 	state.execute();
+	if (cursor_state.consume.length) {
+		const [x, y] = cursor_state.consume.pop() ?? [undefined, undefined];
+		if (x !== undefined && y !== undefined) {
+			switch (cursor_state.mode) {
+				case "pen": {
+					const pixel = $$("div");
+					pixel.classList.add("pixel");
+					pixel.style.backgroundColor = cursor_state.color;
+					for (const element of element_from_point(cursor_state)) {
+						element.remove();
+					}
+					pixel.style.left = `${x}px`;
+					pixel.style.top = `${y}px`;
+					body.appendChild(pixel);
+					elements.push(pixel);
+					break;
+				}
+				case "eraser": {
+					for (const element of element_from_point(cursor_state)) {
+						element.remove();
+						elements.splice(elements.indexOf(element), 1);
+					}
+					break;
+				}
+			}
+		}
+	}
 	requestAnimationFrame(main);
 }
 requestAnimationFrame(main);
