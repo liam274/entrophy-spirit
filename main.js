@@ -153,10 +153,30 @@ const state = {
 		"erase",
 		"sleep",
 	],
-	/**@type {int[]} */
-	action_weigh: [1, 1, 1, 1, 1, 1, 1, 1, 1],
-	/**@type {int[]} */
-	action_energy: [0.5, 10, 20, 0.5, 1, 0, 1, 1, 0],
+	/**@type {Object<string,int>} */
+	action_weigh: {
+		recall_memory: 1,
+		walk: 1,
+		run: 1,
+		make_action: 1,
+		talk: 1,
+		make_memory: 1,
+		draw: 1,
+		erase: 1,
+		sleep: 1,
+	},
+	/**@type {Object<string,int>} */
+	action_energy: {
+		recall_memory: 0.5,
+		walk: 10,
+		run: 20,
+		make_action: 0.5,
+		talk: 1,
+		make_memory: 0,
+		draw: 1,
+		erase: 1,
+		sleep: 0,
+	},
 	execute() {
 		let res = undefined,
 			tried = false;
@@ -272,7 +292,6 @@ const actions = {
 			}
 		}
 		state.action.push(action);
-		state.action_weigh.push(state.general_weigh);
 	},
 	/**
 	 * @param  {...string} message
@@ -289,7 +308,7 @@ const actions = {
 		const now_memory = new memory_node(
 			state.general_weigh,
 			[state.current_thought],
-			state.current_thought.actions,
+			decive_action(state.current_thought.actions),
 			[state.x, state.y],
 			nearby()
 		);
@@ -392,6 +411,16 @@ function distance(element) {
 		Math.pow(parseFloat(temp.left) - state.x, 2) +
 			Math.pow(parseFloat(temp.top) - state.y, 2)
 	);
+}
+/**
+ * deceive new action
+ * @param {string[]} action_data
+ * @returns {string[]}
+ */
+function decive_action(action_data) {
+	/** @type {string[]} */
+	const result = [];
+	return result;
 }
 const cursor_state = {
 	/** @type {int} */
