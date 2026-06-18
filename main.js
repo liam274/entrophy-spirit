@@ -421,8 +421,10 @@ document.addEventListener("mousedown", (e) => {
 	if (mousedown) {
 		return;
 	}
-	cursor_state.x = e.clientX;
-	cursor_state.y = e.clientY;
+	cursor_state.consume.push([
+		(cursor_state.x = e.clientX),
+		(cursor_state.y = e.clientY),
+	]);
 	mousedown = true;
 });
 document.addEventListener("mousemove", (e) => {
@@ -434,7 +436,7 @@ document.addEventListener("mousemove", (e) => {
 		(cursor_state.y = e.clientY),
 	]);
 });
-document.addEventListener("mouseup", (e) => {
+document.addEventListener("mouseup", () => {
 	if (!mousedown) {
 		return;
 	}
