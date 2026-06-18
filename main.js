@@ -89,8 +89,8 @@ const state = {
 		["draw"],
 		["erase"],
 	],
-	/**@type {Set<string>} */
-	available_action: new Set([
+	/**@type {string[]} */
+	available_action: [
 		"recall_memory",
 		"walk",
 		"run",
@@ -99,19 +99,26 @@ const state = {
 		"make_memory",
 		"draw",
 		"erase",
-	]),
+	],
 	/**@type {int[]} */
 	action_weigh: [1, 1, 1],
 	execute() {
-		if (this.current_thought === null) {
-			return;
-		}
-		let res = undefined;
+		let res = undefined,
+			tried = false;
 		for (const act of this.current_thought.actions) {
 			if (act in this.available_action) {
 				res = actions[act](res);
+				tried = true;
 			}
 		}
+		if (!tried) {
+			this.current_thought.actions.push(
+				state.available_action[
+					Math.floor(Math.random() * state.available_action.length)
+				]
+			);
+		}
+		actions.make_memory();
 	},
 	max_depth: 3,
 	site: 40,
