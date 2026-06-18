@@ -10,6 +10,8 @@ const $ = document.querySelector.bind(document),
 const spirit = /** @type {HTMLSpanElement} */ ($("#spirit")),
 	blackboard = /**@type {HTMLTextAreaElement} */ ($("#blackboard")),
 	{ body } = document;
+const MINUTE = 60;
+const MILLISECOND = 1000;
 class memory_node {
 	/** @type {int} */
 	weigh = 0;
@@ -25,6 +27,8 @@ class memory_node {
 	x = 0;
 	/** @type {int} */
 	y = 0;
+	/** @type {float} */
+	last_time = 0;
 	/**
 	 * @param {int} weigh
 	 * @param {memory_node[]} related
@@ -40,6 +44,14 @@ class memory_node {
 		this.position = position;
 		this.content = content;
 		[this.x, this.y] = this.position;
+		this.last_time = Date.now();
+	}
+	update_weigh() {
+		/* We don't care what the weigh is like, until we access the node */
+		const now = Date.now();
+		const interval = now - this.last_time;
+		this.weigh -= interval / (MINUTE * MILLISECOND);
+		this.last_time = now - (interval % (MINUTE * MILLISECOND));
 	}
 }
 /**
@@ -114,7 +126,7 @@ const state = {
 	current_thought: new memory_node(
 		1,
 		[],
-		["recall_memory", "walk"],
+		["recall_memory", "walk", "draw"],
 		[100, 100],
 		[]
 	),
@@ -148,6 +160,7 @@ const state = {
 	execute() {
 		let res = undefined,
 			tried = false;
+		this.current_thought.update_weigh();
 		for (const act of this.current_thought.actions) {
 			if (this.available_action.includes(act)) {
 				res = actions[act](res);
@@ -194,6 +207,7 @@ const actions = {
 					]
 			) ?? state.current_thought;
 		result.weigh += state.general_weigh;
+		result.update_weigh();
 		return result;
 	},
 	/**
@@ -211,6 +225,7 @@ const actions = {
 		go((x - state.x) / 30, (y - state.y) / 30, 30);
 	},
 	make_action() {
+		state.current_thought.update_weigh();
 		/**
 		 * @type {expandable_iter<memory_node>}
 		 */
@@ -222,6 +237,7 @@ const actions = {
 			width = 0,
 			tried = 0;
 		for (const node of iter) {
+			node.update_weigh();
 			iter.add(...node.related);
 			width += node.related.length;
 			const w = node.weigh;
@@ -266,8 +282,10 @@ const actions = {
 		blackboard.innerText += message.join(". ");
 	},
 	make_memory() {
+		state.current_thought.update_weigh();
 		if (_cache.ok) {
 			state.current_thought.weigh += state.general_weigh;
+			return;
 		}
 		const now_memory = new memory_node(
 			state.general_weigh,
@@ -482,6 +500,6 @@ function main() {
 		state.energy += state.sleep;
 		state.sleep = 0;
 		requestAnimationFrame(main);
-	}, state.sleep * 1000);
+	}, state.sleep * MILLISECOND);
 }
 requestAnimationFrame(main);
