@@ -445,6 +445,9 @@ document.addEventListener("mouseup", () => {
 	mousedown = false;
 	cursor_state.consume.length = 0;
 });
+document.addEventListener("contextmenu", (e) => {
+	e.preventDefault();
+});
 /**
  *
  * @param {{x: int,y: int}} param0
@@ -471,12 +474,18 @@ function main() {
 				const [x, y] = /** @type {[int,int]}*/ (
 					cursor_state.consume.pop()
 				);
+				let a = false;
+				for (const element of element_from_point({ x, y })) {
+					element.style.backgroundColor = cursor_state.color;
+					a = true;
+					break;
+				}
+				if (a) {
+					break;
+				}
 				const pixel = $$("div");
 				pixel.classList.add("pixel");
 				pixel.style.backgroundColor = cursor_state.color;
-				for (const element of element_from_point(cursor_state)) {
-					element.remove();
-				}
 				pixel.style.left = `${x}px`;
 				pixel.style.top = `${y}px`;
 				body.appendChild(pixel);
