@@ -1,33 +1,36 @@
 "use strict";
 /**
  * @typedef {number} int
+ * @typedef {number} float
  */
 const $ = document.querySelector.bind(document),
 	log = console.log.bind(console);
+const spirit = /** @type {HTMLSpanElement} */ ($("#spirit")),
+	blackboard = /**@type {HTMLTextAreaElement} */ ($("#blackboard"));
 class memory_node {
-	/**
-	 * @type {int}
-	 */
+	/** @type {int} */
 	weigh = 0;
-	/**
-	 * @type {memory_node[]}
-	 */
+	/** @type {memory_node[]} */
 	related = [];
-	/**
-	 * @type {string[]}
-	 */
+	/** @type {string[]} */
 	actions = [];
+	/** @type {[int,int]} */
+	position = [state.x, state.y];
+	/** @type {any[]} */
+	content = [];
 	/**
 	 * @param {int} weigh
 	 * @param {memory_node[]} related
 	 * @param {string[]} actions
-	 * @param {[int,int]} content
+	 * @param {[int,int]} position
+	 * @param {any[]} content
 	 * @returns memory_node
 	 */
-	constructor(weigh, related, actions, content) {
+	constructor(weigh, related, actions, position, content) {
 		this.weigh = weigh;
 		this.related = related;
 		this.actions = actions;
+		this.position = position;
 		this.content = content;
 	}
 }
@@ -73,11 +76,24 @@ const state = {
 	/**@type {int} */
 	y: 10,
 	/** @type {memory_node} */
-	current_thought: new memory_node(1, [], [], [10, 10]),
+	current_thought: new memory_node(1, [], [], [10, 10], []),
 	/**@type {string[][]} */
-	action: [["recall_memory", "walk"], ["run"], ["make_action"]],
-	/**@type {string[]} */
-	available_action: ["recall_memory", "walk", "run", "make_action"],
+	action: [
+		["recall_memory", "walk"],
+		["run"],
+		["make_action"],
+		["talk"],
+		["make_memory"],
+	],
+	/**@type {Set<string>} */
+	available_action: new Set([
+		"recall_memory",
+		"walk",
+		"run",
+		"make_action",
+		"talk",
+		"make_memory",
+	]),
 	/**@type {int[]} */
 	action_weigh: [1, 1, 1],
 	execute() {
@@ -87,18 +103,21 @@ const state = {
 		let res = undefined;
 		for (const act of this.current_thought.actions) {
 			if (act in this.action) {
-				// @ts-ignore
-				res = this[act](res);
+				res = actions[act](res);
 			}
 		}
 	},
+	max_depth: 3,
+};
+/**@type {Object<string,CallableFunction>} */
+const actions = {
 	/**
 	 * @param {int} id
 	 * @returns {memory_node}
 	 */
 	recall_memory(id) {
-		return this.memory[
-			id ?? this.memory[Math.floor(Math.random() * this.memory.length)]
+		return state.memory[
+			id ?? state.memory[Math.floor(Math.random() * state.memory.length)]
 		];
 	},
 	/**
@@ -106,23 +125,23 @@ const state = {
 	 */
 	walk([x, y]) {
 		// eslint-disable-next-line no-magic-numbers
-		go((x - this.x) / 100, (y - this.y) / 100, 100);
+		go((x - state.x) / 100, (y - state.y) / 100, 100);
 	},
 	/**
 	 * @param {[int,int]} param0
 	 */
 	run([x, y]) {
 		// eslint-disable-next-line no-magic-numbers
-		go((x - this.x) / 30, (y - this.y) / 30, 30);
+		go((x - state.x) / 30, (y - state.y) / 30, 30);
 	},
 	make_action() {
 		/**
 		 * @type {expandable_iter<memory_node>}
 		 */
-		const iter = new expandable_iter([this.current_thought]),
+		const iter = new expandable_iter([state.current_thought]),
 			/**@type {Object<string,int>} */
 			list = {};
-		let point = this.current_thought.related.length,
+		let point = state.current_thought.related.length,
 			time = 0,
 			width = 0,
 			tried = 0;
@@ -161,11 +180,28 @@ const state = {
 				break;
 			}
 		}
-		this.action.push(action);
+		state.action.push(action);
+		state.action_weigh.push(10);
 	},
-	max_depth: 3,
+	/**
+	 * @param  {...string} message
+	 */
+	talk(...message) {
+		blackboard.innerText += message.join(". ");
+	},
+	make_memory() {
+		const now_memory = new memory_node(
+			10,
+			[state.current_thought],
+			state.current_thought.actions,
+			[state.x, state.y],
+			nearby()
+		);
+		state.current_thought.related.push(now_memory);
+	},
 };
-const spirit = /** @type {HTMLSpanElement} */ ($("#spirit"));
+/** @type {HTMLElement[]} */
+const elements = [];
 /**
  * walk to somewhere
  * @param {int} dx
@@ -182,6 +218,30 @@ function go(dx, dy, step) {
 		spirit.style.top = `${(state.y += dy)}px`;
 		time++;
 	}, 1);
+}
+/**
+ * @returns {any[]}
+ */
+function nearby() {
+	/** @type {any[]} */
+	const result = [];
+	for (const element of elements) {
+		if (distance(element) < 40) {
+			result.push(element);
+		}
+	}
+	return result;
+}
+/**
+ * @param {HTMLElement} element
+ * @returns {float}
+ */
+function distance(element) {
+	const temp = getComputedStyle(element);
+	return Math.sqrt(
+		Math.pow(parseFloat(temp.left) - state.x, 2) +
+			Math.pow(parseFloat(temp.top) - state.y, 2)
+	);
 }
 /**
  * main loop

@@ -3,6 +3,8 @@ body {
 	display: flex;
 	background-color: white;
 	margin: 0;
+	justify-content: flex-end;
+	align-items: flex-end;
 }
 #spirit {
 	background-color: black;
@@ -14,4 +16,13 @@ body {
 	top: 10px;
 	left: 10px;
 	display: block;
+}
+#blackboard {
+	width: 350px;
+	height: 200px;
+	border: 1px solid black;
+	border-radius: 10px 0 0 0;
+	resize: none;
+	padding: 15px;
+	outline: none;
 }
