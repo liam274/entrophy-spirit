@@ -347,40 +347,38 @@ function main() {
 	spirit.style.top = `${state.y}px`;
 	state.execute();
 	if (cursor_state.consume.length) {
-		if (x !== undefined && y !== undefined) {
-			switch (cursor_state.mode) {
-				case "pen": {
-					const [x, y] = cursor_state.consume.pop() ?? [
-						undefined,
-						undefined,
-					];
-					const pixel = $$("div");
-					pixel.classList.add("pixel");
-					pixel.style.backgroundColor = cursor_state.color;
-					for (const element of element_from_point(cursor_state)) {
-						element.remove();
-					}
-					pixel.style.left = `${x}px`;
-					pixel.style.top = `${y}px`;
-					body.appendChild(pixel);
-					elements.push(pixel);
-					break;
+		switch (cursor_state.mode) {
+			case "pen": {
+				const [x, y] = cursor_state.consume.pop() ?? [
+					undefined,
+					undefined,
+				];
+				const pixel = $$("div");
+				pixel.classList.add("pixel");
+				pixel.style.backgroundColor = cursor_state.color;
+				for (const element of element_from_point(cursor_state)) {
+					element.remove();
 				}
-				case "eraser": {
-					const { x, y } = cursor_state;
-					for (let dx = -15; dx <= 15; dx++) {
-						for (let dy = -15; dy < 15; dy++) {
-							for (const element of element_from_point({
-								x: dx + x,
-								y: dy + y,
-							})) {
-								element.remove();
-								elements.splice(elements.indexOf(element), 1);
-							}
+				pixel.style.left = `${x}px`;
+				pixel.style.top = `${y}px`;
+				body.appendChild(pixel);
+				elements.push(pixel);
+				break;
+			}
+			case "eraser": {
+				const { x, y } = cursor_state;
+				for (let dx = -15; dx <= 15; dx++) {
+					for (let dy = -15; dy < 15; dy++) {
+						for (const element of element_from_point({
+							x: dx + x,
+							y: dy + y,
+						})) {
+							element.remove();
+							elements.splice(elements.indexOf(element), 1);
 						}
 					}
-					break;
 				}
+				break;
 			}
 		}
 	}
