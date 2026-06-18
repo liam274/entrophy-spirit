@@ -108,6 +108,8 @@ const state = {
 		}
 	},
 	max_depth: 3,
+	site: 40,
+	general_weigh: 10,
 };
 /**@type {Object<string,CallableFunction>} */
 const actions = {
@@ -181,7 +183,7 @@ const actions = {
 			}
 		}
 		state.action.push(action);
-		state.action_weigh.push(10);
+		state.action_weigh.push(state.general_weigh);
 	},
 	/**
 	 * @param  {...string} message
@@ -191,7 +193,7 @@ const actions = {
 	},
 	make_memory() {
 		const now_memory = new memory_node(
-			10,
+			state.general_weigh,
 			[state.current_thought],
 			state.current_thought.actions,
 			[state.x, state.y],
@@ -226,7 +228,7 @@ function nearby() {
 	/** @type {any[]} */
 	const result = [];
 	for (const element of elements) {
-		if (distance(element) < 40) {
+		if (distance(element) < state.site) {
 			result.push(element);
 		}
 	}
