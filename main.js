@@ -302,12 +302,13 @@ const actions = {
 	 */
 	draw({ x, y } = { x: state.x, y: state.y }) {
 		_cache.unset();
+		for (const element of element_from_point({ x, y })) {
+			element.style.backgroundColor = cursor_state.color;
+			return;
+		}
 		const pixel = $$("div");
 		pixel.classList.add("pixel");
 		pixel.style.backgroundColor = cursor_state.color;
-		for (const element of element_from_point({ x, y })) {
-			element.remove();
-		}
 		pixel.style.left = `${x}px`;
 		pixel.style.top = `${y}px`;
 		body.appendChild(pixel);
