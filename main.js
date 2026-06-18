@@ -197,16 +197,16 @@ const actions = {
 		return result;
 	},
 	/**
-	 * @param {[int,int]} param0
+	 * @param {{x:int,y:int}} param0
 	 */
-	walk([x, y] = [state.x + 1, state.y + 1]) {
+	walk({ x, y } = { x: state.x, y: state.y }) {
 		// eslint-disable-next-line no-magic-numbers
 		go((x - state.x) / 100, (y - state.y) / 100, 100);
 	},
 	/**
-	 * @param {[int,int]} param0
+	 * @param {{x:int,y:int}} param0
 	 */
-	run([x, y] = [state.x + 1, state.y + 1]) {
+	run({ x, y } = { x: state.x, y: state.y }) {
 		// eslint-disable-next-line no-magic-numbers
 		go((x - state.x) / 30, (y - state.y) / 30, 30);
 	},
