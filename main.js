@@ -429,16 +429,15 @@ document.addEventListener("mousemove", (e) => {
 	if (!mousedown) {
 		return;
 	}
-	cursor_state.x = e.clientX;
-	cursor_state.y = e.clientY;
-	cursor_state.consume.push([cursor_state.x, cursor_state.y]);
+	cursor_state.consume.push([
+		(cursor_state.x = e.clientX),
+		(cursor_state.y = e.clientY),
+	]);
 });
 document.addEventListener("mouseup", (e) => {
 	if (!mousedown) {
 		return;
 	}
-	cursor_state.x = e.clientX;
-	cursor_state.y = e.clientY;
 	mousedown = false;
 });
 /**
