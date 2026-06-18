@@ -27,7 +27,7 @@ class memory_node {
 	constructor(weigh, related, actions, content) {
 		this.weigh = weigh;
 		this.related = related;
-		this.action = actions;
+		this.actions = actions;
 		this.content = content;
 	}
 }
@@ -63,26 +63,23 @@ class expandable_iter {
 const state = {
 	dopamine: 0.5,
 	/**
-	 * @type memory_node[]
+	 * @type {memory_node[]}
 	 */
 	memory: [],
 	short_urge: 0.9,
 	long_urge: 0.5,
-	/**
-	 * @type {int}
-	 */
+	/**@type {int} */
 	x: 10,
-	/**
-	 * @type {int}
-	 */
+	/**@type {int} */
 	y: 10,
-	/**
-	 * @type {memory_node}
-	 */
+	/** @type {memory_node} */
 	current_thought: new memory_node(1, [], [], [10, 10]),
-	action: [["recall_memory", "walk"], ["run"]],
+	/**@type {string[][]} */
+	action: [["recall_memory", "walk"], ["run"], ["make_action"]],
+	/**@type {string[]} */
 	available_action: ["recall_memory", "walk", "run", "make_action"],
-	action_weigh: [1],
+	/**@type {int[]} */
+	action_weigh: [1, 1, 1],
 	execute() {
 		if (this.current_thought === null) {
 			return;
@@ -122,11 +119,51 @@ const state = {
 		/**
 		 * @type {expandable_iter<memory_node>}
 		 */
-		const iter = new expandable_iter(this.current_thought.related);
-		for (const related of iter) {
-			iter.add(...related.related);
+		const iter = new expandable_iter([this.current_thought]),
+			/**@type {Object<string,int>} */
+			list = {};
+		let point = this.current_thought.related.length,
+			time = 0,
+			width = 0,
+			tried = 0;
+		for (const node of iter) {
+			iter.add(...node.related);
+			width += node.related.length;
+			const w = node.weigh;
+			for (const action in node.actions) {
+				list[action] += (list[action] ?? 0) + w;
+			}
+			if (time++ === point) {
+				point = width;
+				time = 0;
+				width = 0;
+				if (tried++ === state.max_depth) {
+					break;
+				}
+			}
 		}
+		/**@type {string[]} */
+		const action = [],
+			sorted = /**@type {[string,int][]} */ (
+				Object.entries(list)
+					.sort(([, a], [, b]) => b - a)
+					.reduce((r, [k, v]) => ({ ...r, [k]: v }), {})
+			);
+		for (
+			let i = Math.floor(Math.random() * state.max_depth) + 1;
+			i > 0;
+			i--
+		) {
+			const temp = sorted[0];
+			if (temp) {
+				action.push(temp[0]);
+			} else {
+				break;
+			}
+		}
+		this.action.push(action);
 	},
+	max_depth: 3,
 };
 const spirit = /** @type {HTMLSpanElement} */ ($("#spirit"));
 /**
