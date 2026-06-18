@@ -5,6 +5,7 @@ body {
 	margin: 0;
 	justify-content: flex-end;
 	align-items: flex-end;
+	overflow: hidden;
 }
 #spirit {
 	background-color: black;

@@ -294,6 +294,7 @@ document.addEventListener("mousemove", (e) => {
 				pixel.style.left = `${cursor_state.x}px`;
 				pixel.style.top = `${cursor_state.y}px`;
 				body.appendChild(pixel);
+				elements.push(pixel);
 				break;
 			}
 			case "eraser": {
@@ -302,6 +303,7 @@ document.addEventListener("mousemove", (e) => {
 					cursor_state.y
 				)) {
 					element.remove();
+					elements.splice(elements.indexOf(element), 1);
 				}
 				break;
 			}
