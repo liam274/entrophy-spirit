@@ -173,28 +173,24 @@ const actions = {
 	 * @param {int} id
 	 * @returns {memory_node}
 	 */
-	recall_memory(id) {
-		const result =
-			state.memory[
-				id ??
-					state.memory[
-						Math.floor(Math.random() * state.memory.length)
-					]
-			];
+	recall_memory(id = -1) {
+		const result = state.memory.at(
+			id ?? state.memory[Math.floor(Math.random() * state.memory.length)]
+		);
 		result.weigh += state.general_weigh;
 		return result;
 	},
 	/**
 	 * @param {[int,int]} param0
 	 */
-	walk([x, y]) {
+	walk([x = state.x + 1, y = state.y + 1]) {
 		// eslint-disable-next-line no-magic-numbers
 		go((x - state.x) / 100, (y - state.y) / 100, 100);
 	},
 	/**
 	 * @param {[int,int]} param0
 	 */
-	run([x, y]) {
+	run([x = state.x + 1, y = state.y + 1]) {
 		// eslint-disable-next-line no-magic-numbers
 		go((x - state.x) / 30, (y - state.y) / 30, 30);
 	},

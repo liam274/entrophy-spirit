@@ -7,7 +7,7 @@ export default [
 		languageOptions: {
 			globals: {
 				...globals.browser,
-				...globals.es2021,
+				...globals.es2026,
 			},
 			ecmaVersion: "latest",
 			sourceType: "module",
