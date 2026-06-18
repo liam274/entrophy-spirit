@@ -165,7 +165,7 @@ const actions = {
 						Math.floor(Math.random() * state.memory.length)
 					]
 			];
-		result.weigh++;
+		result.weigh += state.general_weigh;
 		return result;
 	},
 	/**
@@ -238,6 +238,9 @@ const actions = {
 		blackboard.innerText += message.join(". ");
 	},
 	make_memory() {
+		if (_cache.ok) {
+			state.current_thought.weigh += state.general_weigh;
+		}
 		const now_memory = new memory_node(
 			state.general_weigh,
 			[state.current_thought],
