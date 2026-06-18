@@ -347,10 +347,13 @@ function main() {
 	spirit.style.top = `${state.y}px`;
 	state.execute();
 	if (cursor_state.consume.length) {
-		const [x, y] = cursor_state.consume.pop() ?? [undefined, undefined];
 		if (x !== undefined && y !== undefined) {
 			switch (cursor_state.mode) {
 				case "pen": {
+					const [x, y] = cursor_state.consume.pop() ?? [
+						undefined,
+						undefined,
+					];
 					const pixel = $$("div");
 					pixel.classList.add("pixel");
 					pixel.style.backgroundColor = cursor_state.color;
@@ -364,9 +367,17 @@ function main() {
 					break;
 				}
 				case "eraser": {
-					for (const element of element_from_point(cursor_state)) {
-						element.remove();
-						elements.splice(elements.indexOf(element), 1);
+					const { x, y } = cursor_state;
+					for (let dx = -15; dx <= 15; dx++) {
+						for (let dy = -15; dy < 15; dy++) {
+							for (const element of element_from_point({
+								x: dx + x,
+								y: dy + y,
+							})) {
+								element.remove();
+								elements.splice(elements.indexOf(element), 1);
+							}
+						}
 					}
 					break;
 				}
