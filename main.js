@@ -349,10 +349,9 @@ function main() {
 	if (cursor_state.consume.length) {
 		switch (cursor_state.mode) {
 			case "pen": {
-				const [x, y] = cursor_state.consume.pop() ?? [
-					undefined,
-					undefined,
-				];
+				const [x, y] = /** @type {[int,int]}*/ (
+					cursor_state.consume.pop()
+				);
 				const pixel = $$("div");
 				pixel.classList.add("pixel");
 				pixel.style.backgroundColor = cursor_state.color;
