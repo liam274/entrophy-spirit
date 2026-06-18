@@ -2,8 +2,8 @@
 	"compilerOptions": {
 		"checkJs": true,
 		"strict": true,
-		"target": "ES2020",
-		"lib": ["ES2020", "DOM"]
+		"target": "ES2025",
+		"lib": ["ES2025", "DOM"]
 	},
 	"include": ["*.js"]
 }

@@ -174,9 +174,14 @@ const actions = {
 	 * @returns {memory_node}
 	 */
 	recall_memory(id = -1) {
-		const result = state.memory.at(
-			id ?? state.memory[Math.floor(Math.random() * state.memory.length)]
-		);
+		/** @type {memory_node} */
+		const result =
+			state.memory.at(
+				id ??
+					state.memory[
+						Math.floor(Math.random() * state.memory.length)
+					]
+			) ?? state.current_thought;
 		result.weigh += state.general_weigh;
 		return result;
 	},
