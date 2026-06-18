@@ -446,7 +446,7 @@ document.addEventListener("mouseup", () => {
 	cursor_state.consume.length = 0;
 });
 document.addEventListener("contextmenu", (e) => {
-	e.preventDefault();
+	// e.preventDefault();
 });
 /**
  *
