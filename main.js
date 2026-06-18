@@ -21,6 +21,10 @@ class memory_node {
 	position = [0, 0];
 	/** @type {any[]} */
 	content = [];
+	/** @type {int} */
+	x = 0;
+	/** @type {int} */
+	y = 0;
 	/**
 	 * @param {int} weigh
 	 * @param {memory_node[]} related
@@ -35,6 +39,7 @@ class memory_node {
 		this.actions = actions;
 		this.position = position;
 		this.content = content;
+		[this.x, this.y] = this.position;
 	}
 }
 /**
@@ -106,7 +111,13 @@ const state = {
 	/**@type {int} */
 	y: 100,
 	/** @type {memory_node} */
-	current_thought: new memory_node(1, [], ["walk"], [100, 100], []),
+	current_thought: new memory_node(
+		1,
+		[],
+		["random_place", "walk"],
+		[100, 100],
+		[]
+	),
 	/**@type {string[][]} */
 	action: [
 		["recall_memory", "walk"],
@@ -117,6 +128,7 @@ const state = {
 		["draw"],
 		["erase"],
 		["sleep"],
+		["recall_memory", "walk"],
 	],
 	/**@type {string[]} */
 	available_action: [
