@@ -74,11 +74,11 @@ const state = {
 	short_urge: 0.9,
 	long_urge: 0.5,
 	/**@type {int} */
-	x: 10,
+	x: 100,
 	/**@type {int} */
-	y: 10,
+	y: 100,
 	/** @type {memory_node} */
-	current_thought: new memory_node(1, [], ["walk"], [10, 10], []),
+	current_thought: new memory_node(1, [], ["walk"], [100, 100], []),
 	/**@type {string[][]} */
 	action: [
 		["recall_memory", "walk"],
@@ -269,23 +269,13 @@ function go(dx, dy, step) {
 function nearby() {
 	/** @type {any[]} */
 	const result = [];
-	for (const element of elements) {
-		if (distance(element) < state.site) {
-			result.push(element);
+	const pos = { x: state.x, y: state.y };
+	for (let x = -state.site; x <= state.site; x++) {
+		for (let y = -state.site; y <= state.site; y++) {
+			result.concat(element_from_point({ x: pos.x + x, y: pos.y + y }));
 		}
 	}
 	return result;
-}
-/**
- * @param {HTMLElement} element
- * @returns {float}
- */
-function distance(element) {
-	const temp = getComputedStyle(element);
-	return Math.sqrt(
-		Math.pow(parseFloat(temp.left) - state.x, 2) +
-			Math.pow(parseFloat(temp.top) - state.y, 2)
-	);
 }
 const cursor_state = {
 	/** @type {int} */

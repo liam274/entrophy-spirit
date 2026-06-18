@@ -18,6 +18,14 @@ body {
 	left: 10px;
 	display: block;
 }
+#spirit::before {
+	content: "Spirit";
+	color: black;
+	background-color: white;
+	transform: translateY(-25px) translateX(-50%);
+	position: absolute;
+	left: 50%;
+}
 #blackboard {
 	width: 350px;
 	height: 200px;
