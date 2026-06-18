@@ -115,6 +115,7 @@ const state = {
 		["make_memory"],
 		["draw"],
 		["erase"],
+		["sleep"],
 	],
 	/**@type {string[]} */
 	available_action: [
@@ -126,9 +127,10 @@ const state = {
 		"make_memory",
 		"draw",
 		"erase",
+		"sleep",
 	],
 	/**@type {int[]} */
-	action_weigh: [1, 1, 1],
+	action_weigh: [1, 1, 1, 1, 1, 1, 1, 1],
 	execute() {
 		let res = undefined,
 			tried = false;
@@ -150,6 +152,8 @@ const state = {
 	max_depth: 3,
 	site: 40,
 	general_weigh: 10,
+	/**@type {int} */
+	sleep: 0,
 };
 /**@type {Object<string,CallableFunction>} */
 const actions = {
@@ -274,6 +278,9 @@ const actions = {
 			element.remove();
 			elements.splice(elements.indexOf(element), 1);
 		}
+	},
+	sleep() {
+		state.sleep += Math.floor(Math.random() * 10) * 1000;
 	},
 };
 /** @type {HTMLElement[]} */
@@ -447,6 +454,9 @@ function main() {
 			}
 		}
 	}
-	requestAnimationFrame(main);
+	setTimeout(() => {
+		state.sleep = 0;
+		requestAnimationFrame(main);
+	}, state.sleep);
 }
 requestAnimationFrame(main);
