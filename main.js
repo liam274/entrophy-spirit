@@ -114,7 +114,7 @@ const state = {
 	current_thought: new memory_node(
 		1,
 		[],
-		["random_place", "walk"],
+		["recall_memory", "walk"],
 		[100, 100],
 		[]
 	),
@@ -128,7 +128,6 @@ const state = {
 		["draw"],
 		["erase"],
 		["sleep"],
-		["recall_memory", "walk"],
 	],
 	/**@type {string[]} */
 	available_action: [
