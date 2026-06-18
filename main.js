@@ -199,14 +199,14 @@ const actions = {
 	/**
 	 * @param {[int,int]} param0
 	 */
-	walk([x = state.x + 1, y = state.y + 1]) {
+	walk([x, y] = [state.x + 1, state.y + 1]) {
 		// eslint-disable-next-line no-magic-numbers
 		go((x - state.x) / 100, (y - state.y) / 100, 100);
 	},
 	/**
 	 * @param {[int,int]} param0
 	 */
-	run([x = state.x + 1, y = state.y + 1]) {
+	run([x, y] = [state.x + 1, state.y + 1]) {
 		// eslint-disable-next-line no-magic-numbers
 		go((x - state.x) / 30, (y - state.y) / 30, 30);
 	},
@@ -281,7 +281,7 @@ const actions = {
 	/**
 	 * @param {{x: int, y: int}} param0
 	 */
-	draw({ x = state.x, y = state.y }) {
+	draw({ x, y } = { x: state.x, y: state.y }) {
 		_cache.unset();
 		const pixel = $$("div");
 		pixel.classList.add("pixel");
@@ -296,7 +296,7 @@ const actions = {
 	/**
 	 * @param {{x: int, y: int}} param0
 	 */
-	erase({ x = state.x, y = state.y }) {
+	erase({ x, y } = { x: state.x, y: state.y }) {
 		_cache.unset();
 		for (const element of element_from_point({ x, y })) {
 			element.remove();
