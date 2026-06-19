@@ -235,15 +235,18 @@ const actions = {
 	},
 	/**
 	 * @param {{x:int,y:int}} param0
+	 * @returns {{x:int,y:int}}
 	 */
-	walk({ x, y } = { x: state.x, y: state.y }) {
+	walk({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
 		go((x - state.x) / 100, (y - state.y) / 100, 100);
+		return { x, y };
 	},
 	/**
 	 * @param {{x:int,y:int}} param0
 	 */
-	run({ x, y } = { x: state.x, y: state.y }) {
+	run({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
 		go((x - state.x) / 30, (y - state.y) / 30, 30);
+		return { x, y };
 	},
 	make_action() {
 		state.current_thought.update_weigh();
@@ -326,7 +329,7 @@ const actions = {
 	/**
 	 * @param {{x: int, y: int}} param0
 	 */
-	draw({ x, y } = { x: state.x, y: state.y }) {
+	draw({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
 		_cache.unset();
 		for (const element of element_from_point({ x, y })) {
 			element.style.backgroundColor = cursor_state.color;
@@ -342,7 +345,7 @@ const actions = {
 	/**
 	 * @param {{x: int, y: int}} param0
 	 */
-	erase({ x, y } = { x: state.x, y: state.y }) {
+	erase({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
 		_cache.unset();
 		for (const element of element_from_point({ x, y })) {
 			element.remove();
