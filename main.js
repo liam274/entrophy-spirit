@@ -275,9 +275,7 @@ const actions = {
 		/**@type {string[]} */
 		const action = [],
 			sorted = /**@type {[string,int][]} */ (
-				Object.entries(list)
-					.sort(([, a], [, b]) => b - a)
-					.reduce((r, [k, v]) => ({ ...r, [k]: v }), {})
+				Object.entries(list).sort(([, a], [, b]) => b - a)
 			);
 		for (
 			let i = Math.floor(Math.random() * state.max_depth) + 1;
@@ -292,6 +290,7 @@ const actions = {
 			}
 		}
 		state.action.push(action);
+		return state.action.length - 1;
 	},
 	/**
 	 * @param  {...string} message
@@ -420,6 +419,15 @@ function distance(element) {
 function decive_action(action_data) {
 	/** @type {string[]} */
 	const result = [];
+	/** @type {Object<string,int>} */
+	const temp = {};
+	for (const [key, value] of Object.entries(state.action_weigh)) {
+		temp[key] = action_data.includes(key) ? value : 2 * value;
+	}
+	const action_weigh = Object.entries(temp).sort(([, a], [, b]) => b - a);
+	for (let i = Math.floor(Math.random() * state.max_depth) + 1; i > 0; i--) {
+		result.push(action_weigh[i][0]);
+	}
 	return result;
 }
 const cursor_state = {
