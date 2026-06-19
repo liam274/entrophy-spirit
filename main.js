@@ -12,6 +12,8 @@ const spirit = /** @type {HTMLSpanElement} */ ($("#spirit")),
 	{ body } = document;
 const MINUTE = 60;
 const MILLISECOND = 1000;
+const FPS = 60;
+const MUST_SLEEP = MILLISECOND / FPS;
 class memory_node {
 	/** @type {int} */
 	weigh = 0;
@@ -572,10 +574,13 @@ function main() {
 			}
 		}
 	}
-	setTimeout(() => {
-		state.energy += state.sleep;
-		state.sleep = 0;
-		requestAnimationFrame(main);
-	}, state.sleep * MILLISECOND);
+	setTimeout(
+		() => {
+			state.energy += state.sleep;
+			state.sleep = 0;
+			requestAnimationFrame(main);
+		},
+		state.sleep * MILLISECOND + MUST_SLEEP
+	);
 }
 requestAnimationFrame(main);
