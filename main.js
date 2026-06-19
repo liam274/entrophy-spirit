@@ -577,13 +577,14 @@ function main() {
 			}
 		}
 	}
+	const sleep_amount = state.sleep;
+	state.sleep = 0;
 	setTimeout(
 		() => {
-			state.energy += state.sleep;
-			state.sleep = 0;
+			state.energy += sleep_amount;
 			requestAnimationFrame(main);
 		},
-		state.sleep * MILLISECOND + MUST_SLEEP
+		sleep_amount * MILLISECOND + MUST_SLEEP
 	);
 }
 requestAnimationFrame(main);
