@@ -471,7 +471,9 @@ const cursor_state = {
 	/** @type {string} */
 	color: "black",
 	/** @type {[int,int][]} */
-	consume: [],
+	consume_draw: [],
+	/** @type {[int,int][]} */
+	consume_erase: [],
 };
 $("#pen")?.addEventListener("click", () => {
 	cursor_state.mode = "pen";
@@ -491,27 +493,30 @@ document.addEventListener("mousedown", (e) => {
 	if (mousedown || cursor_state.mode === "click") {
 		return;
 	}
-	cursor_state.consume.push([
-		(cursor_state.x = e.clientX),
-		(cursor_state.y = e.clientY),
-	]);
+	(cursor_state.mode === "pen"
+		? cursor_state.consume_draw
+		: cursor_state.consume_erase
+	).push([(cursor_state.x = e.clientX), (cursor_state.y = e.clientY)]);
 	mousedown = true;
 });
 document.addEventListener("mousemove", (e) => {
 	if (!mousedown) {
 		return;
 	}
-	cursor_state.consume.push([
-		(cursor_state.x = e.clientX),
-		(cursor_state.y = e.clientY),
-	]);
+	(cursor_state.mode === "pen"
+		? cursor_state.consume_draw
+		: cursor_state.consume_erase
+	).push([(cursor_state.x = e.clientX), (cursor_state.y = e.clientY)]);
 });
 document.addEventListener("mouseup", () => {
 	if (!mousedown || cursor_state.mode === "click") {
 		return;
 	}
 	mousedown = false;
-	cursor_state.consume.length = 0;
+	(cursor_state.mode === "pen"
+		? cursor_state.consume_draw
+		: cursor_state.consume_erase
+	).length = 0;
 });
 document.addEventListener("contextmenu", (e) => {
 	// e.preventDefault();
@@ -535,45 +540,40 @@ function main() {
 	spirit.style.left = `${state.x}px`;
 	spirit.style.top = `${state.y}px`;
 	state.execute();
-	if (cursor_state.consume.length) {
-		_cache.unset();
-		switch (cursor_state.mode) {
-			case "pen": {
-				const [x, y] = /** @type {[int,int]}*/ (
-					cursor_state.consume.pop()
-				);
-				let a = false;
-				for (const element of element_from_point({ x, y })) {
-					element.style.backgroundColor = cursor_state.color;
-					a = true;
-					break;
+	if (cursor_state.consume_draw.length) {
+		const [x, y] = /** @type {[int,int]}*/ (
+			cursor_state.consume_draw.pop()
+		);
+		let a = false;
+		for (const element of element_from_point({ x, y })) {
+			element.style.backgroundColor = cursor_state.color;
+			a = true;
+			break;
+		}
+		if (!a) {
+			const pixel = $$("div");
+			pixel.classList.add("pixel");
+			pixel.style.backgroundColor = cursor_state.color;
+			pixel.style.left = `${x}px`;
+			pixel.style.top = `${y}px`;
+			body.appendChild(pixel);
+			elements.push(pixel);
+			_cache.unset();
+		}
+	}
+	if (cursor_state.consume_erase.length) {
+		const [x, y] = /** @type {[int,int]}*/ (
+			cursor_state.consume_erase.pop()
+		);
+		for (let dx = -15; dx <= 15; dx++) {
+			for (let dy = -15; dy < 15; dy++) {
+				for (const element of element_from_point({
+					x: dx + x,
+					y: dy + y,
+				})) {
+					element.remove();
+					elements.splice(elements.indexOf(element), 1);
 				}
-				if (a) {
-					break;
-				}
-				const pixel = $$("div");
-				pixel.classList.add("pixel");
-				pixel.style.backgroundColor = cursor_state.color;
-				pixel.style.left = `${x}px`;
-				pixel.style.top = `${y}px`;
-				body.appendChild(pixel);
-				elements.push(pixel);
-				break;
-			}
-			case "eraser": {
-				const { x, y } = cursor_state;
-				for (let dx = -15; dx <= 15; dx++) {
-					for (let dy = -15; dy < 15; dy++) {
-						for (const element of element_from_point({
-							x: dx + x,
-							y: dy + y,
-						})) {
-							element.remove();
-							elements.splice(elements.indexOf(element), 1);
-						}
-					}
-				}
-				break;
 			}
 		}
 	}
