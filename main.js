@@ -15,7 +15,7 @@ const MILLISECOND = 1000;
 class memory_node {
 	/** @type {int} */
 	weigh = 0;
-	/** @type {memory_node[]} */
+	/** @type {int[]} */
 	related = [];
 	/** @type {string[]} */
 	actions = [];
@@ -31,7 +31,7 @@ class memory_node {
 	last_time = 0;
 	/**
 	 * @param {int} weigh
-	 * @param {memory_node[]} related
+	 * @param {int[]} related
 	 * @param {string[]} actions
 	 * @param {[int,int]} position
 	 * @param {any[]} content
@@ -257,7 +257,7 @@ const actions = {
 			tried = 0;
 		for (const node of iter) {
 			node.update_weigh();
-			iter.add(...node.related);
+			iter.add(...node.related.map((v) => state.memory[v]));
 			width += node.related.length;
 			const w = node.weigh;
 			for (const action in node.actions) {
@@ -306,12 +306,12 @@ const actions = {
 		}
 		const now_memory = new memory_node(
 			state.general_weigh,
-			[state.current_thought],
+			[state.memory.indexOf(state.current_thought)],
 			decive_action(state.current_thought.actions),
 			[state.x, state.y],
 			nearby()
 		);
-		state.current_thought.related.push(now_memory);
+		state.current_thought.related.push(state.memory.length);
 		state.memory.push(now_memory);
 		state.current_thought = now_memory;
 	},
