@@ -513,13 +513,9 @@ document.addEventListener("mouseup", () => {
 		return;
 	}
 	mousedown = false;
-	(cursor_state.mode === "pen"
-		? cursor_state.consume_draw
-		: cursor_state.consume_erase
-	).length = 0;
 });
 document.addEventListener("contextmenu", (e) => {
-	// e.preventDefault();
+	e.preventDefault();
 });
 /**
  *
