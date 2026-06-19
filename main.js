@@ -261,7 +261,13 @@ const actions = {
 			width += node.related.length;
 			const w = node.weigh;
 			for (const action in node.actions) {
-				list[action] += (list[action] ?? 0) + w;
+				list[action] +=
+					(list[action] ?? 0) +
+					w *
+						similarity(
+							state.current_thought.related,
+							node.related
+						);
 			}
 			if (time++ === point) {
 				point = width;
@@ -429,6 +435,26 @@ function decive_action(action_data) {
 		result.push(action_weigh[i][0]);
 	}
 	return result;
+}
+/**
+ * Caculate the similarity
+ * @param {int[]} nodes1
+ * @param {int[]} nodes2
+ * @returns {float}
+ */
+function similarity(nodes1, nodes2) {
+	let result = 0;
+	for (const i of nodes1) {
+		if (nodes2.includes(i)) {
+			result++;
+		}
+	}
+	for (const i of nodes2) {
+		if (nodes1.includes(i)) {
+			result++;
+		}
+	}
+	return result / (nodes1.length + nodes2.length);
 }
 const cursor_state = {
 	/** @type {int} */
