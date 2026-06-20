@@ -433,7 +433,8 @@ function decive_action(action_data) {
 	/** @type {Object<string,int>} */
 	const temp = {};
 	for (const [key, value] of Object.entries(state.action_weigh)) {
-		temp[key] = action_data.includes(key) ? value : 2 * value;
+		temp[key] = action_data.includes(key) ? value : 2 * value; // 好奇心模式
+		// 這自然會因為記憶數量變多->重複動作權重變大，而變成習慣模式
 	}
 	const action_weigh = Object.entries(temp).sort(([, a], [, b]) => b - a);
 	for (let i = Math.floor(Math.random() * state.max_depth) + 1; i > 0; i--) {
