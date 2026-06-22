@@ -31,6 +31,8 @@ class memory_node {
 	y = 0;
 	/** @type {float} */
 	last_time = 0;
+	/** @type {int} */
+	most_likely = 0;
 	/**
 	 * @param {int} weigh
 	 * @param {int[]} related
@@ -323,6 +325,26 @@ const actions = {
 			nearby()
 		);
 		state.current_thought.related.push(state.memory.length);
+		/** @type {float} */
+		let max_sim = 0,
+			max_id = 0;
+		let id = 0;
+		for (const node of state.memory) {
+			const ori_sim = similarity(
+					node.related,
+					state.memory[node.most_likely].related
+				),
+				now_sim = similarity(node.related, now_memory.related);
+			if (ori_sim < now_sim) {
+				node.most_likely = state.memory.length;
+			}
+			if (max_sim < now_sim) {
+				max_sim = now_sim;
+				max_id = id;
+			}
+			id++;
+		}
+		now_memory.most_likely = max_id;
 		state.memory.push(now_memory);
 		state.current_thought = now_memory;
 	},
