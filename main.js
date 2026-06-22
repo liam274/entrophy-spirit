@@ -19,8 +19,8 @@ class memory_node {
 	weigh = 0;
 	/** @type {int[]} */
 	related = [];
-	/** @type {string[]} */
-	actions = [];
+	/** @type {int} */
+	actions = 0;
 	/** @type {[int,int]} */
 	position = [0, 0];
 	/** @type {any[]} */
@@ -36,7 +36,7 @@ class memory_node {
 	/**
 	 * @param {int} weigh
 	 * @param {int[]} related
-	 * @param {string[]} actions
+	 * @param {int} actions
 	 * @param {[int,int]} position
 	 * @param {any[]} content
 	 * @returns memory_node
@@ -127,13 +127,7 @@ const state = {
 	/**@type {int} */
 	y: 100,
 	/** @type {memory_node} */
-	current_thought: new memory_node(
-		1,
-		[],
-		["recall_memory", "walk", "draw"],
-		[100, 100],
-		[]
-	),
+	current_thought: new memory_node(1, [], 8, [100, 100], []),
 	/**@type {string[][]} */
 	action: [
 		["recall_memory", "walk"],
@@ -144,6 +138,7 @@ const state = {
 		["draw"],
 		["erase"],
 		["sleep"],
+		["recall_memory", "walk", "draw"],
 	],
 	/**@type {string[]} */
 	available_action: [
@@ -185,7 +180,7 @@ const state = {
 		let res = undefined,
 			tried = false;
 		this.current_thought.update_weigh();
-		for (const act of this.current_thought.actions) {
+		for (const act of state.action[this.current_thought.actions]) {
 			if (this.available_action.includes(act)) {
 				res = actions[act](res);
 				tried = true;
@@ -194,11 +189,18 @@ const state = {
 			}
 		}
 		if (!tried) {
-			this.current_thought.actions.push(
+			const temp = state.action[this.current_thought.actions];
+			temp.push(
 				state.available_action[
 					Math.floor(Math.random() * state.available_action.length)
 				]
 			);
+			if (state.action.includes(temp)) {
+				this.current_thought.actions = state.action.indexOf(temp);
+			} else {
+				this.current_thought.actions = state.action.length;
+				state.action.push(temp);
+			}
 		}
 		actions.make_memory();
 	},
@@ -267,7 +269,7 @@ const actions = {
 			iter.add(...node.related.map((v) => state.memory[v]));
 			width += node.related.length;
 			const w = node.weigh;
-			for (const action in node.actions) {
+			for (const action in state.action[node.actions]) {
 				list[action] +=
 					(list[action] ?? 0) +
 					w *
@@ -320,7 +322,7 @@ const actions = {
 		const now_memory = new memory_node(
 			state.general_weigh,
 			[state.memory.indexOf(state.current_thought)],
-			decive_action(state.current_thought.actions),
+			decive_action(state.action[state.current_thought.actions]),
 			[state.x, state.y],
 			nearby()
 		);
@@ -447,7 +449,7 @@ function distance(element) {
 /**
  * deceive new action
  * @param {string[]} action_data
- * @returns {string[]}
+ * @returns {int}
  */
 function decive_action(action_data) {
 	/** @type {string[]} */
@@ -462,7 +464,14 @@ function decive_action(action_data) {
 	for (let i = Math.floor(Math.random() * state.max_depth) + 1; i > 0; i--) {
 		result.push(action_weigh[i][0]);
 	}
-	return result;
+	let id = 0;
+	if (state.action.includes(result)) {
+		id = state.action.indexOf(result);
+	} else {
+		id = state.action.length;
+		state.action.push(result);
+	}
+	return id;
 }
 /**
  * Caculate the similarity
