@@ -247,7 +247,7 @@ const actions = {
 	 * @param {{x:int,y:int}} param0
 	 */
 	run({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
-		go((x - state.x) / 30, (y - state.y) / 30, 30);
+		go((x - state.x) / 30, (y - state.y) / 30, 100);
 		return { x, y };
 	},
 	make_action() {
