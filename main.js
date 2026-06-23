@@ -525,22 +525,21 @@ const cursor_state = {
 	/** @type {[int,int][]} */
 	consume_erase: [],
 };
+let prev = "click";
 $("#pen")?.addEventListener("click", () => {
-	cursor_state.mode = "pen";
+	cursor_state.mode = prev = "pen";
 });
 $("#eraser")?.addEventListener("click", () => {
-	cursor_state.mode = "eraser";
+	cursor_state.mode = prev = "eraser";
 });
 $("#dump-all")?.addEventListener("click", () => {
-	cursor_state.mode = "click";
+	cursor_state.mode = prev = "click";
 	elements.map((v) => {
 		v.remove();
 	});
 	elements.length = 0;
 });
-let prev = "click";
 $("#toolbar")?.addEventListener("hover", () => {
-	prev = cursor_state.mode;
 	cursor_state.mode = "click";
 });
 $("#toolbar")?.addEventListener("mouseleave", () => {
