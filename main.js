@@ -36,6 +36,10 @@ class memory_node {
 	most_likely = 0;
 	/** @type {float} */
 	delta_dopamine = 0;
+	/** @type {int} */
+	delta_dopamine_time = 0;
+	/** @type {float} */
+	delta_dopamine_sum = 0;
 	/**
 	 * @param {int} weigh
 	 * @param {int[]} related
@@ -59,6 +63,16 @@ class memory_node {
 		const interval = now - this.last_time;
 		this.weigh -= interval / (MINUTE * MILLISECOND);
 		this.last_time = now - (interval % (MINUTE * MILLISECOND));
+	}
+	/**
+	 * @param {float} value
+	 * @returns {float}
+	 */
+	update_delta_dopamine(value) {
+		this.delta_dopamine_sum += value;
+		this.delta_dopamine =
+			this.delta_dopamine_sum / ++this.delta_dopamine_time;
+		return this.delta_dopamine;
 	}
 }
 /**
@@ -597,8 +611,9 @@ function caculate_dopamine() {
  * @returns null
  */
 function main() {
-	state.current_thought.delta_dopamine =
-		caculate_dopamine() - state.previous_dopamine;
+	state.current_thought.update_delta_dopamine(
+		caculate_dopamine() - state.previous_dopamine
+	);
 	spirit.style.left = `${state.x}px`;
 	spirit.style.top = `${state.y}px`;
 	state.execute();
