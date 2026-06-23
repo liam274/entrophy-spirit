@@ -538,6 +538,14 @@ $("#dump-all")?.addEventListener("click", () => {
 	});
 	elements.length = 0;
 });
+let prev = "click";
+$("#toolbar")?.addEventListener("hover", () => {
+	prev = cursor_state.mode;
+	cursor_state.mode = "click";
+});
+$("#toolbar")?.addEventListener("mouseleave", () => {
+	cursor_state.mode = prev;
+});
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {
 	if (mousedown || cursor_state.mode === "click") {
