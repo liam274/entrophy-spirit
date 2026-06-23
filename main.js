@@ -601,10 +601,9 @@ function element_from_point({ x, y }) {
 }
 /** @returns {float} */
 function caculate_dopamine() {
-	let dopamine = 0;
-	dopamine += state.energy / MAX_ENERGY; // 越飽就越高興
-	dopamine /= state.urgency; // 越着急就越難受
-	return dopamine;
+	state.dopamine += state.energy / MAX_ENERGY; // 越飽就越高興
+	state.dopamine /= state.urgency; // 越着急就越難受
+	return state.dopamine;
 }
 /**
  * main loop
