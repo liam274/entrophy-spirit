@@ -117,12 +117,15 @@ class cache {
 		return this.ok ? this.data : undefined;
 	}
 }
+/** @type {memory_node} */
+const FIRST_THOUGHT = new memory_node(1, [], 8, [100, 100], []),
+	CURIOUS_THOUGHT = new memory_node(1, [], 9, [100, 100], []);
 const state = {
 	dopamine: 0.5,
 	/**
 	 * @type {memory_node[]}
 	 */
-	memory: [],
+	memory: [FIRST_THOUGHT, CURIOUS_THOUGHT],
 	/** @type {float} */
 	short_urge: 0.9,
 	/** @type {float} */
@@ -134,7 +137,7 @@ const state = {
 	/**@type {int} */
 	y: 100,
 	/** @type {memory_node} */
-	current_thought: new memory_node(1, [], 8, [100, 100], []),
+	current_thought: FIRST_THOUGHT,
 	/**@type {string[][]} */
 	action: [
 		["recall_memory", "walk"],
@@ -146,6 +149,7 @@ const state = {
 		["erase"],
 		["sleep"],
 		["recall_memory", "walk", "draw"],
+		["nearest_point", "walk"],
 	],
 	/**@type {string[]} */
 	available_action: [
@@ -158,6 +162,7 @@ const state = {
 		"draw",
 		"erase",
 		"sleep",
+		"nearest_point",
 	],
 	/**@type {Object<string,int>} */
 	action_weigh: {
@@ -387,6 +392,10 @@ const actions = {
 	},
 	sleep() {
 		state.sleep += Math.floor(Math.random() * state.max_sleep);
+	},
+	/** @returns {HTMLElement} */
+	nearest_point() {
+		return nearby()[0];
 	},
 };
 /** @type {HTMLElement[]} */
