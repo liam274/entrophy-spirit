@@ -14,6 +14,7 @@ const MINUTE = 60;
 const MILLISECOND = 1000;
 const FPS = 60;
 const MUST_SLEEP = MILLISECOND / FPS;
+const MAX_ENERGY = 200;
 class memory_node {
 	/** @type {int} */
 	weigh = 0;
@@ -33,6 +34,8 @@ class memory_node {
 	last_time = 0;
 	/** @type {int} */
 	most_likely = 0;
+	/** @type {float} */
+	delta_dopamine = 0;
 	/**
 	 * @param {int} weigh
 	 * @param {int[]} related
@@ -120,8 +123,12 @@ const state = {
 	 * @type {memory_node[]}
 	 */
 	memory: [],
+	/** @type {float} */
 	short_urge: 0.9,
+	/** @type {float} */
 	long_urge: 0.5,
+	/** @type {float} */
+	urgency: 1,
 	/**@type {int} */
 	x: 100,
 	/**@type {int} */
@@ -216,6 +223,8 @@ const state = {
 	energy: 100,
 	/**@type {int} */
 	max_sleep: 100,
+	/** @type {float} */
+	previous_dopamine: 0,
 };
 state.memory.push(state.current_thought);
 /**@type {Object<string,CallableFunction>} */
@@ -268,7 +277,7 @@ const actions = {
 			node.update_weigh();
 			iter.add(...node.related.map((v) => state.memory[v]));
 			width += node.related.length;
-			const w = node.weigh;
+			const w = node.weigh * node.delta_dopamine;
 			for (const action in state.action[node.actions]) {
 				list[action] +=
 					(list[action] ?? 0) +
@@ -464,7 +473,7 @@ function decive_action(action_data) {
 	for (let i = Math.floor(Math.random() * state.max_depth) + 1; i > 0; i--) {
 		result.push(action_weigh[i][0]);
 	}
-	let id = 0;
+	let id;
 	if (state.action.includes(result)) {
 		id = state.action.indexOf(result);
 	} else {
@@ -560,11 +569,20 @@ function element_from_point({ x, y }) {
 		el.classList.contains("pixel")
 	);
 }
+/** @returns {float} */
+function caculate_dopamine() {
+	let dopamine = 0;
+	dopamine += state.energy / MAX_ENERGY; // 越飽就越高興
+	dopamine /= state.urgency; // 越着急就越難受
+	return dopamine;
+}
 /**
  * main loop
  * @returns null
  */
 function main() {
+	state.current_thought.delta_dopamine =
+		caculate_dopamine() - state.previous_dopamine;
 	spirit.style.left = `${state.x}px`;
 	spirit.style.top = `${state.y}px`;
 	state.execute();
