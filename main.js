@@ -262,8 +262,7 @@ const state = store.get("state", {
 			if (state.available_action.includes(act)) {
 				res = actions[act](res);
 				tried = true;
-				state.energy -=
-					state.action_energy[state.available_action.indexOf(act)];
+				state.energy -= state.action_energy[act];
 			}
 		}
 		if (!tried) {
@@ -698,7 +697,10 @@ spirit.style.top = `${state.y}px`;
  */
 function main() {
 	state.current_thought.update_delta_dopamine(
-		caculate_dopamine() - state.previous_dopamine
+		-(
+			state.previous_dopamine -
+			(state.previous_dopamine = caculate_dopamine())
+		)
 	);
 	if (destination.step > 0) {
 		destination.step--;
