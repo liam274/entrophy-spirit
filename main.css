@@ -54,7 +54,7 @@ body {
 	padding: 15px 0 15px 0;
 	z-index: 9998;
 }
-#todo {
+#filter {
 	width: 100vw;
 	height: 100vh;
 	margin: 0;
@@ -97,6 +97,7 @@ body {
 	padding: 10px 50px;
 	border: none;
 	border-radius: 15px;
+	background-color: white;
 }
 .todo-list {
 	padding: 15px;

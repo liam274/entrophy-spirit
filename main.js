@@ -617,8 +617,10 @@ const todo_list = store.get("todo-list", [
 $("#todo")?.addEventListener("click", () => {
 	const filter = $$("div");
 	filter.id = "filter";
-	filter.addEventListener("click", () => {
-		filter.remove();
+	filter.addEventListener("click", (e) => {
+		if (e.target === filter) {
+			filter.remove();
+		}
 	});
 	const todo = $$("div");
 	todo.classList.add("todo");
@@ -651,6 +653,7 @@ $("#todo")?.addEventListener("click", () => {
 		list_item.appendChild(tick);
 		list.appendChild(list_item);
 	}
+	body.appendChild(filter);
 });
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {
