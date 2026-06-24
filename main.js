@@ -164,10 +164,11 @@ class storage {
 	/**
 	 * get value
 	 * @param {string} key
+	 * @param {any} _default
 	 * @returns {any}
 	 */
-	get(key) {
-		return this.data[key];
+	get(key, _default) {
+		return this.data[key] ?? _default;
 	}
 	upload() {
 		localStorage.setItem(this.name, JSON.stringify(this.data));
@@ -179,7 +180,11 @@ class storage {
 /** @type {memory_node} */
 const FIRST_THOUGHT = new memory_node(1, [], 8, [100, 100], []),
 	CURIOUS_THOUGHT = new memory_node(1, [], 9, [100, 100], []);
-const state = {
+/** @type {storage} */
+const store = new storage({}, "state-data");
+/** @type {Object<string,any>} */
+const state = store.get("state", {
+	/** @type {float} */
 	dopamine: 0.5,
 	/**
 	 * @type {memory_node[]}
@@ -289,7 +294,7 @@ const state = {
 	max_sleep: 100,
 	/** @type {float} */
 	previous_dopamine: 0,
-};
+});
 state.memory.push(state.current_thought);
 /**@type {Object<string,CallableFunction>} */
 const actions = {
@@ -604,9 +609,17 @@ $("#toolbar")?.addEventListener("hover", () => {
 $("#toolbar")?.addEventListener("mouseleave", () => {
 	cursor_state.mode = prev;
 });
+/** @type {{content: string, is_ok: boolean}[]} */
+const todo_list = store.get("todo-list", [
+	{ content: "Teach him to speak in a language", is_ok: false },
+	{ content: "Teach him to draw", is_ok: false },
+]);
 $("#todo")?.addEventListener("click", () => {
 	const filter = $$("div");
 	filter.id = "filter";
+	filter.addEventListener("click", () => {
+		filter.remove();
+	});
 	const todo = $$("div");
 	todo.classList.add("todo");
 	filter.appendChild(todo);
@@ -616,7 +629,28 @@ $("#todo")?.addEventListener("click", () => {
 	todo.appendChild(title);
 	todo.append($$("hr"));
 	const list = $$("div");
-	// TODO: generate list items
+	list.classList.add("todo-list");
+	for (const { content, is_ok } of todo_list) {
+		const list_item = $$("div");
+		list_item.classList.add("todo-item");
+		const item = $$("div");
+		item.classList.add("todo-item-content");
+		item.setHTMLUnsafe(content);
+		list_item.appendChild(item);
+		const tick = $$("input");
+		tick.type = "checkbox";
+		if (is_ok) {
+			tick.checked = true;
+		}
+		tick.addEventListener("change", () => {
+			todo_list[todo_list.indexOf({ content, is_ok })] = {
+				content,
+				is_ok: tick.checked,
+			};
+		});
+		list_item.appendChild(tick);
+		list.appendChild(list_item);
+	}
 });
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {
