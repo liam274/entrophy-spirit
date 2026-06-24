@@ -239,6 +239,7 @@ const state = store.get("state", {
 		draw: 1,
 		erase: 1,
 		sleep: 1,
+		nearest_point: 1,
 	},
 	/**@type {Object<string,int>} */
 	action_energy: {
@@ -251,30 +252,31 @@ const state = store.get("state", {
 		draw: 1,
 		erase: 1,
 		sleep: 0,
+		nearest_point: 0.5,
 	},
 	execute() {
 		let res = undefined,
 			tried = false;
-		this.current_thought.update_weigh();
-		for (const act of state.action[this.current_thought.actions]) {
-			if (this.available_action.includes(act)) {
+		state.current_thought.update_weigh();
+		for (const act of state.action[state.current_thought.actions]) {
+			if (state.available_action.includes(act)) {
 				res = actions[act](res);
 				tried = true;
 				state.energy -=
-					this.action_energy[this.available_action.indexOf(act)];
+					state.action_energy[state.available_action.indexOf(act)];
 			}
 		}
 		if (!tried) {
-			const temp = state.action[this.current_thought.actions];
+			const temp = state.action[state.current_thought.actions];
 			temp.push(
 				state.available_action[
 					Math.floor(Math.random() * state.available_action.length)
 				]
 			);
 			if (state.action.includes(temp)) {
-				this.current_thought.actions = state.action.indexOf(temp);
+				state.current_thought.actions = state.action.indexOf(temp);
 			} else {
-				this.current_thought.actions = state.action.length;
+				state.current_thought.actions = state.action.length;
 				state.action.push(temp);
 			}
 		}
