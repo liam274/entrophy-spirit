@@ -607,7 +607,7 @@ $("#todo")?.addEventListener("click", () => {
 	todo.appendChild(title);
 	todo.append($$("hr"));
 	const list = $$("div");
-	// ...
+	// TODO: generate list items
 });
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {
