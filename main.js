@@ -5,7 +5,6 @@
  * @typedef {number} float
  */
 const $ = document.querySelector.bind(document),
-	log = console.log.bind(console),
 	$$ = document.createElement.bind(document);
 const spirit = /** @type {HTMLSpanElement} */ ($("#spirit")),
 	blackboard = /**@type {HTMLTextAreaElement} */ ($("#blackboard")),
@@ -129,6 +128,43 @@ class cache {
 	 */
 	get() {
 		return this.ok ? this.data : undefined;
+	}
+}
+class storage {
+	/** @type {Object<string,any>} */
+	data = {};
+	/** @type {string} */
+	name = "";
+	/**
+	 * @param {Object<string,any>} data
+	 * @param {string} name
+	 */
+	constructor(data, name) {
+		this.data = data;
+		this.name = name;
+	}
+	/**
+	 * set value
+	 * @param {string} key
+	 * @param {any} value
+	 * @returns {any}
+	 */
+	set(key, value) {
+		return (this.data[key] = value);
+	}
+	/**
+	 * get value
+	 * @param {string} key
+	 * @returns {any}
+	 */
+	get(key) {
+		return this.data[key];
+	}
+	upload() {
+		localStorage.setItem(this.name, JSON.stringify(this.data));
+	}
+	download() {
+		this.data = JSON.parse(localStorage.getItem(this.name) ?? "{}");
 	}
 }
 /** @type {memory_node} */
@@ -558,6 +594,20 @@ $("#toolbar")?.addEventListener("hover", () => {
 });
 $("#toolbar")?.addEventListener("mouseleave", () => {
 	cursor_state.mode = prev;
+});
+$("#todo")?.addEventListener("click", () => {
+	const filter = $$("div");
+	filter.id = "filter";
+	const todo = $$("div");
+	todo.classList.add("todo");
+	filter.appendChild(todo);
+	const title = $$("h1");
+	title.style.fontWeight = "bold";
+	title.setHTMLUnsafe("Todo List");
+	todo.appendChild(title);
+	todo.append($$("hr"));
+	const list = $$("div");
+	// ...
 });
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {

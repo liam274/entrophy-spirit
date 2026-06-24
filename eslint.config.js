@@ -44,7 +44,6 @@ export default [
 			"object-shorthand": ["error", "always"],
 			"prefer-template": "error",
 			"no-param-reassign": ["error", { props: false }],
-			"no-return-assign": ["error", "always"],
 			"no-useless-constructor": "error",
 			"no-useless-escape": "error",
 			"no-alert": "warn",
