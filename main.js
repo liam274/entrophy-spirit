@@ -602,8 +602,9 @@ $("#dump-all")?.addEventListener("click", () => {
 		v.remove();
 	});
 	elements.length = 0;
+	_cache.unset();
 });
-$("#toolbar")?.addEventListener("hover", () => {
+$("#toolbar")?.addEventListener("mouseenter", () => {
 	cursor_state.mode = "click";
 });
 $("#toolbar")?.addEventListener("mouseleave", () => {
@@ -632,6 +633,7 @@ $("#todo")?.addEventListener("click", () => {
 	todo.append($$("hr"));
 	const list = $$("div");
 	list.classList.add("todo-list");
+	let index = 0;
 	for (const { content, is_ok } of todo_list) {
 		const list_item = $$("div");
 		list_item.classList.add("todo-item");
@@ -645,13 +647,14 @@ $("#todo")?.addEventListener("click", () => {
 			tick.checked = true;
 		}
 		tick.addEventListener("change", () => {
-			todo_list[todo_list.indexOf({ content, is_ok })] = {
+			todo_list[index] = {
 				content,
 				is_ok: tick.checked,
 			};
 		});
 		list_item.appendChild(tick);
 		list.appendChild(list_item);
+		index++;
 	}
 	body.appendChild(filter);
 });
