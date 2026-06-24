@@ -688,6 +688,8 @@ function caculate_dopamine() {
 	state.dopamine /= state.urgency; // 越着急就越難受
 	return state.dopamine;
 }
+spirit.style.left = `${state.x}px`;
+spirit.style.top = `${state.y}px`;
 /**
  * main loop
  * @returns null
