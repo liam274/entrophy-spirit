@@ -480,8 +480,8 @@ function go(dx, dy, step) {
 		if (time === step) {
 			clearInterval(id);
 		}
-		spirit.style.left = `${(state.x += dx)}px`;
-		spirit.style.top = `${(state.y += dy)}px`;
+		state.x += dx;
+		state.y += dy;
 		time++;
 	}, 1);
 }
