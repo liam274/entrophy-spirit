@@ -696,7 +696,8 @@ function main() {
 	state.current_thought.update_delta_dopamine(
 		caculate_dopamine() - state.previous_dopamine
 	);
-	if (destination.step-- > 0) {
+	if (destination.step > 0) {
+		destination.step--;
 		if (destination.dx === 0 && destination.dy === 0) {
 			destination.step = 0;
 		} else {
