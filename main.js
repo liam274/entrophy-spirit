@@ -142,6 +142,14 @@ class storage {
 	constructor(data, name) {
 		this.data = data;
 		this.name = name;
+		document.addEventListener("beforeunload", () => {
+			if (
+				JSON.parse(localStorage.getItem(this.name) ?? "{}") ===
+				this.data
+			) {
+				this.upload();
+			}
+		});
 	}
 	/**
 	 * set value
