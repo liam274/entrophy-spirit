@@ -178,8 +178,9 @@ class storage {
 	}
 }
 /** @type {memory_node} */
-const FIRST_THOUGHT = new memory_node(1, [1], 8, [100, 100], []),
-	CURIOUS_THOUGHT = new memory_node(1, [0], 9, [100, 100], []);
+const FIRST_THOUGHT = new memory_node(1, [1, 2], 8, [100, 100], []),
+	CURIOUS_THOUGHT = new memory_node(1, [0], 9, [100, 100], []),
+	SLEEP_THOUGHT = new memory_node(1, [0], 7, [100, 100], []);
 /** @type {storage} */
 const store = new storage({}, "state-data");
 /** @type {Object<string,any>} */
@@ -189,7 +190,7 @@ const state = store.get("state", {
 	/**
 	 * @type {memory_node[]}
 	 */
-	memory: [FIRST_THOUGHT, CURIOUS_THOUGHT],
+	memory: [FIRST_THOUGHT, CURIOUS_THOUGHT, SLEEP_THOUGHT],
 	/** @type {float} */
 	short_urge: 0.9,
 	/** @type {float} */
