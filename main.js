@@ -178,8 +178,8 @@ class storage {
 	}
 }
 /** @type {memory_node} */
-const FIRST_THOUGHT = new memory_node(1, [], 8, [100, 100], []),
-	CURIOUS_THOUGHT = new memory_node(1, [], 9, [100, 100], []);
+const FIRST_THOUGHT = new memory_node(1, [1], 8, [100, 100], []),
+	CURIOUS_THOUGHT = new memory_node(1, [0], 9, [100, 100], []);
 /** @type {storage} */
 const store = new storage({}, "state-data");
 /** @type {Object<string,any>} */
