@@ -320,14 +320,18 @@ const actions = {
 	 * @returns {{x:int,y:int}}
 	 */
 	walk({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
-		go((x - state.x) / 100, (y - state.y) / 100, 100);
+		destination.dx = (x - state.x) / 100;
+		destination.dy = (y - state.y) / 100;
+		destination.step = 100;
 		return { x, y };
 	},
 	/**
 	 * @param {{x:int,y:int}} param0
 	 */
 	run({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
-		go((x - state.x) / 30, (y - state.y) / 30, 30);
+		destination.dx = (x - state.x) / 30;
+		destination.dy = (y - state.y) / 30;
+		destination.step = 30;
 		return { x, y };
 	},
 	make_action() {
@@ -464,27 +468,7 @@ const actions = {
 };
 /** @type {HTMLElement[]} */
 const elements = [];
-/**
- * walk to somewhere
- * @param {int} dx
- * @param {int} dy
- * @param {int} step
- */
-function go(dx, dy, step) {
-	if (dx === 0 && dy === 0) {
-		_cache.unset();
-		return;
-	}
-	let time = 0;
-	const id = setInterval(() => {
-		if (time === step) {
-			clearInterval(id);
-		}
-		state.x += dx;
-		state.y += dy;
-		time++;
-	}, 1);
-}
+const destination = { dx: 0, dy: 0, step: 0 };
 /**
  * @type {cache<HTMLElement[]>}
  */
@@ -712,8 +696,14 @@ function main() {
 	state.current_thought.update_delta_dopamine(
 		caculate_dopamine() - state.previous_dopamine
 	);
-	spirit.style.left = `${state.x}px`;
-	spirit.style.top = `${state.y}px`;
+	if (destination.step) {
+		if (destination.dx === 0 && destination.dy === 0) {
+			destination.step = 0;
+		} else {
+			spirit.style.left = `${(state.x += destination.dx)}px`;
+			spirit.style.top = `${(state.y += destination.dy)}px`;
+		}
+	}
 	state.execute();
 	if (cursor_state.consume_draw.length) {
 		const [x, y] = /** @type {[int,int]}*/ (
