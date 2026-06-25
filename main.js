@@ -304,7 +304,6 @@ const state = store.get("state", {
 	/** @type {float} */
 	previous_dopamine: 0,
 });
-state.memory.push(state.current_thought);
 /**@type {Object<string,CallableFunction>} */
 const actions = {
 	/**
@@ -508,8 +507,8 @@ function nearby() {
 		const pos = { x: state.x, y: state.y };
 		for (let x = -state.site; x <= state.site; x++) {
 			for (let y = -state.site; y <= state.site; y++) {
-				result.concat(
-					element_from_point({ x: pos.x + x, y: pos.y + y })
+				result.push(
+					...element_from_point({ x: pos.x + x, y: pos.y + y })
 				);
 			}
 		}
