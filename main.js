@@ -476,13 +476,15 @@ const actions = {
 	sleep() {
 		state.sleep += Math.floor(Math.random() * state.max_sleep);
 	},
-	/** @returns {HTMLElement} */
+	/** @returns {{x:float,y:float}} */
 	nearest_point() {
-		return nearby()[0];
+		const el = nearby()[0];
+		return { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
 	},
 };
 /** @type {HTMLElement[]} */
 const elements = [];
+/** @type {{dx: int, dy: int, step: int}} */
 const destination = { dx: 0, dy: 0, step: 0 };
 /**
  * @type {cache<HTMLElement[]>}
@@ -660,6 +662,7 @@ $("#todo")?.addEventListener("click", () => {
 	}
 	body.appendChild(filter);
 });
+/** @type {boolean} */
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {
 	if (mousedown || cursor_state.mode === "click") {
