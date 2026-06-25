@@ -430,10 +430,13 @@ const actions = {
 	make_memory() {
 		state.current_thought.update_weigh();
 		state.memory_direction[
-			Math.floor(
-				(Math.atan2(state.old_y - state.y, state.old_x - state.x) *
-					12) /
-					Math.PI
+			Math.min(
+				Math.floor(
+					(Math.atan2(state.old_y - state.y, state.old_x - state.x) *
+						12) /
+						Math.PI
+				),
+				23
 			)
 		]++;
 		if (_cache.ok) {
@@ -555,7 +558,7 @@ function nearby() {
 	if (_cache.ok) {
 		return _cache.data;
 	}
-	if (elements.length < 10000) {
+	if (elements.length < (state.site * 2) ** 2) {
 		for (const element of elements) {
 			if (distance(element) < state.site) {
 				result.push(element);
