@@ -282,7 +282,7 @@ const state = store.get("state", {
 				}
 				index++;
 			}
-			if (index < 0) {
+			if (index >= 0) {
 				state.current_thought.actions = state.action.length;
 				state.action.push(temp);
 			}
