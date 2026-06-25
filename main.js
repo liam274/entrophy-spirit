@@ -828,10 +828,10 @@ function main() {
 	);
 	if (destination.step > 0) {
 		destination.step--;
-		_cache.unset();
 		if (destination.dx === 0 && destination.dy === 0) {
 			destination.step = 0;
 		} else {
+			_cache.unset();
 			spirit.style.left = `${(state.x += destination.dx)}px`;
 			spirit.style.top = `${(state.y += destination.dy)}px`;
 		}
