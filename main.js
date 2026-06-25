@@ -693,29 +693,40 @@ $("#todo")?.addEventListener("click", () => {
 	todo.append($$("hr"));
 	const list = $$("div");
 	list.classList.add("todo-list");
-	let index = 0;
-	for (const { content, is_ok } of todo_list) {
-		const list_item = $$("div");
-		list_item.classList.add("todo-item");
-		const item = $$("div");
-		item.classList.add("todo-item-content");
-		item.setHTMLUnsafe(content);
-		list_item.appendChild(item);
-		const tick = $$("input");
-		tick.type = "checkbox";
-		if (is_ok) {
-			tick.checked = true;
+	const update = () => {
+		let index = 0;
+		for (const { content, is_ok } of todo_list) {
+			const list_item = $$("div");
+			list_item.classList.add("todo-item");
+			const item = $$("div");
+			item.classList.add("todo-item-content");
+			item.setHTMLUnsafe(content);
+			list_item.appendChild(item);
+			const tick = $$("input");
+			tick.type = "checkbox";
+			if (is_ok) {
+				tick.checked = true;
+			}
+			tick.addEventListener("change", () => {
+				todo_list[index] = {
+					content,
+					is_ok: tick.checked,
+				};
+			});
+			list_item.appendChild(tick);
+			list.appendChild(list_item);
+			index++;
 		}
-		tick.addEventListener("change", () => {
-			todo_list[index] = {
-				content,
-				is_ok: tick.checked,
-			};
-		});
-		list_item.appendChild(tick);
-		list.appendChild(list_item);
-		index++;
-	}
+	};
+	todo.appendChild(list);
+	const input = $$("input");
+	input.addEventListener("keydown", (e) => {
+		if (e.key === "Enter") {
+			todo_list.push({ content: input.value, is_ok: false });
+			input.value = "";
+			update();
+		}
+	});
 	body.appendChild(filter);
 });
 /** @type {boolean} */
