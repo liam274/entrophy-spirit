@@ -360,7 +360,7 @@ const actions = {
 			iter.add(...node.related.map((v) => state.memory[v]));
 			width += node.related.length;
 			const w = node.weigh * node.delta_dopamine;
-			for (const action in state.action[node.actions]) {
+			for (const action of state.action[node.actions]) {
 				list[action] +=
 					(list[action] ?? 0) +
 					w *
