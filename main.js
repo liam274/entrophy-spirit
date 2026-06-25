@@ -527,7 +527,7 @@ const actions = {
 					) *
 						12) /
 						Math.PI
-				) === max_index
+				) === min_index
 			) {
 				return {
 					x: parseFloat(point.style.left),
