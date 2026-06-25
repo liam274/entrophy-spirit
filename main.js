@@ -511,7 +511,7 @@ const actions = {
 	},
 	/** @returns {{x:float,y:float}} */
 	curious_point() {
-		let min = 0,
+		let min = Infinity,
 			min_index = 0,
 			index = 0;
 		for (const direction of state.memory_direction) {
