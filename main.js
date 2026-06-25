@@ -303,6 +303,14 @@ const state = store.get("state", {
 	max_sleep: 100,
 	/** @type {float} */
 	previous_dopamine: 0,
+	/** @type {[int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int]} */
+	memory_direction: [
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	],
+	/** @type {int} */
+	old_x: 0,
+	/** @type {int} */
+	old_y: 0,
 });
 /**@type {Object<string,CallableFunction>} */
 const actions = {
@@ -328,6 +336,8 @@ const actions = {
 	 * @returns {{x:int,y:int}}
 	 */
 	walk({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
+		state.old_x = state.x;
+		state.old_y = state.y;
 		destination.dx = (x - state.x) / 100;
 		destination.dy = (y - state.y) / 100;
 		destination.step = 100;
@@ -337,6 +347,8 @@ const actions = {
 	 * @param {{x:int,y:int}} param0
 	 */
 	run({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
+		state.old_x = state.x;
+		state.old_y = state.y;
 		destination.dx = (x - state.x) / 30;
 		destination.dy = (y - state.y) / 30;
 		destination.step = 30;
@@ -412,6 +424,13 @@ const actions = {
 	},
 	make_memory() {
 		state.current_thought.update_weigh();
+		state.memory_direction[
+			Math.floor(
+				(Math.atan2(state.y - state.old_y, state.x - state.old_x) *
+					12) /
+					Math.PI
+			)
+		]++;
 		if (_cache.ok) {
 			state.current_thought.weigh += state.general_weigh;
 			return;
@@ -740,6 +759,7 @@ function main() {
 	);
 	if (destination.step > 0) {
 		destination.step--;
+		_cache.unset();
 		if (destination.dx === 0 && destination.dy === 0) {
 			destination.step = 0;
 		} else {
