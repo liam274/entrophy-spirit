@@ -260,7 +260,7 @@ const state = store.get("state", {
 			tried = false;
 		state.current_thought.update_weigh();
 		for (const act of state.action[state.current_thought.actions]) {
-			if (includes(state.available_action, act)) {
+			if (state.available_action.includes(act)) {
 				res = actions[act](res);
 				tried = true;
 				state.energy -= state.action_energy[act];
@@ -721,20 +721,6 @@ function array_equal(a, b) {
 		}
 	}
 	return true;
-}
-/**
- * @template T
- * @param {T[]} arr
- * @param {T} ele
- * @returns {boolean}
- */
-function includes(arr, ele) {
-	for (const el of arr) {
-		if (el === ele) {
-			return true;
-		}
-	}
-	return false;
 }
 spirit.style.left = `${state.x}px`;
 spirit.style.top = `${state.y}px`;
