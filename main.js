@@ -260,7 +260,7 @@ const state = store.get("state", {
 			tried = false;
 		state.current_thought.update_weigh();
 		for (const act of state.action[state.current_thought.actions]) {
-			if (state.available_action.includes(act)) {
+			if (includes(state.available_action, act)) {
 				res = actions[act](res);
 				tried = true;
 				state.energy -= state.action_energy[act];
@@ -273,9 +273,16 @@ const state = store.get("state", {
 					Math.floor(Math.random() * state.available_action.length)
 				]
 			);
-			if (state.action.includes(temp)) {
-				state.current_thought.actions = state.action.indexOf(temp);
-			} else {
+			let index = 0;
+			for (const action of state.action) {
+				if (array_equal(action, temp)) {
+					state.current_thought.actions = index;
+					index = -1;
+					break;
+				}
+				index++;
+			}
+			if (index < 0) {
 				state.current_thought.actions = state.action.length;
 				state.action.push(temp);
 			}
@@ -689,6 +696,36 @@ function caculate_dopamine() {
 	state.dopamine += state.energy / MAX_ENERGY; // 越飽就越高興
 	state.dopamine /= state.urgency; // 越着急就越難受
 	return state.dopamine;
+}
+/**
+ * @param {any[]} a
+ * @param {any[]} b
+ * @returns {boolean}
+ */
+function array_equal(a, b) {
+	if (a.length !== b.length) {
+		return false;
+	}
+	for (let i = 0; i < a.length; i++) {
+		if (a[i] !== b[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+/**
+ * @template T
+ * @param {T[]} arr
+ * @param {T} ele
+ * @returns {boolean}
+ */
+function includes(arr, ele) {
+	for (const el of arr) {
+		if (el === ele) {
+			return true;
+		}
+	}
+	return false;
 }
 spirit.style.left = `${state.x}px`;
 spirit.style.top = `${state.y}px`;
