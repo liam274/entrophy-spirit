@@ -727,6 +727,7 @@ $("#todo")?.addEventListener("click", () => {
 			update();
 		}
 	});
+	todo.appendChild(input);
 	body.appendChild(filter);
 });
 /** @type {boolean} */
