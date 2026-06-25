@@ -539,11 +539,14 @@ function decive_action(action_data) {
 	for (let i = Math.floor(Math.random() * state.max_depth) + 1; i > 0; i--) {
 		result.push(action_weigh[i][0]);
 	}
-	let id;
-	if (state.action.includes(result)) {
-		id = state.action.indexOf(result);
-	} else {
-		id = state.action.length;
+	let id = 0;
+	for (const action of state.action) {
+		if (array_equal(action, result)) {
+			break;
+		}
+		id++;
+	}
+	if (id === state.action.length) {
 		state.action.push(result);
 	}
 	return id;
