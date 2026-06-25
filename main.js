@@ -395,6 +395,13 @@ const actions = {
 				break;
 			}
 		}
+		let id = 0;
+		for (const act of state.action) {
+			if (array_equal(act, action)) {
+				return id;
+			}
+			id++;
+		}
 		state.action.push(action);
 		return state.action.length - 1;
 	},
