@@ -474,11 +474,10 @@ const actions = {
 	 * @param {{x: int, y: int}} param0
 	 */
 	draw({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
-		_cache.unset();
-		for (const element of element_from_point({ x, y })) {
-			element.style.backgroundColor = cursor_state.color;
+		if (element_from_point({ x, y }).length) {
 			return;
 		}
+		_cache.unset();
 		const pixel = $$("div");
 		pixel.classList.add("pixel");
 		pixel.style.backgroundColor = cursor_state.color;
@@ -707,22 +706,26 @@ $("#todo")?.addEventListener("click", () => {
 			if (is_ok) {
 				tick.checked = true;
 			}
+			const c_index = index;
 			tick.addEventListener("change", () => {
-				todo_list[index] = {
+				todo_list[c_index] = {
 					content,
 					is_ok: tick.checked,
 				};
+				store.set("todo-list", todo_list);
 			});
 			list_item.appendChild(tick);
 			list.appendChild(list_item);
 			index++;
 		}
 	};
+	update();
 	todo.appendChild(list);
 	const input = $$("input");
 	input.addEventListener("keydown", (e) => {
 		if (e.key === "Enter") {
 			todo_list.push({ content: input.value, is_ok: false });
+			store.set("todo-list", todo_list);
 			input.value = "";
 			update();
 		}
