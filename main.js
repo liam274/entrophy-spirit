@@ -435,7 +435,7 @@ const actions = {
 					(Math.atan2(state.old_y - state.y, state.old_x - state.x) *
 						12) /
 						Math.PI
-				),
+				) + 12,
 				23
 			)
 		]++;
