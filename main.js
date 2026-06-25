@@ -475,7 +475,7 @@ const actions = {
 	 * @param {{x: int, y: int}} param0
 	 */
 	draw({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
-		if (element_from_point({ x, y }).length) {
+		if (element_from_point({ x, y }, true).length) {
 			return;
 		}
 		_cache.unset();
@@ -491,7 +491,7 @@ const actions = {
 	 */
 	erase({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
 		_cache.unset();
-		for (const element of element_from_point({ x, y })) {
+		for (const element of element_from_point({ x, y }, true)) {
 			element.remove();
 			elements.splice(elements.indexOf(element), 1);
 		}
@@ -773,15 +773,18 @@ document.addEventListener("contextmenu", (e) => {
 /**
  *
  * @param {{x: int,y: int}} param0
+ * @param {boolean} inaccurate
  * @returns {HTMLElement[]}
  */
-function element_from_point({ x, y }) {
-	const result = [
-		...document.elementsFromPoint(x, y),
-		...document.elementsFromPoint(x + 1, y),
-		...document.elementsFromPoint(x, y + 1),
-		...document.elementsFromPoint(x + 1, y + 1),
-	];
+function element_from_point({ x, y }, inaccurate = false) {
+	const result = inaccurate
+		? [
+				...document.elementsFromPoint(x, y),
+				...document.elementsFromPoint(x + 1, y),
+				...document.elementsFromPoint(x, y + 1),
+				...document.elementsFromPoint(x + 1, y + 1),
+			]
+		: document.elementFromPoint(x, y);
 	// @ts-ignore
 	return result.filter((el) => el.classList.contains("pixel"));
 }
