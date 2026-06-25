@@ -700,12 +700,9 @@ $("#todo")?.addEventListener("click", () => {
 			const list_item = $$("div");
 			list_item.classList.add("todo-item");
 			list_item.addEventListener("click", (e) => {
-				if (e.target !== list_item) {
-					return;
-				}
-				list_item.remove();
 				todo_list.splice(c_index, 1);
 				store.set("todo-list", todo_list);
+				update();
 			});
 			const item = $$("div");
 			item.classList.add("todo-item-content");
