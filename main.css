@@ -1,3 +1,6 @@
+* {
+	font-family: "JetBrains Mono";
+}
 body {
 	height: 100vh;
 	display: flex;
@@ -6,6 +9,9 @@ body {
 	justify-content: flex-end;
 	align-items: flex-end;
 	overflow: hidden;
+}
+input {
+	outline: none;
 }
 #spirit {
 	background-color: black;
@@ -64,6 +70,7 @@ body {
 	align-items: center;
 	background-color: rgba(128, 128, 128, 0.5);
 	z-index: 9999;
+	cursor: pointer;
 }
 .button {
 	width: 50px;
@@ -99,6 +106,7 @@ body {
 	border: none;
 	border-radius: 15px;
 	background-color: white;
+	cursor: auto;
 }
 .todo-list {
 	padding: 15px;
@@ -112,4 +120,9 @@ body {
 	height: 20%;
 	display: flex;
 	justify-content: space-between;
+	user-select: none;
+	cursor: pointer;
+}
+.todo-item:hover {
+	text-decoration: line-through;
 }
