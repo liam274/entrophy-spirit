@@ -421,9 +421,9 @@ const actions = {
 		return state.action.length - 1;
 	},
 	/**
-	 * @param  {...string} message
+	 * @param  {{message: any[]}} param0
 	 */
-	talk(...message) {
+	talk({ message }) {
 		blackboard.innerText += message.join(". ");
 	},
 	make_memory() {
