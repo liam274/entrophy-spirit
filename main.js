@@ -699,7 +699,7 @@ $("#todo")?.addEventListener("click", () => {
 		for (const { content, is_ok } of todo_list) {
 			const list_item = $$("div");
 			list_item.classList.add("todo-item");
-			list_item.addEventListener("click", (e) => {
+			list_item.addEventListener("click", () => {
 				todo_list.splice(c_index, 1);
 				store.set("todo-list", todo_list);
 				update();
