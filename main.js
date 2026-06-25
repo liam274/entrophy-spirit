@@ -215,6 +215,7 @@ const state = store.get("state", {
 		["sleep"],
 		["recall_memory", "walk", "draw"],
 		["nearest_point", "walk"],
+		["curious_point", "walk"],
 	],
 	/**@type {string[]} */
 	available_action: [
@@ -228,6 +229,7 @@ const state = store.get("state", {
 		"erase",
 		"sleep",
 		"nearest_point",
+		"curious_point",
 	],
 	/**@type {Object<string,int>} */
 	action_weigh: {
@@ -241,6 +243,7 @@ const state = store.get("state", {
 		erase: 1,
 		sleep: 1,
 		nearest_point: 1,
+		curious_point: 0.5,
 	},
 	/**@type {Object<string,int>} */
 	action_energy: {
@@ -254,6 +257,7 @@ const state = store.get("state", {
 		erase: 1,
 		sleep: 0,
 		nearest_point: 0.5,
+		curious_point: 0.5,
 	},
 	execute() {
 		let res = undefined,
