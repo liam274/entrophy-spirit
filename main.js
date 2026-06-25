@@ -787,7 +787,7 @@ function element_from_point({ x, y }, inaccurate = false) {
 				...document.elementsFromPoint(x, y + 1),
 				...document.elementsFromPoint(x + 1, y + 1),
 			]
-		: document.elementFromPoint(x, y);
+		: document.elementsFromPoint(x, y);
 	// @ts-ignore
 	return result.filter((el) => el.classList.contains("pixel"));
 }
