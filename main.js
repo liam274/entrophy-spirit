@@ -426,7 +426,7 @@ const actions = {
 		state.current_thought.update_weigh();
 		state.memory_direction[
 			Math.floor(
-				(Math.atan2(state.y - state.old_y, state.x - state.old_x) *
+				(Math.atan2(state.old_y - state.y, state.old_x - state.x) *
 					12) /
 					Math.PI
 			)
@@ -497,8 +497,41 @@ const actions = {
 	},
 	/** @returns {{x:float,y:float}} */
 	nearest_point() {
-		const el = nearby()[0];
+		const temp = nearby();
+		const el = temp[1] ??
+			temp[0] ?? { style: { left: `${state.x}`, top: `${state.y}` } };
 		return { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
+	},
+	/** @returns {{x:float,y:float}} */
+	curious_point() {
+		let max = 0,
+			max_index = 0,
+			index = 0;
+		for (const direction of state.memory_direction) {
+			if (max < direction) {
+				max = direction;
+				max_index = index;
+			}
+			index++;
+		}
+		for (const point of nearby()) {
+			if (
+				Math.floor(
+					(Math.atan2(
+						parseFloat(point.style.top) - state.y,
+						parseFloat(point.style.left) - state.x
+					) *
+						12) /
+						Math.PI
+				) === max_index
+			) {
+				return {
+					x: parseFloat(point.style.left),
+					y: parseFloat(point.style.top),
+				};
+			}
+		}
+		return { x: state.x, y: state.y };
 	},
 };
 /** @type {HTMLElement[]} */
