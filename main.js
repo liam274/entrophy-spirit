@@ -419,7 +419,7 @@ const actions = {
 		const now_memory = new memory_node(
 			state.general_weigh,
 			[state.memory.indexOf(state.current_thought)],
-			decive_action(state.action[state.current_thought.actions]),
+			derive_action(state.action[state.current_thought.actions]),
 			[state.x, state.y],
 			nearby()
 		);
@@ -532,7 +532,7 @@ function distance(element) {
  * @param {string[]} action_data
  * @returns {int}
  */
-function decive_action(action_data) {
+function derive_action(action_data) {
 	/** @type {string[]} */
 	const result = [];
 	/** @type {Object<string,int>} */
