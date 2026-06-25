@@ -769,10 +769,14 @@ document.addEventListener("contextmenu", (e) => {
  * @returns {HTMLElement[]}
  */
 function element_from_point({ x, y }) {
+	const result = [
+		...document.elementsFromPoint(x, y),
+		...document.elementsFromPoint(x + 1, y),
+		...document.elementsFromPoint(x, y + 1),
+		...document.elementsFromPoint(x + 1, y + 1),
+	];
 	// @ts-ignore
-	return (document.elementsFromPoint(x, y) ?? []).filter((el) =>
-		el.classList.contains("pixel")
-	);
+	return result.filter((el) => el.classList.contains("pixel"));
 }
 /** @returns {float} */
 function caculate_dopamine() {
