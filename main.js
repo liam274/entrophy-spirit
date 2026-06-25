@@ -69,9 +69,8 @@ class memory_node {
 	 */
 	update_delta_dopamine(value) {
 		this.delta_dopamine_sum += value;
-		this.delta_dopamine =
-			this.delta_dopamine_sum / ++this.delta_dopamine_time;
-		return this.delta_dopamine;
+		return (this.delta_dopamine =
+			this.delta_dopamine_sum / ++this.delta_dopamine_time);
 	}
 }
 /**
@@ -291,7 +290,9 @@ const state = store.get("state", {
 				state.action.push(temp);
 			}
 		}
-		actions.make_memory();
+		if (!_cache.ok) {
+			actions.make_memory();
+		}
 	},
 	/**@type {int} */
 	max_depth: 3,
@@ -423,7 +424,7 @@ const actions = {
 	/**
 	 * @param  {{message: any[]}} param0
 	 */
-	talk({ message }) {
+	talk({ message } = { message: [] }) {
 		blackboard.innerText += message.join(". ");
 	},
 	make_memory() {
