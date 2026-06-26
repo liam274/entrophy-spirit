@@ -153,18 +153,20 @@ class storage {
 	}
 	/**
 	 * set value
+	 * @template T
 	 * @param {string} key
-	 * @param {any} value
-	 * @returns {any}
+	 * @param {T} value
+	 * @returns {T}
 	 */
 	set(key, value) {
 		return (this.data[key] = value);
 	}
 	/**
 	 * get value
+	 * @template T
 	 * @param {string} key
-	 * @param {any} _default
-	 * @returns {any}
+	 * @param {T} _default
+	 * @returns {T}
 	 */
 	get(key, _default) {
 		return this.data[key] ?? _default;
@@ -182,7 +184,6 @@ const FIRST_THOUGHT = new memory_node(1, [1, 2], 8, [100, 100], []),
 	SLEEP_THOUGHT = new memory_node(1, [0], 7, [100, 100], []);
 /** @type {storage} */
 const store = new storage({}, "state-data");
-/** @type {Object<string,any>} */
 const state = store.get("state", {
 	/** @type {float} */
 	dopamine: 0.5,
@@ -289,9 +290,11 @@ const state = store.get("state", {
 	/**@type {int} */
 	sleep: 0,
 	/**@type {int} */
-	energy: 100,
-	/**@type {int} */
 	max_sleep: 90,
+	/** @type {int} */
+	min_sleep: 20,
+	/**@type {int} */
+	energy: 100,
 	/** @type {float} */
 	previous_dopamine: 0,
 	/** @type {[int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int]} */
@@ -332,7 +335,6 @@ const global_state = {
 		nearest_point: 0.5,
 		curious_point: 0.5,
 	},
-	min_sleep: 20,
 };
 /**@type {Object<string,CallableFunction>} */
 const actions = {
@@ -853,8 +855,8 @@ function main() {
 			spirit.style.top = `${(state.y += destination.dy)}px`;
 		}
 	}
-	if (global_state.min_sleep > state.energy) {
-		state.sleep();
+	if (state.min_sleep > state.energy) {
+		actions.sleep();
 	}
 	state.execute();
 	if (cursor_state.consume_draw.length) {
