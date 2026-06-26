@@ -242,21 +242,7 @@ const state = store.get("state", {
 		erase: 1,
 		sleep: 1,
 		nearest_point: 1,
-		curious_point: 0.5,
-	},
-	/**@type {Object<string,int>} */
-	action_energy: {
-		recall_memory: 0.5,
-		walk: 10,
-		run: 20,
-		make_action: 0.5,
-		talk: 1,
-		make_memory: 0,
-		draw: 1,
-		erase: 1,
-		sleep: 0,
-		nearest_point: 0.5,
-		curious_point: 0.5,
+		curious_point: 1,
 	},
 	execute() {
 		let res = undefined,
@@ -266,7 +252,7 @@ const state = store.get("state", {
 			if (state.available_action.includes(act)) {
 				res = actions[act](res);
 				tried = true;
-				state.energy -= state.action_energy[act];
+				state.energy -= global_state.action_energy[act];
 			}
 		}
 		if (!tried) {
@@ -305,7 +291,7 @@ const state = store.get("state", {
 	/**@type {int} */
 	energy: 100,
 	/**@type {int} */
-	max_sleep: 100,
+	max_sleep: 90,
 	/** @type {float} */
 	previous_dopamine: 0,
 	/** @type {[int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int]} */
@@ -317,6 +303,37 @@ const state = store.get("state", {
 	/** @type {int} */
 	old_y: 0,
 });
+const global_state = {
+	/**@type {Object<string,int>} */
+	action_use: {
+		recall_memory: 0,
+		walk: 0,
+		run: 0,
+		make_action: 0,
+		talk: 0,
+		make_memory: 0,
+		draw: 0,
+		erase: 0,
+		sleep: 0,
+		nearest_point: 0,
+		curious_point: 0,
+	},
+	/**@type {Object<string,int>} */
+	action_energy: {
+		recall_memory: 0.5,
+		walk: 10,
+		run: 20,
+		make_action: 0.5,
+		talk: 1,
+		make_memory: 0,
+		draw: 1,
+		erase: 1,
+		sleep: 0,
+		nearest_point: 0.5,
+		curious_point: 0.5,
+	},
+	min_sleep: 20,
+};
 /**@type {Object<string,CallableFunction>} */
 const actions = {
 	/**
@@ -500,7 +517,7 @@ const actions = {
 		}
 	},
 	sleep() {
-		state.sleep += Math.floor(Math.random() * state.max_sleep);
+		state.sleep += Math.floor(Math.random() * state.max_sleep) + 10;
 	},
 	/** @returns {{x:float,y:float}} */
 	nearest_point() {
@@ -835,6 +852,9 @@ function main() {
 			spirit.style.left = `${(state.x += destination.dx)}px`;
 			spirit.style.top = `${(state.y += destination.dy)}px`;
 		}
+	}
+	if (global_state.min_sleep > state.energy) {
+		state.sleep();
 	}
 	state.execute();
 	if (cursor_state.consume_draw.length) {
