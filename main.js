@@ -831,7 +831,7 @@ let doing = false;
  * main loop
  * @returns null
  */
-function main() {
+function spirit_main() {
 	state.current_thought.update_delta_dopamine(
 		-(
 			state.previous_dopamine -
@@ -864,7 +864,7 @@ function main() {
 		setTimeout(() => {
 			clearInterval(sleep);
 			doing = true;
-			requestAnimationFrame(main);
+			requestAnimationFrame(spirit_main);
 		}, sleep_amount * MILLISECOND);
 		return;
 	}
@@ -910,6 +910,13 @@ function main() {
 			actions.make_memory();
 		}
 	}
+}
+actions.think_action();
+requestAnimationFrame(spirit_main);
+/**
+ * render main
+ */
+function render_main() {
 	// draw point
 	if (cursor_state.consume_draw.length) {
 		const [x, y] = /** @type {[int,int]}*/ (
@@ -948,6 +955,6 @@ function main() {
 			}
 		}
 	}
+	requestAnimationFrame(render_main);
 }
-actions.think_action();
-requestAnimationFrame(main);
+requestAnimationFrame(render_main);
