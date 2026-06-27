@@ -115,9 +115,21 @@ class cache {
 	unset() {
 		this.ok = false;
 	}
-	/** @param {type} data */
-	set(data) {
-		this.data = data;
+	/**
+	 * @param {any} data
+	 * @param {string[]} key
+	 * */
+	set(data, key) {
+		if (key.length) {
+			/** @type {any} */
+			let temp = this.data;
+			for (let i = 0; i < key.length - 1; i++) {
+				temp = temp[key[i]];
+			}
+			temp[key[key.length - 1]] = data;
+		} else {
+			this.data = data;
+		}
 		this.ok = true;
 	}
 	/**
@@ -565,9 +577,12 @@ const elements = [];
 /** @type {{dx: int, dy: int, step: int}} */
 const destination = { dx: 0, dy: 0, step: 0 };
 /**
- * @type {cache<HTMLElement[]>}
+ * @type {cache<{element: HTMLElement[],last_class_name: string}>}
  */
-const _cache = new cache([]);
+const _cache = new cache({
+	element: [],
+	last_class_name: "",
+});
 /**
  * @param {string} class_name
  * @returns {HTMLElement[]}
@@ -575,8 +590,11 @@ const _cache = new cache([]);
 function nearby(class_name = "pixel") {
 	/** @type {HTMLElement[]} */
 	const result = [];
+	if (class_name !== _cache.data.last_class_name) {
+		_cache.unset();
+	}
 	if (_cache.ok) {
-		return _cache.data;
+		return _cache.data.element;
 	}
 	if (elements.length < (state.site * 2) ** 2) {
 		for (const element of elements) {
@@ -598,7 +616,7 @@ function nearby(class_name = "pixel") {
 			}
 		}
 	}
-	_cache.set(result);
+	_cache.set(result, ["element"]);
 	return result;
 }
 /**
