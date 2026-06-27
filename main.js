@@ -11,8 +11,6 @@ const spirit = /** @type {HTMLSpanElement} */ ($("#spirit")),
 	{ body } = document;
 const MINUTE = 60;
 const MILLISECOND = 1000;
-const FPS = 60;
-const MUST_SLEEP = MILLISECOND / FPS;
 const MAX_ENERGY = 200;
 class memory_node {
 	/** @type {int} */
@@ -275,6 +273,10 @@ const state = store.get("state", {
 	old_x: 0,
 	/** @type {int} */
 	old_y: 0,
+	/** @type {int} */
+	momentum_energy: 90,
+	/** @type {int} */
+	cognitive_energy: 10,
 });
 const global_state = {
 	/**@type {Object<string,int>} */
@@ -323,6 +325,7 @@ const actions = {
 			) ?? state.current_thought;
 		result.weigh += state.general_weigh;
 		result.update_weigh();
+		doing = false;
 		return result;
 	},
 	/**
@@ -408,6 +411,7 @@ const actions = {
 			id++;
 		}
 		state.action.push(action);
+		doing = false;
 		return state.action.length - 1;
 	},
 	/**
@@ -415,6 +419,7 @@ const actions = {
 	 */
 	talk({ message } = { message: [] }) {
 		blackboard.innerText += message.join(". ");
+		doing = false;
 	},
 	make_memory() {
 		state.current_thought.update_weigh();
@@ -462,6 +467,7 @@ const actions = {
 		now_memory.most_likely = max_id;
 		state.memory.push(now_memory);
 		state.current_thought = now_memory;
+		doing = false;
 	},
 	/**
 	 * @param {{x: int, y: int}} param0
@@ -477,6 +483,7 @@ const actions = {
 		pixel.style.left = `${x}px`;
 		pixel.style.top = `${y}px`;
 		body.appendChild(pixel);
+		doing = false;
 	},
 	/**
 	 * @param {{x: int, y: int}} param0
@@ -487,15 +494,17 @@ const actions = {
 			element.remove();
 			elements.splice(elements.indexOf(element), 1);
 		}
+		doing = false;
 	},
 	sleep() {
-		state.sleep += Math.floor(Math.random() * state.max_sleep) + 10;
+		state.sleep += state.cognitive_energy + 10;
 	},
 	/** @returns {{x:float,y:float}} */
 	nearest_point() {
 		const temp = nearby();
 		const el = temp[1] ??
 			temp[0] ?? { style: { left: `${state.x}`, top: `${state.y}` } };
+		doing = false;
 		return { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
 	},
 	/** @returns {{x:float,y:float}} */
@@ -527,6 +536,7 @@ const actions = {
 				};
 			}
 		}
+		doing = false;
 		return { x: state.x, y: state.y };
 	},
 };
@@ -806,6 +816,8 @@ spirit.style.left = `${state.x}px`;
 spirit.style.top = `${state.y}px`;
 /** @type {any} */
 let res = undefined;
+/** @type {boolean} */
+let doing = false;
 /**
  * main loop
  * @returns null
@@ -822,51 +834,71 @@ function main() {
 		destination.step--;
 		if (destination.dx === 0 && destination.dy === 0) {
 			destination.step = 0;
+			doing = false;
 		} else {
 			_cache.unset();
 			spirit.style.left = `${(state.x += destination.dx)}px`;
 			spirit.style.top = `${(state.y += destination.dy)}px`;
 		}
+	} else {
+		doing = false;
 	}
 	// fall asleep
-	if (state.min_sleep > state.energy) {
+	if (state.min_sleep > state.momentum_energy) {
 		actions.sleep();
+		const sleep_amount = state.sleep;
+		state.sleep = 0;
+		const sleep = setInterval(() => {
+			state.momentum_energy++;
+			state.cognitive_energy--;
+		}, MILLISECOND);
+		setTimeout(() => {
+			clearInterval(sleep);
+			requestAnimationFrame(main);
+		}, sleep_amount * MILLISECOND);
+		return;
 	}
 	// put action
 	state.execute();
 	// execute action
-	let tried = false;
-	for (const act of action_iter) {
-		res = actions[act](res);
-		tried = true;
-		state.energy -= global_state.action_energy[act];
-		break;
-	}
-	// make new action
-	if (!tried) {
-		const temp = state.action[state.current_thought.actions];
-		temp.push(
-			state.available_action[
-				Math.floor(Math.random() * state.available_action.length)
-			]
-		);
-		let index = 0;
-		for (const action of state.action) {
-			if (array_equal(action, temp)) {
-				state.current_thought.actions = index;
-				index = -1;
-				break;
+	if (!doing) {
+		let tried = false;
+		doing = true;
+		for (const act of action_iter) {
+			res = actions[act](res);
+			tried = true;
+			state.energy -= global_state.action_energy[act];
+			state.momentum_energy -= global_state.action_energy[act];
+			state.cognitive_energy += global_state.action_energy[act];
+			break;
+		}
+		// make new action
+		if (!tried) {
+			const temp = state.action[state.current_thought.actions];
+			temp.push(
+				state.available_action[
+					Math.floor(Math.random() * state.available_action.length)
+				]
+			);
+			let index = 0;
+			for (const action of state.action) {
+				if (array_equal(action, temp)) {
+					state.current_thought.actions = index;
+					index = -1;
+					break;
+				}
+				index++;
 			}
-			index++;
+			if (index >= 0) {
+				state.current_thought.actions = state.action.length;
+				state.action.push(temp);
+			}
 		}
-		if (index >= 0) {
-			state.current_thought.actions = state.action.length;
-			state.action.push(temp);
+		if (!_cache.ok) {
+			actions.make_memory();
 		}
 	}
-	if (!_cache.ok) {
-		actions.make_memory();
-	}
+	// draw point
 	if (cursor_state.consume_draw.length) {
 		const [x, y] = /** @type {[int,int]}*/ (
 			cursor_state.consume_draw.pop()
@@ -904,14 +936,5 @@ function main() {
 			}
 		}
 	}
-	const sleep_amount = state.sleep;
-	state.sleep = 0;
-	setTimeout(
-		() => {
-			state.energy += sleep_amount;
-			requestAnimationFrame(main);
-		},
-		sleep_amount * MILLISECOND + MUST_SLEEP
-	);
 }
 requestAnimationFrame(main);
