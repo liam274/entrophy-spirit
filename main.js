@@ -213,7 +213,7 @@ const state = store.get("state", {
 		["draw"],
 		["erase"],
 		["sleep"],
-		["recall_memory", "walk", "draw"],
+		["recall_memory", "walk", "draw", "think_action"],
 		["nearest_point", "walk"],
 		["curious_point", "walk"],
 		["recall_memory", "think_action"],
@@ -544,6 +544,7 @@ const actions = {
 	think_action() {
 		state.current_thought.update_weigh();
 		action_iter.add(...state.action[state.current_thought.actions]);
+		doing = false;
 	},
 };
 /** @type {HTMLElement[]} */
@@ -800,7 +801,7 @@ function element_from_point({ x, y }, inaccurate = false) {
 function caculate_dopamine() {
 	state.dopamine += state.energy / MAX_ENERGY; // 越飽就越高興
 	state.dopamine += state.momentum_energy;
-	state.dopamine -= state.cognitive_energy;
+	state.dopamine -= state.cognitive_energy; // 越睏越煩燥
 	state.dopamine /= state.urgency; // 越着急就越難受
 	return state.dopamine;
 }
