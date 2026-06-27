@@ -1005,7 +1005,7 @@ function render_main() {
 		if (!element_from_point({ x, y }, false, "food").length) {
 			const pixel = $$("div");
 			pixel.classList.add("food");
-			pixel.style.backgroundColor = "black";
+			pixel.style.backgroundColor = "orange";
 			pixel.style.left = `${x}px`;
 			pixel.style.top = `${y}px`;
 			body.appendChild(pixel);
