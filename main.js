@@ -214,10 +214,11 @@ const state = store.get("state", {
 		["erase"],
 		["sleep"],
 		["recall_memory", "walk", "draw", "think_action"],
-		["nearest_point", "walk"],
 		["curious_point", "walk"],
+		["nearest_point", "walk"],
 		["recall_memory", "think_action"],
 		["make_action", "think_action"],
+		["recall_memory", "walk", "eat"],
 	],
 	/**@type {string[]} */
 	available_action: [
@@ -233,6 +234,7 @@ const state = store.get("state", {
 		"nearest_point",
 		"curious_point",
 		"think_action",
+		"eat",
 	],
 	/**@type {Object<string,int>} */
 	action_weigh: {
@@ -248,6 +250,7 @@ const state = store.get("state", {
 		nearest_point: 1,
 		curious_point: 1,
 		think_action: 1,
+		eat: 1,
 	},
 	/**@type {int} */
 	max_depth: 3,
@@ -293,6 +296,7 @@ const global_state = {
 		nearest_point: 0,
 		curious_point: 0,
 		think_action: 0,
+		eat: 0,
 	},
 	/**@type {Object<string,int>} */
 	action_energy: {
@@ -308,6 +312,7 @@ const global_state = {
 		nearest_point: 0.5,
 		curious_point: 0.5,
 		think_action: 0.5,
+		eat: 0,
 	},
 };
 /**@type {Object<string,CallableFunction>} */
@@ -481,7 +486,7 @@ const actions = {
 		_cache.unset();
 		const pixel = $$("div");
 		pixel.classList.add("pixel");
-		pixel.style.backgroundColor = cursor_state.color;
+		pixel.style.backgroundColor = "black";
 		pixel.style.left = `${x}px`;
 		pixel.style.top = `${y}px`;
 		body.appendChild(pixel);
@@ -546,6 +551,14 @@ const actions = {
 		action_iter.add(...state.action[state.current_thought.actions]);
 		doing = false;
 	},
+	eat() {
+		const result = nearby("food");
+		if (result.length) {
+			state.energy += 10;
+			result[0].remove();
+		}
+		doing = false;
+	},
 };
 /** @type {HTMLElement[]} */
 const elements = [];
@@ -556,9 +569,10 @@ const destination = { dx: 0, dy: 0, step: 0 };
  */
 const _cache = new cache([]);
 /**
+ * @param {string} class_name
  * @returns {HTMLElement[]}
  */
-function nearby() {
+function nearby(class_name = "pixel") {
 	/** @type {HTMLElement[]} */
 	const result = [];
 	if (_cache.ok) {
@@ -575,7 +589,11 @@ function nearby() {
 		for (let x = -state.site; x <= state.site; x++) {
 			for (let y = -state.site; y <= state.site; y++) {
 				result.push(
-					...element_from_point({ x: pos.x + x, y: pos.y + y })
+					...element_from_point(
+						{ x: pos.x + x, y: pos.y + y },
+						false,
+						class_name
+					)
 				);
 			}
 		}
@@ -651,12 +669,12 @@ const cursor_state = {
 	y: 0,
 	/** @type {string} */
 	mode: "click",
-	/** @type {string} */
-	color: "black",
 	/** @type {[int,int][]} */
 	consume_draw: [],
 	/** @type {[int,int][]} */
 	consume_erase: [],
+	/** @type {[int,int][]} */
+	consume_food: [],
 };
 let prev = "click";
 $("#pen")?.addEventListener("click", () => {
@@ -749,26 +767,52 @@ $("#todo")?.addEventListener("click", () => {
 	todo.appendChild(input);
 	body.appendChild(filter);
 });
+$("#food")?.addEventListener("click", () => {
+	cursor_state.mode = prev = "food";
+});
 /** @type {boolean} */
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {
 	if (mousedown || cursor_state.mode === "click") {
 		return;
 	}
-	(cursor_state.mode === "pen"
-		? cursor_state.consume_draw
-		: cursor_state.consume_erase
-	).push([(cursor_state.x = e.clientX), (cursor_state.y = e.clientY)]);
+	/** @type {[int,int][]} */
+	let _do;
+	switch (cursor_state.mode) {
+		case "pen":
+			_do = cursor_state.consume_draw;
+			break;
+		case "erase":
+			_do = cursor_state.consume_erase;
+			break;
+		case "food":
+			_do = cursor_state.consume_food;
+			break;
+		default:
+			_do = [];
+			break;
+	}
+	_do?.push([(cursor_state.x = e.clientX), (cursor_state.y = e.clientY)]);
 	mousedown = true;
 });
 document.addEventListener("mousemove", (e) => {
 	if (!mousedown) {
 		return;
 	}
-	(cursor_state.mode === "pen"
-		? cursor_state.consume_draw
-		: cursor_state.consume_erase
-	).push([(cursor_state.x = e.clientX), (cursor_state.y = e.clientY)]);
+	/** @type {[int,int][]} */
+	let _do;
+	switch (cursor_state.mode) {
+		case "pen":
+			_do = cursor_state.consume_draw;
+			break;
+		case "erase":
+			_do = cursor_state.consume_erase;
+			break;
+		default:
+			_do = [];
+			break;
+	}
+	_do?.push([(cursor_state.x = e.clientX), (cursor_state.y = e.clientY)]);
 });
 document.addEventListener("mouseup", () => {
 	if (!mousedown || cursor_state.mode === "click") {
@@ -783,9 +827,14 @@ document.addEventListener("contextmenu", (e) => {
  *
  * @param {{x: int,y: int}} param0
  * @param {boolean} inaccurate
+ * @param {string} class_name
  * @returns {HTMLElement[]}
  */
-function element_from_point({ x, y }, inaccurate = false) {
+function element_from_point(
+	{ x, y },
+	inaccurate = false,
+	class_name = "pixel"
+) {
 	const result = inaccurate
 		? [
 				...document.elementsFromPoint(x, y),
@@ -795,7 +844,7 @@ function element_from_point({ x, y }, inaccurate = false) {
 			]
 		: document.elementsFromPoint(x, y);
 	// @ts-ignore
-	return result.filter((el) => el.classList.contains("pixel"));
+	return result.filter((el) => el.classList.contains(class_name));
 }
 /** @returns {float} */
 function caculate_dopamine() {
@@ -922,16 +971,10 @@ function render_main() {
 		const [x, y] = /** @type {[int,int]}*/ (
 			cursor_state.consume_draw.pop()
 		);
-		let a = false;
-		for (const element of element_from_point({ x, y })) {
-			element.style.backgroundColor = cursor_state.color;
-			a = true;
-			break;
-		}
-		if (!a) {
+		if (!element_from_point({ x, y }).length) {
 			const pixel = $$("div");
 			pixel.classList.add("pixel");
-			pixel.style.backgroundColor = cursor_state.color;
+			pixel.style.backgroundColor = "black";
 			pixel.style.left = `${x}px`;
 			pixel.style.top = `${y}px`;
 			body.appendChild(pixel);
@@ -953,6 +996,20 @@ function render_main() {
 					elements.splice(elements.indexOf(element), 1);
 				}
 			}
+		}
+	}
+	if (cursor_state.consume_food.length) {
+		const [x, y] = /** @type {[int,int]}*/ (
+			cursor_state.consume_food.pop()
+		);
+		if (!element_from_point({ x, y }, false, "food").length) {
+			const pixel = $$("div");
+			pixel.classList.add("food");
+			pixel.style.backgroundColor = "black";
+			pixel.style.left = `${x}px`;
+			pixel.style.top = `${y}px`;
+			body.appendChild(pixel);
+			_cache.unset();
 		}
 	}
 	requestAnimationFrame(render_main);
