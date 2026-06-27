@@ -800,7 +800,7 @@ document.addEventListener("mousedown", (e) => {
 		case "pen":
 			_do = cursor_state.consume_draw;
 			break;
-		case "erase":
+		case "eraser":
 			_do = cursor_state.consume_erase;
 			break;
 		case "food":
@@ -823,7 +823,7 @@ document.addEventListener("mousemove", (e) => {
 		case "pen":
 			_do = cursor_state.consume_draw;
 			break;
-		case "erase":
+		case "eraser":
 			_do = cursor_state.consume_erase;
 			break;
 		default:
