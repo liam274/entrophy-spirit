@@ -592,6 +592,7 @@ function nearby(class_name = "pixel") {
 	const result = [];
 	if (class_name !== _cache.data.last_class_name) {
 		_cache.unset();
+		_cache.data.last_class_name = class_name;
 	}
 	if (_cache.ok) {
 		return _cache.data.element;
