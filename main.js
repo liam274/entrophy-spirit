@@ -216,6 +216,8 @@ const state = store.get("state", {
 		["recall_memory", "walk", "draw"],
 		["nearest_point", "walk"],
 		["curious_point", "walk"],
+		["recall_memory", "think_action"],
+		["make_action", "think_action"],
 	],
 	/**@type {string[]} */
 	available_action: [
@@ -230,6 +232,7 @@ const state = store.get("state", {
 		"sleep",
 		"nearest_point",
 		"curious_point",
+		"think_action",
 	],
 	/**@type {Object<string,int>} */
 	action_weigh: {
@@ -244,10 +247,7 @@ const state = store.get("state", {
 		sleep: 1,
 		nearest_point: 1,
 		curious_point: 1,
-	},
-	execute() {
-		state.current_thought.update_weigh();
-		action_iter.add(...state.action[state.current_thought.actions]);
+		think_action: 1,
 	},
 	/**@type {int} */
 	max_depth: 3,
@@ -292,6 +292,7 @@ const global_state = {
 		sleep: 0,
 		nearest_point: 0,
 		curious_point: 0,
+		think_action: 0,
 	},
 	/**@type {Object<string,int>} */
 	action_energy: {
@@ -306,6 +307,7 @@ const global_state = {
 		sleep: 0,
 		nearest_point: 0.5,
 		curious_point: 0.5,
+		think_action: 0.5,
 	},
 };
 /**@type {Object<string,CallableFunction>} */
@@ -538,6 +540,10 @@ const actions = {
 		}
 		doing = false;
 		return { x: state.x, y: state.y };
+	},
+	think_action() {
+		state.current_thought.update_weigh();
+		action_iter.add(...state.action[state.current_thought.actions]);
 	},
 };
 /** @type {HTMLElement[]} */
@@ -854,12 +860,15 @@ function main() {
 		}, MILLISECOND);
 		setTimeout(() => {
 			clearInterval(sleep);
+			doing = true;
 			requestAnimationFrame(main);
 		}, sleep_amount * MILLISECOND);
 		return;
 	}
-	// put action
-	state.execute();
+	// too much energy
+	if (state.momentum_energy > 90) {
+		actions.think_action();
+	}
 	// execute action
 	if (!doing) {
 		let tried = false;
@@ -937,4 +946,5 @@ function main() {
 		}
 	}
 }
+actions.think_action();
 requestAnimationFrame(main);
