@@ -184,6 +184,8 @@ const FIRST_THOUGHT = new memory_node(1, [1, 2], 8, [100, 100], []),
 	SLEEP_THOUGHT = new memory_node(1, [0], 7, [100, 100], []);
 /** @type {storage} */
 const store = new storage({}, "state-data");
+/** @type {expandable_iter<string>} */
+const action_iter = new expandable_iter([]);
 const state = store.get("state", {
 	/** @type {float} */
 	dopamine: 0.5,
@@ -246,40 +248,8 @@ const state = store.get("state", {
 		curious_point: 1,
 	},
 	execute() {
-		let res = undefined,
-			tried = false;
 		state.current_thought.update_weigh();
-		for (const act of state.action[state.current_thought.actions]) {
-			if (state.available_action.includes(act)) {
-				res = actions[act](res);
-				tried = true;
-				state.energy -= global_state.action_energy[act];
-			}
-		}
-		if (!tried) {
-			const temp = state.action[state.current_thought.actions];
-			temp.push(
-				state.available_action[
-					Math.floor(Math.random() * state.available_action.length)
-				]
-			);
-			let index = 0;
-			for (const action of state.action) {
-				if (array_equal(action, temp)) {
-					state.current_thought.actions = index;
-					index = -1;
-					break;
-				}
-				index++;
-			}
-			if (index >= 0) {
-				state.current_thought.actions = state.action.length;
-				state.action.push(temp);
-			}
-		}
-		if (!_cache.ok) {
-			actions.make_memory();
-		}
+		action_iter.add(...state.action[state.current_thought.actions]);
 	},
 	/**@type {int} */
 	max_depth: 3,
@@ -834,6 +804,8 @@ function array_equal(a, b) {
 }
 spirit.style.left = `${state.x}px`;
 spirit.style.top = `${state.y}px`;
+/** @type {any} */
+let res = undefined;
 /**
  * main loop
  * @returns null
@@ -845,6 +817,7 @@ function main() {
 			(state.previous_dopamine = caculate_dopamine())
 		)
 	);
+	// walk
 	if (destination.step > 0) {
 		destination.step--;
 		if (destination.dx === 0 && destination.dy === 0) {
@@ -855,10 +828,45 @@ function main() {
 			spirit.style.top = `${(state.y += destination.dy)}px`;
 		}
 	}
+	// fall asleep
 	if (state.min_sleep > state.energy) {
 		actions.sleep();
 	}
+	// put action
 	state.execute();
+	// execute action
+	let tried = false;
+	for (const act of action_iter) {
+		res = actions[act](res);
+		tried = true;
+		state.energy -= global_state.action_energy[act];
+		break;
+	}
+	// make new action
+	if (!tried) {
+		const temp = state.action[state.current_thought.actions];
+		temp.push(
+			state.available_action[
+				Math.floor(Math.random() * state.available_action.length)
+			]
+		);
+		let index = 0;
+		for (const action of state.action) {
+			if (array_equal(action, temp)) {
+				state.current_thought.actions = index;
+				index = -1;
+				break;
+			}
+			index++;
+		}
+		if (index >= 0) {
+			state.current_thought.actions = state.action.length;
+			state.action.push(temp);
+		}
+	}
+	if (!_cache.ok) {
+		actions.make_memory();
+	}
 	if (cursor_state.consume_draw.length) {
 		const [x, y] = /** @type {[int,int]}*/ (
 			cursor_state.consume_draw.pop()
