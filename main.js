@@ -326,7 +326,45 @@ const global_state = {
 		think_action: 0.5,
 		eat: 0,
 	},
+	patient_factor: 1.2,
 };
+/**
+ * @param {string} act
+ * @returns {float}
+ */
+function action_weigh(act) {
+	state.current_thought.update_weigh();
+	/**
+	 * @type {expandable_iter<memory_node>}
+	 */
+	const iter = new expandable_iter([state.current_thought]),
+		/**@type {Object<string,float>} */
+		list = {};
+	let point = state.current_thought.related.length,
+		time = 0,
+		width = 0,
+		tried = 0;
+	for (const node of iter) {
+		node.update_weigh();
+		iter.add(...node.related.map((v) => state.memory[v]));
+		width += node.related.length;
+		const w = node.weigh * node.delta_dopamine;
+		for (const action of state.action[node.actions]) {
+			list[action] +=
+				(list[action] ?? 0) +
+				w * similarity(state.current_thought.related, node.related);
+		}
+		if (time++ === point) {
+			point = width;
+			time = 0;
+			width = 0;
+			if (tried++ === state.max_depth) {
+				break;
+			}
+		}
+	}
+	return list[act] ?? 0;
+}
 /**@type {Object<string,CallableFunction>} */
 const actions = {
 	/**
@@ -645,9 +683,9 @@ function derive_action(action_data) {
 		temp[key] = action_data.includes(key) ? value : 2 * value; // 好奇心模式
 		// 這自然會因為記憶數量變多->重複動作權重變大，而變成習慣模式
 	}
-	const action_weigh = Object.entries(temp).sort(([, a], [, b]) => b - a);
+	const action_w = Object.entries(temp).sort(([, a], [, b]) => b - a);
 	for (let i = Math.floor(Math.random() * state.max_depth) + 1; i > 0; i--) {
-		result.push(action_weigh[i][0]);
+		result.push(action_w[i][0]);
 	}
 	let id = 0;
 	for (const action of state.action) {
@@ -895,6 +933,10 @@ spirit.style.top = `${state.y}px`;
 let res = undefined;
 /** @type {boolean} */
 let doing = false;
+const old = {
+	/** @type {string} */
+	action: "",
+};
 /**
  * main loop
  * @returns null
@@ -908,6 +950,9 @@ function spirit_main() {
 	);
 	// walk
 	if (destination.step > 0) {
+		if (!doing) {
+			destination.step = 0;
+		}
 		destination.step--;
 		if (destination.dx === 0 && destination.dy === 0) {
 			destination.step = 0;
@@ -922,15 +967,19 @@ function spirit_main() {
 	}
 	// fall asleep
 	if (state.min_sleep > state.momentum_energy) {
+		doing = true;
 		actions.sleep();
 		const sleep_amount = state.sleep;
 		state.sleep = 0;
 		const sleep = setInterval(() => {
 			state.momentum_energy++;
 			state.cognitive_energy--;
+			if (!doing) {
+				clearTimeout(timeout);
+				clearInterval(sleep);
+			}
 		}, MILLISECOND);
-		setTimeout(() => {
-			clearInterval(sleep);
+		const timeout = setTimeout(() => {
 			doing = true;
 			requestAnimationFrame(spirit_main);
 		}, sleep_amount * MILLISECOND);
@@ -939,6 +988,12 @@ function spirit_main() {
 	// too much energy
 	if (state.momentum_energy > 90) {
 		actions.think_action();
+	}
+	if (
+		action_weigh(action_iter.iterable[0]) >
+		action_weigh(old.action) * global_state.patient_factor
+	) {
+		doing = false;
 	}
 	// execute action
 	if (!doing) {
