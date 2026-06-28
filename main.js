@@ -199,8 +199,6 @@ const FIRST_THOUGHT = new memory_node(1, [1, 2], 8, [100, 100], []),
 	SLEEP_THOUGHT = new memory_node(1, [0], 7, [100, 100], []);
 /** @type {storage} */
 const store = new storage({}, "state-data");
-/** @type {expandable_iter<string>} */
-const action_iter = new expandable_iter([]);
 const state = store.get("state", {
 	/** @type {float} */
 	dopamine: 0.5,
@@ -299,7 +297,6 @@ const state = store.get("state", {
 	cognitive_energy: 10,
 });
 const global_state = {
-	/**@type {Object<string,int>} */
 	action_use: {
 		recall_memory: 0,
 		walk: 0,
@@ -315,7 +312,6 @@ const global_state = {
 		think_action: 0,
 		eat: 0,
 	},
-	/**@type {Object<string,int>} */
 	action_energy: {
 		recall_memory: 0.5,
 		walk: 10,
@@ -396,6 +392,12 @@ function action_weigh(act) {
 	}
 	return action_weigh_cache.set(list[act] ?? 0);
 }
+/** @param {float} energy */
+function consume_energy(energy) {
+	state.energy -= energy;
+	state.momentum_energy -= energy;
+	state.cognitive_energy += energy;
+}
 /**@type {Object<string,CallableFunction>} */
 const actions = {
 	/**
@@ -426,6 +428,11 @@ const actions = {
 		destination.dx = (x - state.x) / 100;
 		destination.dy = (y - state.y) / 100;
 		destination.step = 100;
+		if (x === state.x && y === state.y) {
+			doing = false;
+			consume_energy(-global_state.action_energy.walk);
+			destination.step = 0;
+		}
 		return { x, y };
 	},
 	/**
@@ -437,6 +444,11 @@ const actions = {
 		destination.dx = (x - state.x) / 30;
 		destination.dy = (y - state.y) / 30;
 		destination.step = 30;
+		if (x === state.x && y === state.y) {
+			doing = false;
+			consume_energy(-global_state.action_energy.run);
+			destination.step = 0;
+		}
 		return { x, y };
 	},
 	make_action() {
@@ -562,6 +574,7 @@ const actions = {
 	 */
 	draw({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
 		if (element_from_point({ x, y }, true).length) {
+			consume_energy(-global_state.action_energy.draw);
 			return;
 		}
 		_cache.unset();
@@ -577,8 +590,13 @@ const actions = {
 	 * @param {{x: int, y: int}} param0
 	 */
 	erase({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
+		const temp = element_from_point({ x, y }, true);
+		if (temp.length === 0) {
+			consume_energy(-global_state.action_energy.erase);
+			return;
+		}
 		_cache.unset();
-		for (const element of element_from_point({ x, y }, true)) {
+		for (const element of temp) {
 			element.remove();
 			elements.splice(elements.indexOf(element), 1);
 		}
@@ -641,6 +659,8 @@ const actions = {
 		doing = false;
 	},
 };
+/** @type {expandable_iter<string>} */
+const action_iter = new expandable_iter([]);
 /** @type {HTMLElement[]} */
 const elements = [];
 /** @type {{dx: int, dy: int, step: int}} */
@@ -985,14 +1005,9 @@ function spirit_main() {
 			destination.step = 0;
 		}
 		destination.step--;
-		if (destination.dx === 0 && destination.dy === 0) {
-			destination.step = 0;
-			doing = false;
-		} else {
-			_cache.unset();
-			spirit.style.left = `${(state.x += destination.dx)}px`;
-			spirit.style.top = `${(state.y += destination.dy)}px`;
-		}
+		_cache.unset();
+		spirit.style.left = `${(state.x += destination.dx)}px`;
+		spirit.style.top = `${(state.y += destination.dy)}px`;
 	} else {
 		doing = false;
 	}
@@ -1017,7 +1032,7 @@ function spirit_main() {
 		return;
 	}
 	// too much energy
-	if (state.momentum_energy > 90) {
+	if (state.momentum_energy > 90 || state.energy < 20) {
 		actions.think_action();
 	}
 	if (
@@ -1033,9 +1048,8 @@ function spirit_main() {
 		for (const act of action_iter) {
 			res = actions[act](res);
 			tried = true;
-			state.energy -= global_state.action_energy[act];
-			state.momentum_energy -= global_state.action_energy[act];
-			state.cognitive_energy += global_state.action_energy[act];
+			// @ts-ignore
+			consume_energy(global_state.action_energy[act]);
 			break;
 		}
 		// make new action
