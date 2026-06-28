@@ -353,7 +353,7 @@ function action_weigh(act) {
 	let result = state.current_thought;
 	for (const node of iter) {
 		node.update_weigh();
-		iter.add(...node.related.map((v) => state.memory[v]));
+		iter.add(...node.related.map((v) => state.memory[v]).toReversed());
 		width += node.related.length;
 		if (state.action[node.actions].includes(act)) {
 			result = node;
@@ -373,7 +373,7 @@ function action_weigh(act) {
 	const real_iter = new expandable_iter([result]);
 	for (const node of real_iter) {
 		node.update_weigh();
-		iter.add(...node.related.map((v) => state.memory[v]));
+		real_iter.add(...node.related.map((v) => state.memory[v]));
 		width += node.related.length;
 		const w = node.weigh * node.delta_dopamine;
 		for (const action of state.action[node.actions]) {
@@ -655,6 +655,7 @@ const actions = {
 		if (result.length) {
 			state.energy += 10;
 			result[0].remove();
+			_cache.unset();
 		}
 		doing = false;
 	},
@@ -1050,6 +1051,7 @@ function spirit_main() {
 			tried = true;
 			// @ts-ignore
 			consume_energy(global_state.action_energy[act]);
+			old.action = act;
 			break;
 		}
 		// make new action
