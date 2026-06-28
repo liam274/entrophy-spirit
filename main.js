@@ -111,15 +111,18 @@ class cache {
 	 */
 	constructor(data) {
 		this.data = data;
+		this.initial = data;
 	}
 	unset() {
 		this.ok = false;
 	}
 	/**
-	 * @param {any} data
+	 * @template T
+	 * @param {T} data
 	 * @param {string[]} key
+	 * @returns {T}
 	 * */
-	set(data, key) {
+	set(data, key = []) {
 		if (key.length) {
 			/** @type {any} */
 			let temp = this.data;
@@ -128,15 +131,17 @@ class cache {
 			}
 			temp[key[key.length - 1]] = data;
 		} else {
-			this.data = data;
+			// @ts-ignore
+			this.data = /** @type {type} */ (data);
 		}
 		this.ok = true;
+		return data;
 	}
 	/**
-	 * @returns {type|undefined}
+	 * @returns {type}
 	 */
 	get() {
-		return this.ok ? this.data : undefined;
+		return this.ok ? this.data : this.initial;
 	}
 }
 class storage {
@@ -328,11 +333,16 @@ const global_state = {
 	},
 	patient_factor: 1.2,
 };
+/** @type {cache<float>} */
+const action_weigh_cache = new cache(0);
 /**
  * @param {string} act
  * @returns {float}
  */
 function action_weigh(act) {
+	if (_cache.ok) {
+		return action_weigh_cache.get();
+	}
 	state.current_thought.update_weigh();
 	/**
 	 * @type {expandable_iter<memory_node>}
@@ -384,7 +394,7 @@ function action_weigh(act) {
 			}
 		}
 	}
-	return list[act] ?? 0;
+	return action_weigh_cache.set(list[act] ?? 0);
 }
 /**@type {Object<string,CallableFunction>} */
 const actions = {
