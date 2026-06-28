@@ -344,7 +344,28 @@ function action_weigh(act) {
 		time = 0,
 		width = 0,
 		tried = 0;
+	let result = state.current_thought;
 	for (const node of iter) {
+		node.update_weigh();
+		iter.add(...node.related.map((v) => state.memory[v]));
+		width += node.related.length;
+		if (state.action[node.actions].includes(act)) {
+			result = node;
+		}
+		if (time++ === point) {
+			point = width;
+			time = 0;
+			width = 0;
+			if (tried++ === state.max_depth) {
+				break;
+			}
+		}
+	}
+	/**
+	 * @type {expandable_iter<memory_node>}
+	 */
+	const real_iter = new expandable_iter([result]);
+	for (const node of real_iter) {
 		node.update_weigh();
 		iter.add(...node.related.map((v) => state.memory[v]));
 		width += node.related.length;
