@@ -973,6 +973,7 @@ function spirit_main() {
 				state.current_thought.actions = state.action.length;
 				state.action.push(temp);
 			}
+			doing = false;
 		}
 		if (!_cache.ok) {
 			actions.make_memory();
