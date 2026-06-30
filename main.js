@@ -346,10 +346,15 @@ function action_weigh(act) {
 	const iter = new expandable_iter([state.current_thought]),
 		/**@type {Object<string,float>} */
 		list = {};
+	/** @type {int} */
 	let point = state.current_thought.related.length,
+		/** @type {int} */
 		time = 0,
+		/** @type {int} */
 		width = 0,
+		/** @type {int} */
 		tried = 0;
+	/** @type {memory_node} */
 	let result = state.current_thought;
 	for (const node of iter) {
 		node.update_weigh();
@@ -367,6 +372,11 @@ function action_weigh(act) {
 			}
 		}
 	}
+	// reset
+	point = result.related.length;
+	time = 0;
+	width = 0;
+	tried = 0;
 	/**
 	 * @type {expandable_iter<memory_node>}
 	 */
@@ -377,7 +387,7 @@ function action_weigh(act) {
 		width += node.related.length;
 		const w = node.weigh * node.delta_dopamine;
 		for (const action of state.action[node.actions]) {
-			list[action] +=
+			list[action] =
 				(list[action] ?? 0) +
 				w * similarity(state.current_thought.related, node.related);
 		}
@@ -429,9 +439,9 @@ const actions = {
 		destination.dy = (y - state.y) / 100;
 		destination.step = 100;
 		if (x === state.x && y === state.y) {
-			doing = false;
 			consume_energy(-global_state.action_energy.walk);
 			destination.step = 0;
+			doing = false;
 		}
 		return { x, y };
 	},
@@ -445,9 +455,9 @@ const actions = {
 		destination.dy = (y - state.y) / 30;
 		destination.step = 30;
 		if (x === state.x && y === state.y) {
-			doing = false;
 			consume_energy(-global_state.action_energy.run);
 			destination.step = 0;
+			doing = false;
 		}
 		return { x, y };
 	},
@@ -459,9 +469,13 @@ const actions = {
 		const iter = new expandable_iter([state.current_thought]),
 			/**@type {Object<string,int>} */
 			list = {};
+		/** @type {int} */
 		let point = state.current_thought.related.length,
+			/** @type {int} */
 			time = 0,
+			/** @type {int} */
 			width = 0,
+			/** @type {int} */
 			tried = 0;
 		for (const node of iter) {
 			node.update_weigh();
@@ -469,7 +483,7 @@ const actions = {
 			width += node.related.length;
 			const w = node.weigh * node.delta_dopamine;
 			for (const action of state.action[node.actions]) {
-				list[action] +=
+				list[action] =
 					(list[action] ?? 0) +
 					w *
 						similarity(
@@ -489,14 +503,14 @@ const actions = {
 		/**@type {string[]} */
 		const action = [],
 			sorted = /**@type {[string,int][]} */ (
-				Object.entries(list).sort(([, a], [, b]) => b - a)
+				Object.entries(list).sort(([, a], [, b]) => a - b)
 			);
 		for (
-			let i = Math.floor(Math.random() * state.max_depth) + 1;
+			let i = Math.floor(Math.random() * state.max_depth ** 2) + 1;
 			i > 0;
 			i--
 		) {
-			const temp = sorted[0];
+			const temp = sorted.pop();
 			if (temp) {
 				action.push(temp[0]);
 			} else {
@@ -506,6 +520,7 @@ const actions = {
 		let id = 0;
 		for (const act of state.action) {
 			if (array_equal(act, action)) {
+				doing = false;
 				return id;
 			}
 			id++;
@@ -535,8 +550,10 @@ const actions = {
 		]++;
 		if (_cache.ok) {
 			state.current_thought.weigh += state.general_weigh;
+			doing = false;
 			return;
 		}
+		/** @typee {memory_node} */
 		const now_memory = new memory_node(
 			state.general_weigh,
 			[state.memory.indexOf(state.current_thought)],
@@ -547,7 +564,9 @@ const actions = {
 		state.current_thought.related.push(state.memory.length);
 		/** @type {float} */
 		let max_sim = 0,
+			/** @type {int} */
 			max_id = 0;
+		/** @type {int} */
 		let id = 0;
 		for (const node of state.memory) {
 			const ori_sim = similarity(
@@ -575,6 +594,7 @@ const actions = {
 	draw({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
 		if (element_from_point({ x, y }, true).length) {
 			consume_energy(-global_state.action_energy.draw);
+			doing = false;
 			return;
 		}
 		_cache.unset();
@@ -593,6 +613,7 @@ const actions = {
 		const temp = element_from_point({ x, y }, true);
 		if (temp.length === 0) {
 			consume_energy(-global_state.action_energy.erase);
+			doing = false;
 			return;
 		}
 		_cache.unset();
@@ -636,6 +657,7 @@ const actions = {
 						Math.PI
 				) === min_index
 			) {
+				doing = false;
 				return {
 					x: parseFloat(point.style.left),
 					y: parseFloat(point.style.top),
@@ -735,10 +757,12 @@ function derive_action(action_data) {
 		temp[key] = action_data.includes(key) ? value : 2 * value; // 好奇心模式
 		// 這自然會因為記憶數量變多->重複動作權重變大，而變成習慣模式
 	}
+	/** @type {[string,float][]} */
 	const action_w = Object.entries(temp).sort(([, a], [, b]) => b - a);
 	for (let i = Math.floor(Math.random() * state.max_depth) + 1; i > 0; i--) {
 		result.push(action_w[i][0]);
 	}
+	/** @type {int} */
 	let id = 0;
 	for (const action of state.action) {
 		if (array_equal(action, result)) {
@@ -785,6 +809,7 @@ const cursor_state = {
 	/** @type {[int,int][]} */
 	consume_food: [],
 };
+/** @type {string} */
 let prev = "click";
 $("#pen")?.addEventListener("click", () => {
 	cursor_state.mode = prev = "pen";
@@ -1016,8 +1041,10 @@ function spirit_main() {
 	if (state.min_sleep > state.momentum_energy) {
 		doing = true;
 		actions.sleep();
+		/** @type {int} */
 		const sleep_amount = state.sleep;
 		state.sleep = 0;
+		/** @type {int} */
 		const sleep = setInterval(() => {
 			state.momentum_energy++;
 			state.cognitive_energy--;
@@ -1026,8 +1053,9 @@ function spirit_main() {
 				clearInterval(sleep);
 			}
 		}, MILLISECOND);
+		/** @type {int} */
 		const timeout = setTimeout(() => {
-			doing = true;
+			doing = false;
 			requestAnimationFrame(spirit_main);
 		}, sleep_amount * MILLISECOND);
 		return;
@@ -1044,6 +1072,7 @@ function spirit_main() {
 	}
 	// execute action
 	if (!doing) {
+		/** @type {boolean} */
 		let tried = false;
 		doing = true;
 		for (const act of action_iter) {
