@@ -553,7 +553,7 @@ const actions = {
 			doing = false;
 			return;
 		}
-		/** @typee {memory_node} */
+		/** @type {memory_node} */
 		const now_memory = new memory_node(
 			state.general_weigh,
 			[state.memory.indexOf(state.current_thought)],
@@ -759,7 +759,14 @@ function derive_action(action_data) {
 	}
 	/** @type {[string,float][]} */
 	const action_w = Object.entries(temp).sort(([, a], [, b]) => b - a);
-	for (let i = Math.floor(Math.random() * state.max_depth) + 1; i > 0; i--) {
+	for (
+		let i = Math.floor(Math.random() * state.max_depth ** 2) + 1;
+		i > 0;
+		i--
+	) {
+		if (action_w.length <= i) {
+			break;
+		}
 		result.push(action_w[i][0]);
 	}
 	/** @type {int} */
@@ -856,8 +863,11 @@ $("#todo")?.addEventListener("click", () => {
 	list.classList.add("todo-list");
 	const update = () => {
 		list.innerHTML = "";
+		/** @type {int} */
 		let index = 0;
 		for (const { content, is_ok } of todo_list) {
+			/** @type {int} */
+			const c_index = index;
 			const list_item = $$("div");
 			list_item.classList.add("todo-item");
 			list_item.addEventListener("click", () => {
@@ -874,7 +884,6 @@ $("#todo")?.addEventListener("click", () => {
 			if (is_ok) {
 				tick.checked = true;
 			}
-			const c_index = index;
 			tick.addEventListener("change", () => {
 				todo_list[c_index] = {
 					content,
