@@ -435,9 +435,10 @@ const actions = {
 	walk({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
 		state.old_x = state.x;
 		state.old_y = state.y;
-		destination.dx = (x - state.x) / 100;
-		destination.dy = (y - state.y) / 100;
-		destination.step = 100;
+		destination.dx = Math.min(10, x - state.x);
+		destination.dy = Math.min(10, y - state.y);
+		destination.step =
+			Math.sqrt((x - state.x) ** 2 + (y - state.y) ** 2) / 10;
 		if (x === state.x && y === state.y) {
 			consume_energy(-global_state.action_energy.walk);
 			destination.step = 0;
@@ -451,9 +452,10 @@ const actions = {
 	run({ x = state.x, y = state.y } = { x: state.x, y: state.y }) {
 		state.old_x = state.x;
 		state.old_y = state.y;
-		destination.dx = (x - state.x) / 30;
-		destination.dy = (y - state.y) / 30;
-		destination.step = 30;
+		destination.dx = Math.min(30, x - state.x);
+		destination.dy = Math.min(30, y - state.y);
+		destination.step =
+			Math.sqrt((x - state.x) ** 2 + (y - state.y) ** 2) / 30;
 		if (x === state.x && y === state.y) {
 			consume_energy(-global_state.action_energy.run);
 			destination.step = 0;
@@ -1000,8 +1002,9 @@ function caculate_dopamine() {
 	return state.dopamine;
 }
 /**
- * @param {any[]} a
- * @param {any[]} b
+ * @template T
+ * @param {T[]} a
+ * @param {T[]} b
  * @returns {boolean}
  */
 function array_equal(a, b) {
@@ -1072,7 +1075,8 @@ function spirit_main() {
 		return;
 	}
 	// too much energy
-	if (state.momentum_energy > 90 || state.energy < 20) {
+	if (state.momentum_energy > 90 || state.energy < 20 || state.energy > 90) {
+		doing = true;
 		actions.think_action();
 	}
 	if (
