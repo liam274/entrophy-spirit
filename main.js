@@ -219,7 +219,7 @@ const state = store.get("state", {
 	y: 100,
 	/** @type {memory_node} */
 	current_thought: FIRST_THOUGHT,
-	/**@type {string[][]} */
+	/** @type {string[][]} */
 	action: [
 		["recall_memory", "walk"],
 		["run"],
@@ -409,7 +409,6 @@ function consume_energy(energy) {
 	state.momentum_energy -= energy;
 	state.cognitive_energy += energy;
 }
-/**@type {Object<string,CallableFunction>} */
 const actions = {
 	/**
 	 * @param {int} id
@@ -673,7 +672,11 @@ const actions = {
 	},
 	think_action() {
 		state.current_thought.update_weigh();
-		action_iter.add(...state.action[state.current_thought.actions]);
+		action_iter.add(
+			.../** @type {(keyof typeof actions)[]} */ (
+				state.action[state.current_thought.actions]
+			)
+		);
 		doing = false;
 	},
 	eat() {
@@ -686,7 +689,7 @@ const actions = {
 		doing = false;
 	},
 };
-/** @type {expandable_iter<string>} */
+/** @type {expandable_iter<keyof actions>} */
 const action_iter = new expandable_iter([]);
 /** @type {HTMLElement[]} */
 const elements = [];
@@ -1095,9 +1098,9 @@ function spirit_main() {
 		let tried = false;
 		doing = true;
 		for (const act of action_iter) {
+			//@ts-ignore
 			res = actions[act](res);
 			tried = true;
-			// @ts-ignore
 			consume_energy(global_state.action_energy[act]);
 			old.action = act;
 			break;
