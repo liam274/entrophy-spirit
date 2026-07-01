@@ -1131,6 +1131,7 @@ function spirit_main() {
 			actions.make_memory();
 		}
 	}
+	requestAnimationFrame(spirit_main);
 }
 actions.think_action();
 requestAnimationFrame(spirit_main);
