@@ -517,6 +517,7 @@ const actions = {
 				break;
 			}
 		}
+		/** @type {int} */
 		let id = 0;
 		for (const act of state.action) {
 			if (array_equal(act, action)) {
@@ -789,6 +790,7 @@ function derive_action(action_data) {
  * @returns {float}
  */
 function similarity(nodes1, nodes2) {
+	/** @type {int} */
 	let result = 0;
 	for (const i of nodes1) {
 		if (nodes2.includes(i)) {
@@ -1094,12 +1096,14 @@ function spirit_main() {
 		}
 		// make new action
 		if (!tried) {
+			/** @type {string[]} */
 			const temp = state.action[state.current_thought.actions];
 			temp.push(
 				state.available_action[
 					Math.floor(Math.random() * state.available_action.length)
 				]
 			);
+			/** @type {int} */
 			let index = 0;
 			for (const action of state.action) {
 				if (array_equal(action, temp)) {
