@@ -8,7 +8,8 @@ const $ = document.querySelector.bind(document),
 	$$ = document.createElement.bind(document);
 const spirit = /** @type {HTMLSpanElement} */ ($("#spirit")),
 	blackboard = /**@type {HTMLTextAreaElement} */ ($("#blackboard")),
-	{ body } = document;
+	{ body } = document,
+	status_board = /** @type {HTMLSpanElement}*/ ($("#status"));
 const MINUTE = 60;
 const MILLISECOND = 1000;
 const MAX_ENERGY = 200;
@@ -627,7 +628,7 @@ const actions = {
 		doing = false;
 	},
 	sleep() {
-		state.sleep += state.cognitive_energy + 10;
+		state.sleep += state.cognitive_energy / MILLISECOND + 10;
 	},
 	/** @returns {{x:float,y:float}} */
 	nearest_point() {
@@ -1069,9 +1070,11 @@ function spirit_main() {
 		}, MILLISECOND);
 		/** @type {int} */
 		const timeout = setTimeout(() => {
+			status_board.setHTMLUnsafe("Awake!");
 			doing = false;
 			requestAnimationFrame(spirit_main);
 		}, sleep_amount * MILLISECOND);
+		status_board.setHTMLUnsafe("Sleeping...");
 		return;
 	}
 	// too much energy
