@@ -1066,6 +1066,7 @@ function spirit_main() {
 			if (!doing) {
 				clearTimeout(timeout);
 				clearInterval(sleep);
+				requestAnimationFrame(spirit_main);
 			}
 		}, MILLISECOND);
 		/** @type {int} */
