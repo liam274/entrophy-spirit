@@ -38,6 +38,8 @@ class memory_node {
 	delta_dopamine_time = 0;
 	/** @type {float} */
 	delta_dopamine_sum = 0;
+	/** @type {float} */
+	urgency = 1;
 	/**
 	 * @param {int} weigh
 	 * @param {int[]} related
@@ -296,6 +298,7 @@ const state = store.get("state", {
 	momentum_energy: 90,
 	/** @type {int} */
 	cognitive_energy: 10,
+	// TODO: MOOD
 });
 const global_state = {
 	action_use: {
@@ -677,6 +680,7 @@ const actions = {
 				state.action[state.current_thought.actions]
 			)
 		);
+		old.memory_nodes.push(state.current_thought);
 		doing = false;
 	},
 	eat() {
@@ -1003,6 +1007,8 @@ function caculate_dopamine() {
 	state.dopamine += state.momentum_energy;
 	state.dopamine -= state.cognitive_energy; // 越睏越煩燥
 	state.dopamine /= state.urgency; // 越着急就越難受
+	// TODO: CACULATE ISOLATION DOPAMINE
+	// TODO: ISOLATION STATUS
 	return state.dopamine;
 }
 /**
@@ -1031,6 +1037,16 @@ let doing = false;
 const old = {
 	/** @type {string} */
 	action: "",
+	/** @type {memory_node[]} */
+	executing_memory_node: [FIRST_THOUGHT],
+	/** @type {memory_node} */
+	last_memory: FIRST_THOUGHT,
+	/** @type {memory_node[]} */
+	memory_nodes: [],
+	/** @type {int[]} */
+	act_len_left: [],
+	/** @type {int} */
+	last_act: state.action[FIRST_THOUGHT.actions].length,
 };
 /**
  * main loop
@@ -1066,6 +1082,7 @@ function spirit_main() {
 		const sleep = setInterval(() => {
 			state.momentum_energy++;
 			state.cognitive_energy--;
+			// TODO: DREAM
 			if (!doing) {
 				clearTimeout(timeout);
 				clearInterval(sleep);
@@ -1091,9 +1108,17 @@ function spirit_main() {
 		action_weigh(old.action) * global_state.patient_factor
 	) {
 		doing = false;
+		old.last_memory.urgency *=
+			state.action[old.last_memory.actions].length / old.last_act;
+		state.urgency *= old.last_memory.urgency;
+		old.act_len_left.push(old.last_act);
+		old.executing_memory_node.push(old.last_memory);
+		old.last_memory = old.memory_nodes.splice(0, 1)[0];
+		old.last_act = state.action[old.last_memory.actions].length;
 	}
 	// execute action
 	if (!doing) {
+		old.last_act--;
 		/** @type {boolean} */
 		let tried = false;
 		doing = true;
@@ -1132,6 +1157,20 @@ function spirit_main() {
 		}
 		if (!_cache.ok) {
 			actions.make_memory();
+		}
+		if (old.last_act === 0) {
+			state.urgency /= old.last_memory.urgency;
+			if (old.act_len_left.length === 0) {
+				old.last_memory = old.memory_nodes.splice(0, 1)[0];
+				old.last_act = state.action[old.last_memory.actions].length;
+				old.act_len_left.push(old.last_act);
+				old.executing_memory_node.push(old.last_memory);
+			} else {
+				old.last_memory = /** @type {memory_node}*/ (
+					old.executing_memory_node.pop()
+				);
+				old.last_act = /** @type {int}*/ (old.act_len_left.pop());
+			}
 		}
 	}
 	requestAnimationFrame(spirit_main);
