@@ -1075,9 +1075,17 @@ function spirit_main() {
 	if (state.min_sleep > state.momentum_energy) {
 		doing = true;
 		actions.sleep();
+	}
+	if (state.sleep) {
 		/** @type {int} */
 		const sleep_amount = state.sleep;
 		state.sleep = 0;
+		/** @type {int} */
+		const timeout = setTimeout(() => {
+			status_board.setHTMLUnsafe("Awake!");
+			doing = false;
+			requestAnimationFrame(spirit_main);
+		}, sleep_amount * MILLISECOND);
 		/** @type {int} */
 		const sleep = setInterval(() => {
 			state.momentum_energy++;
@@ -1089,12 +1097,6 @@ function spirit_main() {
 				requestAnimationFrame(spirit_main);
 			}
 		}, MILLISECOND);
-		/** @type {int} */
-		const timeout = setTimeout(() => {
-			status_board.setHTMLUnsafe("Awake!");
-			doing = false;
-			requestAnimationFrame(spirit_main);
-		}, sleep_amount * MILLISECOND);
 		status_board.setHTMLUnsafe("Sleeping...");
 		return;
 	}
