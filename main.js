@@ -283,7 +283,7 @@ const state = store.get("state", {
 	/** @type {int} */
 	min_sleep: 20,
 	/**@type {int} */
-	energy: 100,
+	energy: 100000,
 	/** @type {float} */
 	previous_dopamine: 0,
 	/** @type {[int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int]} */
@@ -630,7 +630,7 @@ const actions = {
 		doing = false;
 	},
 	sleep() {
-		state.sleep += state.cognitive_energy / MILLISECOND + 10;
+		state.sleep += state.cognitive_energy + 10;
 	},
 	/** @returns {{x:float,y:float}} */
 	nearest_point() {
