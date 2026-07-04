@@ -12,7 +12,7 @@ const spirit = /** @type {HTMLSpanElement} */ ($("#spirit")),
 	status_board = /** @type {HTMLSpanElement}*/ ($("#status"));
 const MINUTE = 60;
 const MILLISECOND = 1000;
-const MAX_ENERGY = 200;
+const MAX_ENERGY = 200000;
 class memory_node {
 	/** @type {int} */
 	weigh = 0;
