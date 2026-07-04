@@ -295,9 +295,9 @@ const state = store.get("state", {
 	/** @type {int} */
 	old_y: 0,
 	/** @type {int} */
-	momentum_energy: 90,
+	momentum_energy: 90000,
 	/** @type {int} */
-	cognitive_energy: 10,
+	cognitive_energy: 10000,
 	// TODO: MOOD
 });
 const global_state = {
@@ -1101,7 +1101,11 @@ function spirit_main() {
 		return;
 	}
 	// too much energy
-	if (state.momentum_energy > 90 || state.energy < 20 || state.energy > 90) {
+	if (
+		state.momentum_energy > 90000 ||
+		state.energy < 20000 ||
+		state.energy > 90000
+	) {
 		doing = true;
 		actions.think_action();
 	}
@@ -1162,6 +1166,7 @@ function spirit_main() {
 		}
 		if (old.last_act === 0) {
 			state.urgency /= old.last_memory.urgency;
+			old.last_memory.urgency = 1;
 			if (old.act_len_left.length === 0) {
 				old.last_memory = old.memory_nodes.splice(0, 1)[0];
 				old.last_act = state.action[old.last_memory.actions].length;
