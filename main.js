@@ -41,6 +41,8 @@ class memory_node {
 	delta_dopamine_sum = 0;
 	/** @type {float} */
 	urgency = 1;
+	/** @type {int} */
+	abstract_node = 0;
 	/**
 	 * @param {int} weigh
 	 * @param {int[]} related
@@ -75,6 +77,7 @@ class memory_node {
 			this.delta_dopamine_sum / ++this.delta_dopamine_time);
 	}
 }
+class abstract_node extends memory_node {}
 /**
  * @template type
  */
@@ -299,6 +302,8 @@ const state = store.get("state", {
 	momentum_energy: 90000,
 	/** @type {int} */
 	cognitive_energy: 10000,
+	/** @type {abstract_node[]} */
+	abstract_memory: [],
 	// TODO: MOOD
 });
 const isolation_state = func.copy_obj(state);
