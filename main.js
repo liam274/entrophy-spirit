@@ -23,7 +23,7 @@ class memory_node {
 	actions = 0;
 	/** @type {[int,int]} */
 	position = [0, 0];
-	/** @type {any[]} */
+	/** @type {HTMLElement[]} */
 	content = [];
 	/** @type {int} */
 	x = 0;
@@ -48,7 +48,7 @@ class memory_node {
 	 * @param {int[]} related
 	 * @param {int} actions
 	 * @param {[int,int]} position
-	 * @param {any[]} content
+	 * @param {HTMLElement[]} content
 	 * @returns memory_node
 	 */
 	constructor(weigh, related, actions, position, content) {
@@ -100,11 +100,13 @@ class expandable_iter {
 	}
 	/**
 	 * @param  {...type} items
+	 * @returns {int}
 	 */
 	add(...items) {
 		for (const item of items) {
 			this.iterable.push(item);
 		}
+		return items.length;
 	}
 }
 /**
@@ -241,6 +243,7 @@ const state = store.get("state", {
 		["recall_memory", "think_action"],
 		["make_action", "think_action"],
 		["recall_memory", "walk", "eat"],
+		["recall_memory", "abstract"],
 	],
 	/**@type {string[]} */
 	available_action: [
@@ -257,6 +260,7 @@ const state = store.get("state", {
 		"curious_point",
 		"think_action",
 		"eat",
+		"abstract",
 	],
 	/**@type {Object<string,int>} */
 	action_weigh: {
@@ -273,6 +277,7 @@ const state = store.get("state", {
 		curious_point: 1,
 		think_action: 1,
 		eat: 1,
+		abstract: 1,
 	},
 	/**@type {int} */
 	max_depth: 3,
@@ -323,6 +328,7 @@ const global_state = {
 		curious_point: 0,
 		think_action: 0,
 		eat: 0,
+		abstract: 0,
 	},
 	action_energy: {
 		recall_memory: 0.5,
@@ -338,6 +344,7 @@ const global_state = {
 		curious_point: 0.5,
 		think_action: 0.5,
 		eat: 0,
+		abstract: 0.5,
 	},
 	patient_factor: 1.2,
 };
@@ -370,8 +377,9 @@ function action_weigh(act) {
 	let result = state.current_thought;
 	for (const node of iter) {
 		node.update_weigh();
-		iter.add(...node.related.map((v) => state.memory[v]).toReversed());
-		width += node.related.length;
+		width += iter.add(
+			...node.related.map((v) => state.memory[v]).toReversed()
+		);
 		if (state.action[node.actions].includes(act)) {
 			result = node;
 		}
@@ -395,8 +403,7 @@ function action_weigh(act) {
 	const real_iter = new expandable_iter([result]);
 	for (const node of real_iter) {
 		node.update_weigh();
-		real_iter.add(...node.related.map((v) => state.memory[v]));
-		width += node.related.length;
+		width += real_iter.add(...node.related.map((v) => state.memory[v]));
 		const w = node.weigh * node.delta_dopamine;
 		for (const action of state.action[node.actions]) {
 			list[action] =
@@ -492,8 +499,7 @@ const actions = {
 			tried = 0;
 		for (const node of iter) {
 			node.update_weigh();
-			iter.add(...node.related.map((v) => state.memory[v]));
-			width += node.related.length;
+			width += iter.add(...node.related.map((v) => state.memory[v]));
 			const w = node.weigh * node.delta_dopamine;
 			for (const action of state.action[node.actions]) {
 				list[action] =
@@ -700,6 +706,49 @@ const actions = {
 		}
 		doing = false;
 	},
+	/**
+	 * @param {memory_node} node
+	 * @returns {abstract_node}
+	 */
+	abstract(node) {
+		/** @type {expandable_iter<int>} */
+		const extend = new expandable_iter(node.related);
+		/** @type {int} */
+		let len = node.related.length,
+			/** @type {int} */
+			size = 3,
+			/** @type {int} */
+			new_len = 0;
+		/** @type {Object<string,int>} */
+		const all_in_all = {};
+		for (const mem of extend) {
+			const memory = state.memory[mem];
+			new_len += extend.add(...memory.related);
+			for (const dot of memory.content) {
+				all_in_all[
+					`${Math.floor(parseFloat(dot.style.left))},${Math.floor(parseFloat(dot.style.top))}`
+				] =
+					(all_in_all[
+						`${Math.floor(parseFloat(dot.style.left))},${Math.floor(parseFloat(dot.style.top))}`
+					] ?? 0) + 1;
+			}
+			len--;
+			if (len === 0) {
+				if (size--) {
+					break;
+				}
+				len = new_len;
+			}
+		}
+		const result = new abstract_node(
+			10,
+			[],
+			14,
+			[state.x, state.y],
+			nearby()
+		);
+		return result;
+	},
 };
 /** @type {expandable_iter<keyof actions>} */
 const action_iter = new expandable_iter([]);
@@ -711,6 +760,7 @@ const destination = { dx: 0, dy: 0, step: 0 };
  * @type {cache<{element: HTMLElement[],last_class_name: string}>}
  */
 const _cache = new cache({
+	/** @type {HTMLDivElement[]} */
 	element: [],
 	last_class_name: "",
 });
