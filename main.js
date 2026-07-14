@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 "use strict";
+import * as func from "./func.js";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -300,6 +301,8 @@ const state = store.get("state", {
 	cognitive_energy: 10000,
 	// TODO: MOOD
 });
+const isolation_state = func.copy_obj(state);
+// TODO: ISOLATION STATUS CACULATIONS & UPDATES
 const global_state = {
 	action_use: {
 		recall_memory: 0,
@@ -1007,9 +1010,11 @@ function caculate_dopamine() {
 	state.dopamine += state.momentum_energy;
 	state.dopamine -= state.cognitive_energy; // 越睏越煩燥
 	state.dopamine /= state.urgency; // 越着急就越難受
-	// TODO: CACULATE ISOLATION DOPAMINE
-	// TODO: ISOLATION STATUS
-	return state.dopamine;
+	isolation_state.dopamine += isolation_state.energy / MAX_ENERGY; // 越飽就越高興
+	isolation_state.dopamine += isolation_state.momentum_energy;
+	isolation_state.dopamine -= isolation_state.cognitive_energy; // 越睏越煩燥
+	isolation_state.dopamine /= isolation_state.urgency; // 越着急就越難受
+	return (state.dopamine + isolation_state.dopamine) / 2;
 }
 /**
  * @template T

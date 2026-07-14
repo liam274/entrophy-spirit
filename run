@@ -1,0 +1,10 @@
+#!/bin/bash
+
+sudo python -m http.server 80 &
+SERVER_PID=$!
+
+trap "sudo kill $SERVER_PID 2>/dev/null; exit" INT EXIT
+
+xdg-open http://localhost:80
+
+wait $SERVER_PID
