@@ -166,15 +166,6 @@ class storage {
 	constructor(data, name) {
 		this.#data = data;
 		this.#name = name;
-		document.addEventListener("beforeunload", (e) => {
-			if (
-				localStorage.getItem(this.#name) ??
-				"{}" !== JSON.stringify(this.#data)
-			) {
-				e.preventDefault();
-				this.upload();
-			}
-		});
 	}
 	/**
 	 * set value
@@ -198,15 +189,39 @@ class storage {
 	}
 	/**
 	 * sync data to the storage
+	 * @param {Object<string,any>} data
 	 */
-	upload() {
-		localStorage.setItem(this.#name, JSON.stringify(this.#data));
+	upload(data) {
+		localStorage.setItem(this.#name, JSON.stringify((this.#data = data)));
 	}
 	/**
 	 * sync data from the storage
 	 */
 	download() {
 		this.#data = JSON.parse(localStorage.getItem(this.#name) ?? "{}");
+		/**
+		 * @param {Object<string,any>} data
+		 * @returns {Object<string,any>}
+		 */
+		const a = function (data) {
+			/** @type {Object<string,any>} */
+			const result = {};
+			for (const key in data) {
+				const value = data[key];
+				if (typeof value === "string") {
+					if (value.startsWith("###->")) {
+						// eslint-disable-next-line no-eval
+						result[key] = eval(value.slice(5));
+					}
+				} else if (typeof value === "object") {
+					result[key] = a(value);
+				} else {
+					result[key] = value;
+				}
+			}
+			return result;
+		};
+		a(this.#data);
 	}
 }
 /** @type {memory_node} */
@@ -986,7 +1001,10 @@ $("#food")?.addEventListener("click", () => {
 	cursor_state.mode = prev = "food";
 });
 $("#save")?.addEventListener("click", () => {
-	store.upload();
+	store.upload({
+		state,
+		"todo-list": todo_list,
+	});
 });
 /** @type {boolean} */
 let mousedown = false;
