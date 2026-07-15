@@ -115,12 +115,13 @@ class expandable_iter {
 class cache {
 	/** @type {boolean} */
 	ok = true;
+	#initial;
 	/**
 	 * @param {type} data
 	 */
 	constructor(data) {
 		this.data = data;
-		this.initial = data;
+		this.#initial = data;
 	}
 	unset() {
 		this.ok = false;
@@ -150,25 +151,25 @@ class cache {
 	 * @returns {type}
 	 */
 	get() {
-		return this.ok ? this.data : this.initial;
+		return this.ok ? this.data : this.#initial;
 	}
 }
 class storage {
 	/** @type {Object<string,any>} */
-	data = {};
+	#data = {};
 	/** @type {string} */
-	name = "";
+	#name = "";
 	/**
 	 * @param {Object<string,any>} data
 	 * @param {string} name
 	 */
 	constructor(data, name) {
-		this.data = data;
-		this.name = name;
+		this.#data = data;
+		this.#name = name;
 		document.addEventListener("beforeunload", (e) => {
 			if (
-				localStorage.getItem(this.name) ??
-				"{}" !== JSON.stringify(this.data)
+				localStorage.getItem(this.#name) ??
+				"{}" !== JSON.stringify(this.#data)
 			) {
 				e.preventDefault();
 				this.upload();
@@ -183,7 +184,7 @@ class storage {
 	 * @returns {T}
 	 */
 	set(key, value) {
-		return (this.data[key] = value);
+		return (this.#data[key] = value);
 	}
 	/**
 	 * get value
@@ -193,13 +194,13 @@ class storage {
 	 * @returns {T}
 	 */
 	get(key, _default) {
-		return this.data[key] ?? _default;
+		return this.#data[key] ?? _default;
 	}
 	upload() {
-		localStorage.setItem(this.name, JSON.stringify(this.data));
+		localStorage.setItem(this.#name, JSON.stringify(this.#data));
 	}
 	download() {
-		this.data = JSON.parse(localStorage.getItem(this.name) ?? "{}");
+		this.#data = JSON.parse(localStorage.getItem(this.#name) ?? "{}");
 	}
 }
 /** @type {memory_node} */
@@ -208,7 +209,7 @@ const FIRST_THOUGHT = new memory_node(1, [1, 2], 8, [100, 100], []),
 	SLEEP_THOUGHT = new memory_node(1, [0], 7, [100, 100], []);
 /** @type {storage} */
 const store = new storage({}, "state-data");
-const state = store.get("state", {
+export const state = store.get("state", {
 	/** @type {float} */
 	dopamine: 0.5,
 	/**
@@ -311,9 +312,9 @@ const state = store.get("state", {
 	abstract_memory: [],
 	// TODO: MOOD
 });
-const isolation_state = func.copy_obj(state);
+export const isolation_state = func.copy_obj(state);
 // TODO: ISOLATION STATUS CACULATIONS & UPDATES
-const global_state = {
+export const global_state = {
 	action_use: {
 		recall_memory: 0,
 		walk: 0,
@@ -847,7 +848,7 @@ function derive_action(action_data) {
 	return id;
 }
 /**
- * Caculate the similarity
+ * calculate the similarity
  * @param {int[]} nodes1
  * @param {int[]} nodes2
  * @returns {float}
@@ -1055,7 +1056,7 @@ function element_from_point(
 	return result.filter((el) => el.classList.contains(class_name));
 }
 /** @returns {float} */
-function caculate_dopamine() {
+function calculate_dopamine() {
 	state.dopamine += state.energy / MAX_ENERGY; // 越飽就越高興
 	state.dopamine += state.momentum_energy;
 	state.dopamine -= state.cognitive_energy; // 越睏越煩燥
@@ -1111,7 +1112,7 @@ function spirit_main() {
 	state.current_thought.update_delta_dopamine(
 		-(
 			state.previous_dopamine -
-			(state.previous_dopamine = caculate_dopamine())
+			(state.previous_dopamine = calculate_dopamine())
 		)
 	);
 	// walk
@@ -1131,6 +1132,7 @@ function spirit_main() {
 		doing = true;
 		actions.sleep();
 	}
+	// TODO: BORING TRIGGERS TIRED
 	if (state.sleep) {
 		/** @type {int} */
 		const sleep_amount = state.sleep;
