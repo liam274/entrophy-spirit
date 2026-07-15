@@ -196,9 +196,15 @@ class storage {
 	get(key, _default) {
 		return this.#data[key] ?? _default;
 	}
+	/**
+	 * sync data to the storage
+	 */
 	upload() {
 		localStorage.setItem(this.#name, JSON.stringify(this.#data));
 	}
+	/**
+	 * sync data from the storage
+	 */
 	download() {
 		this.#data = JSON.parse(localStorage.getItem(this.#name) ?? "{}");
 	}
@@ -978,6 +984,9 @@ $("#todo")?.addEventListener("click", () => {
 });
 $("#food")?.addEventListener("click", () => {
 	cursor_state.mode = prev = "food";
+});
+$("#save")?.addEventListener("click", () => {
+	store.upload();
 });
 /** @type {boolean} */
 let mousedown = false;
