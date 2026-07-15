@@ -1,4 +1,8 @@
 /**
+ * @typedef {number} int
+ * @typedef {number} float
+ */
+/**
  * @template {Object} t
  * @param {t} object The object to be copied
  * @returns {t}
@@ -12,6 +16,24 @@ export function copy_obj(object) {
 		if (object.hasOwnProperty(key)) {
 			result[key] = object[key];
 		}
+	}
+	return result;
+}
+/**
+ *
+ * @param {int} x
+ * @param {int} y
+ * @param {HTMLElement[]} eles
+ * @returns {[int,int][]}
+ */
+export function to_abs(x, y, eles) {
+	/** @type {[int,int][]} */
+	const result = [];
+	for (const element of eles) {
+		result.push([
+			Math.floor(parseFloat(element.style.left)) - x,
+			Math.floor(parseFloat(element.style.top)) - y,
+		]);
 	}
 	return result;
 }

@@ -23,7 +23,7 @@ class memory_node {
 	actions = 0;
 	/** @type {[int,int]} */
 	position = [0, 0];
-	/** @type {HTMLElement[]} */
+	/** @type {[int,int][]} */
 	content = [];
 	/** @type {int} */
 	x = 0;
@@ -48,7 +48,7 @@ class memory_node {
 	 * @param {int[]} related
 	 * @param {int} actions
 	 * @param {[int,int]} position
-	 * @param {HTMLElement[]} content
+	 * @param {[int,int][]} content
 	 * @returns memory_node
 	 */
 	constructor(weigh, related, actions, position, content) {
@@ -579,7 +579,7 @@ const actions = {
 			[state.memory.indexOf(state.current_thought)],
 			derive_action(state.action[state.current_thought.actions]),
 			[state.x, state.y],
-			nearby()
+			func.to_abs(state.x, state.y, nearby())
 		);
 		state.current_thought.related.push(state.memory.length);
 		/** @type {float} */
@@ -724,13 +724,8 @@ const actions = {
 		for (const mem of extend) {
 			const memory = state.memory[mem];
 			new_len += extend.add(...memory.related);
-			for (const dot of memory.content) {
-				all_in_all[
-					`${Math.floor(parseFloat(dot.style.left))},${Math.floor(parseFloat(dot.style.top))}`
-				] =
-					(all_in_all[
-						`${Math.floor(parseFloat(dot.style.left))},${Math.floor(parseFloat(dot.style.top))}`
-					] ?? 0) + 1;
+			for (const [x, y] of memory.content) {
+				all_in_all[`${x},${y}`] = (all_in_all[`${x},${y}`] ?? 0) + 1;
 			}
 			len--;
 			if (len === 0) {
@@ -740,12 +735,13 @@ const actions = {
 				len = new_len;
 			}
 		}
+		// TODO: Find the ovbious points
 		const result = new abstract_node(
 			10,
 			[],
 			14,
 			[state.x, state.y],
-			nearby()
+			func.to_abs(state.x, state.y, nearby())
 		);
 		return result;
 	},
@@ -760,7 +756,6 @@ const destination = { dx: 0, dy: 0, step: 0 };
  * @type {cache<{element: HTMLElement[],last_class_name: string}>}
  */
 const _cache = new cache({
-	/** @type {HTMLDivElement[]} */
 	element: [],
 	last_class_name: "",
 });
