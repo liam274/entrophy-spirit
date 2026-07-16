@@ -214,7 +214,37 @@ class storage {
 						result[key] = eval(value.slice(5));
 					}
 				} else if (typeof value === "object") {
-					result[key] = a(value);
+					if (Array.isArray(value)) {
+						result[key] = b(value);
+					} else {
+						result[key] = a(value);
+					}
+				} else {
+					result[key] = value;
+				}
+			}
+			return result;
+		};
+		/**
+		 * @param {any[]} data
+		 * @returns {any[]}
+		 */
+		const b = function (data) {
+			/** @type {any[]} */
+			const result = [];
+			for (const key in data) {
+				const value = data[key];
+				if (typeof value === "string") {
+					if (value.startsWith("###->")) {
+						// eslint-disable-next-line no-eval
+						result[key] = eval(value.slice(5));
+					}
+				} else if (typeof value === "object") {
+					if (Array.isArray(value)) {
+						result[key] = b(value);
+					} else {
+						result[key] = a(value);
+					}
 				} else {
 					result[key] = value;
 				}
