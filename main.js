@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
 "use strict";
-import * as func from "./func.js";
+import { SECOND2MILISECOND, copy_obj, to_abs, fps } from "./func.js";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -12,8 +12,8 @@ const spirit = /** @type {HTMLSpanElement} */ ($("#spirit")),
 	{ body } = document,
 	status_board = /** @type {HTMLSpanElement}*/ ($("#status"));
 const MINUTE = 60;
-const MILLISECOND = 1000;
 const MAX_ENERGY = 200000;
+let FPS = 60;
 class memory_node {
 	/** @type {int} */
 	weigh = 0;
@@ -64,8 +64,8 @@ class memory_node {
 		/* We don't care what the weigh is like, until we access the node */
 		const now = Date.now();
 		const interval = now - this.last_time;
-		this.weigh -= interval / (MINUTE * MILLISECOND);
-		this.last_time = now - (interval % (MINUTE * MILLISECOND));
+		this.weigh -= interval / (MINUTE * SECOND2MILISECOND);
+		this.last_time = now - (interval % (MINUTE * SECOND2MILISECOND));
 	}
 	/**
 	 * @param {float} value
@@ -334,7 +334,7 @@ export const state = store.get("state", {
 	/**@type {int} */
 	max_depth: 3,
 	/**@type {int} */
-	site: 40,
+	site: 100,
 	/**@type {int} */
 	general_weigh: 10,
 	/**@type {int} */
@@ -363,7 +363,7 @@ export const state = store.get("state", {
 	abstract_memory: [],
 	// TODO: MOOD
 });
-export const isolation_state = func.copy_obj(state);
+export const isolation_state = copy_obj(state);
 // TODO: ISOLATION STATUS CACULATIONS & UPDATES
 export const global_state = {
 	action_use: {
@@ -400,6 +400,12 @@ export const global_state = {
 	},
 	patient_factor: 1.2,
 };
+// @ts-ignore
+window.state = state;
+// @ts-ignore
+window.isolation_state = isolation_state;
+// @ts-ignore
+window.global_state = global_state;
 /** @type {cache<float>} */
 const action_weigh_cache = new cache(0);
 /**
@@ -631,7 +637,7 @@ const actions = {
 			[state.memory.indexOf(state.current_thought)],
 			derive_action(state.action[state.current_thought.actions]),
 			[state.x, state.y],
-			func.to_abs(state.x, state.y, nearby())
+			to_abs(state.x, state.y, nearby())
 		);
 		state.current_thought.related.push(state.memory.length);
 		/** @type {float} */
@@ -793,7 +799,7 @@ const actions = {
 			[],
 			14,
 			[state.x, state.y],
-			func.to_abs(state.x, state.y, nearby())
+			to_abs(state.x, state.y, nearby())
 		);
 		return result;
 	},
@@ -1036,6 +1042,14 @@ $("#save")?.addEventListener("click", () => {
 		"todo-list": todo_list,
 	});
 });
+const fpsValue = /** @type {HTMLInputElement} */ ($("#fps-value"));
+fpsValue.addEventListener("value", () => {
+	const v = Math.floor(fpsValue.valueAsNumber);
+	if (v > 120 || v < 1) {
+		return;
+	}
+	FPS = v;
+});
 /** @type {boolean} */
 let mousedown = false;
 document.addEventListener("mousedown", (e) => {
@@ -1198,8 +1212,8 @@ function spirit_main() {
 		const timeout = setTimeout(() => {
 			status_board.setHTMLUnsafe("Awake!");
 			doing = false;
-			requestAnimationFrame(spirit_main);
-		}, sleep_amount * MILLISECOND);
+			fps(spirit_main, FPS);
+		}, sleep_amount * SECOND2MILISECOND);
 		/** @type {int} */
 		const sleep = setInterval(() => {
 			state.momentum_energy++;
@@ -1208,9 +1222,9 @@ function spirit_main() {
 			if (!doing) {
 				clearTimeout(timeout);
 				clearInterval(sleep);
-				requestAnimationFrame(spirit_main);
+				fps(spirit_main, FPS);
 			}
-		}, MILLISECOND);
+		}, SECOND2MILISECOND);
 		status_board.setHTMLUnsafe("Sleeping...");
 		return;
 	}
@@ -1294,10 +1308,10 @@ function spirit_main() {
 			}
 		}
 	}
-	requestAnimationFrame(spirit_main);
+	fps(spirit_main, FPS);
 }
 actions.think_action();
-requestAnimationFrame(spirit_main);
+fps(spirit_main, FPS);
 /**
  * render main
  */

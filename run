@@ -1,5 +1,11 @@
 #!/bin/bash
 
+sudo -v
+if [ $? -ne 0 ]; then
+    echo "Access denied."
+    exit 1
+fi
+
 sudo python -m http.server 80 &
 SERVER_PID=$!
 

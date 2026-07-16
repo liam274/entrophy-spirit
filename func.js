@@ -2,6 +2,10 @@
  * @typedef {number} int
  * @typedef {number} float
  */
+
+/** @type {int} */
+export const SECOND2MILISECOND = 1000;
+
 /**
  * @template {Object} t
  * @param {t} object The object to be copied
@@ -36,4 +40,11 @@ export function to_abs(x, y, eles) {
 		]);
 	}
 	return result;
+}
+/**
+ * @param {CallableFunction} callback
+ * @param {int} FPS
+ */
+export function fps(callback, FPS) {
+	setTimeout(callback, SECOND2MILISECOND / FPS);
 }
