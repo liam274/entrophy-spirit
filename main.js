@@ -1,6 +1,12 @@
 /* eslint-disable no-magic-numbers */
 "use strict";
-import { SECOND2MILISECOND, copy_obj, to_abs, fps } from "./func.js";
+import {
+	SECOND2MILISECOND,
+	copy_obj,
+	to_abs,
+	fps,
+	find_pattern,
+} from "./func.js";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -777,14 +783,13 @@ const actions = {
 			size = 3,
 			/** @type {int} */
 			new_len = 0;
-		/** @type {Object<string,int>} */
-		const all_in_all = {};
+		/** @type {[x: int, y: int][]} */
+		const pattern = node.content;
 		for (const mem of extend) {
 			const memory = state.memory[mem];
 			new_len += extend.add(...memory.related);
-			for (const [x, y] of memory.content) {
-				all_in_all[`${x},${y}`] = (all_in_all[`${x},${y}`] ?? 0) + 1;
-			}
+			pattern.length = 0;
+			pattern.push(...find_pattern(pattern, memory.content));
 			len--;
 			if (len === 0) {
 				if (size--) {
@@ -793,13 +798,12 @@ const actions = {
 				len = new_len;
 			}
 		}
-		// TODO: Find the ovbious points
 		const result = new abstract_node(
 			10,
 			[],
 			14,
 			[state.x, state.y],
-			to_abs(state.x, state.y, nearby())
+			pattern // to_abs(state.x, state.y, nearby())
 		);
 		return result;
 	},
