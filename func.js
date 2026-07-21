@@ -105,8 +105,12 @@ export function find_pattern(data1, data2) {
 	const big = dis1.length > dis2.length ? dis1 : dis2;
 	const small = big === dis1 ? dis2 : dis1;
 	for (const [dis, point] of big) {
-		for (const [d] of small) {
-			if (Math.floor(dis) === Math.floor(d)) {
+		for (const [d, p] of small) {
+			if (
+				Math.floor(dis) === Math.floor(d) &&
+				Math.floor(point[0]) === Math.floor(p[0]) &&
+				Math.floor(point[1]) === Math.floor(p[1])
+			) {
 				pattern.push(point);
 			}
 		}
