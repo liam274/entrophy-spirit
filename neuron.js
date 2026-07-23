@@ -49,12 +49,22 @@ export class neuron {
 	put() {
 		let [zero, one] = this.golgi;
 		for (const neu of this.next) {
-			if (Math.random() > 0.5 && zero-- > 0) {
-				neu.receive(false);
-			} else if (one-- > 0) {
-				neu.receive(true);
+			if (Math.random() > 0.5) {
+				if (zero-- > 0) {
+					neu.receive(false);
+				} else if (one-- > 0) {
+					neu.receive(true);
+				} else {
+					return;
+				}
 			} else {
-				return;
+				if (one-- > 0) {
+					neu.receive(true);
+				} else if (zero-- > 0) {
+					neu.receive(false);
+				} else {
+					return;
+				}
 			}
 		}
 	}
