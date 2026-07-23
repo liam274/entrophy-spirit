@@ -36,7 +36,10 @@ export class neuron {
 		while (this.temp.length) {
 			this.store[this.temp.pop() ? 1 : 0]++;
 		}
-		this.store[this.digestion ? 1 : 0] -= this.digest_ability;
+		this.store[this.digestion ? 1 : 0] -= Math.min(
+			this.digest_ability,
+			this.store[this.digestion ? 1 : 0]
+		);
 		const num = this.digestion === this.store[0] > this.store[1];
 		if (this.store[0] - this.store[1] > this.digest_ability) {
 			this.sensitivity = !this.sensitivity;
