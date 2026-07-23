@@ -33,7 +33,7 @@ export class neuron {
 		this.temp.push(num);
 	}
 	do_receive() {
-		while (this.temp) {
+		while (this.temp.length) {
 			this.store[this.temp.pop() ? 1 : 0]++;
 		}
 		this.store[this.digestion ? 1 : 0] -= this.digest_ability;
