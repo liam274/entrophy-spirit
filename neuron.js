@@ -58,6 +58,5 @@ export class neuron {
 	update() {
 		this.do_receive();
 		this.put();
-		this.update();
 	}
 }
