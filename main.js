@@ -1132,14 +1132,18 @@ function element_from_point(
 }
 /** @returns {float} */
 function calculate_dopamine() {
-	state.dopamine += state.energy / MAX_ENERGY; // 越飽就越高興
-	state.dopamine += state.momentum_energy;
-	state.dopamine -= state.cognitive_energy; // 越睏越煩燥
-	state.dopamine /= state.urgency; // 越着急就越難受
-	isolation_state.dopamine += isolation_state.energy / MAX_ENERGY; // 越飽就越高興
-	isolation_state.dopamine += isolation_state.momentum_energy;
-	isolation_state.dopamine -= isolation_state.cognitive_energy; // 越睏越煩燥
-	isolation_state.dopamine /= isolation_state.urgency; // 越着急就越難受
+	/**
+	 * @param {state} given
+	 * @returns
+	 */
+	const temp = (given) => {
+		given.dopamine += 1 / (1 - given.energy / MAX_ENERGY); // 越飽就越高興，太飽就難受
+		given.dopamine += given.momentum_energy;
+		given.dopamine -= given.cognitive_energy; // 越睏越煩燥
+		given.dopamine /= given.urgency; // 越着急就越難受
+	};
+	temp(state);
+	temp(isolation_state);
 	return (state.dopamine + isolation_state.dopamine) / 2;
 }
 /**
