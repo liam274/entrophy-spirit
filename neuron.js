@@ -44,7 +44,7 @@ export class neuron {
 		if (this.store[0] - this.store[1] > this.digest_ability) {
 			this.sensitivity = !this.sensitivity;
 		}
-		if (num === this.sensitivity && this.golgi[num ? 0 : 1] > 1) {
+		if (num === this.sensitivity && this.golgi[num ? 0 : 1] > 0) {
 			this.golgi[num ? 1 : 0]++;
 			this.golgi[num ? 0 : 1]--;
 		}
