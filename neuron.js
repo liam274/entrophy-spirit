@@ -7,7 +7,7 @@
  * @param {int} num
  * @param {boolean} condition
  */
-function abs(num, condition) {
+function condition_reverse(num, condition) {
 	if (condition) {
 		return -num;
 	}
@@ -60,7 +60,7 @@ export class neuron {
 			this.store[this.digestion ? 1 : 0]
 		);
 		if (
-			abs(this.store[0] - this.store[1], this.digestion) >
+			condition_reverse(this.store[0] - this.store[1], this.digestion) >
 			this.digest_ability
 		) {
 			this.sensitivity = !this.sensitivity;

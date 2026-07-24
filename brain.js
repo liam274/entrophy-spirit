@@ -40,7 +40,7 @@ function make_part(total, layer) {
 		input.push(new neuron(true_or_false(), true_or_false(), pre_layer));
 	}
 	/** @type {neuron[]} */
-	const layers = [];
+	const layers = []; // 反向的層
 	/** @type {neuron[]} */
 	let last = [];
 	for (let i = layer; i > 0; i--) {
@@ -61,10 +61,11 @@ function make_part(total, layer) {
 		output.push(new neuron(true_or_false(), true_or_false(), 50));
 	}
 	for (let count = pre_layer * 2; count > 0; count--) {
-		const temp = /**@type {neuron} */ (layers.at(-(count + 1)));
+		const temp = /**@type {neuron} */ (layers[count]);
 		temp.golgi = [50, 50];
 		temp.next = output;
 	}
+	attach(input, layers.slice(layers.length - pre_layer * 2));
 	return { input, layers, output };
 }
 const language_centre = {
