@@ -3,6 +3,16 @@
  * @typedef {number} int
  * @typedef {number} float
  */
+/**
+ * @param {int} num
+ * @param {boolean} condition
+ */
+function abs(num, condition) {
+	if (condition) {
+		return Math.abs(num);
+	}
+	return num;
+}
 export class neuron {
 	/** @type {boolean} */
 	sensitivity = false;
@@ -40,8 +50,11 @@ export class neuron {
 			this.digest_ability,
 			this.store[this.digestion ? 1 : 0]
 		);
-		const num = this.digestion === this.store[0] > this.store[1];
-		if (this.store[0] - this.store[1] > this.digest_ability) {
+		const num = this.digestion === this.store[0] < this.store[1]; // 檢查降解酶的降解類型是否與多的那種神經傳遞物質相同
+		if (
+			abs(this.store[0] - this.store[1], this.digestion) >
+			this.digest_ability
+		) {
 			this.sensitivity = !this.sensitivity;
 		}
 		if (num === this.sensitivity && this.golgi[num ? 0 : 1] > 0) {
