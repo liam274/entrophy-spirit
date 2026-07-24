@@ -13,12 +13,24 @@ const FACTOR = 1;
 function true_or_false() {
 	return Math.random() > 0.5 * FACTOR;
 }
+/**
+ * Attach two brain parts
+ * @param {neuron[]} plugin
+ * @param {neuron[]} socket
+ */
+function attach(plugin, socket) {
+	const size = socket.length / 2;
+	for (const plug of plugin) {
+		plug.golgi = [size, size];
+		plug.next = socket;
+	}
+}
 
 /**
  * make part of brains
  * @param {int} total
  * @param {int} layer
- * @returns {[input:neuron[],layers:neuron[],output:neuron[]]}
+ * @returns {{input:neuron[],layers:neuron[],output:neuron[]}}
  */
 function make_part(total, layer) {
 	/** @type {neuron[]} */
@@ -53,5 +65,12 @@ function make_part(total, layer) {
 		temp.golgi = [50, 50];
 		temp.next = output;
 	}
-	return [input, layers, output];
+	return { input, layers, output };
 }
+const language_centre = {
+	speak: make_part(10000, 100),
+	understand: make_part(10000, 100),
+	read: make_part(10000, 100),
+};
+attach(language_centre.understand.output, language_centre.speak.input);
+attach(language_centre.read.output, language_centre.understand.input);
