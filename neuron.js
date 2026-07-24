@@ -9,7 +9,7 @@
  */
 function abs(num, condition) {
 	if (condition) {
-		return Math.abs(num);
+		return -num;
 	}
 	return num;
 }
