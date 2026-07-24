@@ -13,6 +13,13 @@ function abs(num, condition) {
 	}
 	return num;
 }
+// #意圖
+// 神經元分為零敏型和壹敏型：
+// 1. 零敏型在接收到較多的零時會將生產零的高爾基體轉化為生產壹的高爾基體，反亦言之
+// 2. 反亦言之
+// 神經元又分為零降解型和壹降解型
+// 零降解型在神經元判別零多還是壹多之前，會率先對零進行降解
+// 反亦言之
 export class neuron {
 	/** @type {boolean} */
 	sensitivity = false;
@@ -50,7 +57,7 @@ export class neuron {
 			this.digest_ability,
 			this.store[this.digestion ? 1 : 0]
 		);
-		const num = this.digestion === this.store[0] < this.store[1]; // 檢查降解酶的降解類型是否與多的那種神經傳遞物質相同
+		const num = this.digestion === this.store[0] > this.store[1]; // 檢查降解酶的降解類型是否與多的那種神經傳遞物質不同
 		if (
 			abs(this.store[0] - this.store[1], this.digestion) >
 			this.digest_ability
@@ -58,8 +65,11 @@ export class neuron {
 			this.sensitivity = !this.sensitivity;
 		}
 		if (num === this.sensitivity && this.golgi[num ? 0 : 1] > 0) {
-			this.golgi[num ? 1 : 0]++;
-			this.golgi[num ? 0 : 1]--;
+			this.golgi[1]++;
+			this.golgi[0]--;
+		} else {
+			this.golgi[0]++;
+			this.golgi[1]--;
 		}
 	}
 	put() {
