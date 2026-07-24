@@ -30,16 +30,18 @@ export class neuron {
 	/** @type {[zero_store: int,one_store: int]} */
 	store = [0, 0];
 	/** @type {[zero_golgi: int,one_golgi: int]} */
-	golgi = [50, 50];
+	golgi = [0, 0];
 	/** @type {neuron[]} */
 	next = [];
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
+	 * @param {int} maxes
 	 */
-	constructor(sensitivity, digestion) {
+	constructor(sensitivity, digestion, maxes) {
 		this.sensitivity = sensitivity;
 		this.digestion = digestion;
+		this.golgi = [maxes, maxes];
 	}
 	/** @type {boolean[]} */
 	temp = [];
