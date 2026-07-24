@@ -57,17 +57,18 @@ export class neuron {
 			this.digest_ability,
 			this.store[this.digestion ? 1 : 0]
 		);
-		const num = this.digestion === this.store[0] > this.store[1]; // 檢查降解酶的降解類型是否與多的那種神經傳遞物質不同
 		if (
 			abs(this.store[0] - this.store[1], this.digestion) >
 			this.digest_ability
 		) {
 			this.sensitivity = !this.sensitivity;
 		}
-		if (num === this.sensitivity && this.golgi[num ? 0 : 1] > 0) {
-			this.golgi[1]++;
-			this.golgi[0]--;
-		} else {
+		if (this.store[0] < this.store[1] === this.sensitivity) {
+			if (this.golgi[0] > 0) {
+				this.golgi[1]++;
+				this.golgi[0]--;
+			}
+		} else if (this.golgi[1] > 0) {
 			this.golgi[0]++;
 			this.golgi[1]--;
 		}
