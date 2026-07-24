@@ -75,3 +75,4 @@ const language_centre = {
 };
 attach(language_centre.understand.output, language_centre.speak.input);
 attach(language_centre.read.output, language_centre.understand.input);
+attach(language_centre.speak.output, language_centre.read.input);
