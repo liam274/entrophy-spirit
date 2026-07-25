@@ -13,6 +13,9 @@ function condition_reverse(num, condition) {
 	}
 	return num;
 }
+
+export function useless() {}
+
 // #意圖
 // 神經元分為零敏型和壹敏型：
 // 1. 零敏型在接收到較多的零時會將生產零的高爾基體轉化為生產壹的高爾基體，反亦言之
@@ -33,15 +36,19 @@ export class neuron {
 	golgi = [0, 0];
 	/** @type {neuron[]} */
 	next = [];
+	/** @type {Function} */
+	handler = useless;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
 	 * @param {int} maxes
+	 * @param {Function} handler
 	 */
-	constructor(sensitivity, digestion, maxes) {
+	constructor(sensitivity, digestion, maxes, handler = useless) {
 		this.sensitivity = sensitivity;
 		this.digestion = digestion;
 		this.golgi = [maxes, maxes];
+		this.handler = handler;
 	}
 	/** @type {boolean[]} */
 	temp = [];
@@ -98,6 +105,7 @@ export class neuron {
 		}
 	}
 	update() {
+		this.handler(this.temp);
 		this.do_receive();
 		this.put();
 	}
