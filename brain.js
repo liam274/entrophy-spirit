@@ -201,6 +201,7 @@ attach(language_centre.understand.output, think.input);
 attach(think.output, PFC.input);
 attach(PFC.output, amygdala.input);
 attach(amygdala.output, think.input);
+// TODO: MEMORY
 
 setInterval(() => {
 	update(language_centre.read);
