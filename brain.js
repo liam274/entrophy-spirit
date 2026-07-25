@@ -174,9 +174,9 @@ const PFC = make_part(
 		},
 	},
 	{
-		input: { least: 0, max: 0.05 },
-		layers: { least: 0, max: 0.05 },
-		output: { least: 0, max: 0.05 },
+		input: { least: 0, max: 0.3 },
+		layers: { least: 0, max: 0.3 },
+		output: { least: 0, max: 0.3 },
 	}
 );
 const amygdala = make_part(10000, 100, {
