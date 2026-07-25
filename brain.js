@@ -47,13 +47,23 @@ function update(neurons) {
  * make part of brains
  * @param {int} total
  * @param {int} layer
- * @param {{input:Function,layers:Function,output:Function}} handler
+ * @param {{input:{log:Function,send:Function},layers:{log:Function,send:Function},output:{log:Function,send:Function}}} handler
+ * @param {{input:{least:int,max:int},layers:{least:int,max:int},output:{least:int,max:int}}} data
  * @returns {{input:neuron[],layers:neuron[],output:neuron[]}}
  */
 function make_part(
 	total,
 	layer,
-	handler = { input: useless, layers: useless, output: useless }
+	handler = {
+		input: { log: useless, send: useless },
+		layers: { log: useless, send: useless },
+		output: { log: useless, send: useless },
+	},
+	data = {
+		input: { least: 0, max: 0 },
+		layers: { least: 0, max: 0 },
+		output: { least: 0, max: 0 },
+	}
 ) {
 	/** @type {neuron[]} */
 	const input = [],
@@ -64,7 +74,10 @@ function make_part(
 				true_or_false(),
 				true_or_false(),
 				pre_layer,
-				handler.input
+				handler.input.log,
+				handler.input.send,
+				data.input.least,
+				data.input.max
 			)
 		);
 	}
@@ -80,7 +93,10 @@ function make_part(
 					true_or_false(),
 					true_or_false(),
 					pre_layer,
-					handler.layers
+					handler.layers.log,
+					handler.layers.send,
+					data.layers.least,
+					data.layers.max
 				)
 			);
 		}
@@ -95,7 +111,15 @@ function make_part(
 	const output = [];
 	for (let i = 100; i > 0; i--) {
 		output.push(
-			new neuron(true_or_false(), true_or_false(), 50, handler.output)
+			new neuron(
+				true_or_false(),
+				true_or_false(),
+				50,
+				handler.output.log,
+				handler.output.send,
+				data.output.least,
+				data.output.max
+			)
 		);
 	}
 	for (let count = pre_layer * 2; count > 0; count--) {
@@ -110,22 +134,25 @@ function make_part(
 const global = [];
 const language_centre = {
 	speak: make_part(10000, 100, {
-		input: useless,
-		layers: useless,
-		/**
-		 * @param {boolean[]} data
-		 */
-		output: (data) => {
-			let zero = 0,
-				one = 0;
-			for (const item of data) {
-				if (item) {
-					one++;
-				} else {
-					zero++;
+		input: { log: useless, send: useless },
+		layers: { log: useless, send: useless },
+		output: {
+			/**
+			 * @param {boolean[]} data
+			 */
+			log: (data) => {
+				let zero = 0,
+					one = 0;
+				for (const item of data) {
+					if (item) {
+						one++;
+					} else {
+						zero++;
+					}
 				}
-			}
-			global.push(one > zero);
+				global.push(one > zero);
+			},
+			send: useless,
 		},
 	}),
 	understand: make_part(10000, 100),
@@ -134,6 +161,46 @@ const language_centre = {
 attach(language_centre.understand.output, language_centre.speak.input);
 attach(language_centre.read.output, language_centre.understand.input);
 attach(language_centre.speak.output, language_centre.read.input);
+const think = make_part(10000, 100);
+const PFC = make_part(
+	10000,
+	100,
+	{
+		input: { log: useless, send: useless },
+		layers: { log: useless, send: useless },
+		output: {
+			log: useless,
+			send: useless,
+		},
+	},
+	{
+		input: { least: 0, max: 0.05 },
+		layers: { least: 0, max: 0.05 },
+		output: { least: 0, max: 0.05 },
+	}
+);
+const amygdala = make_part(10000, 100, {
+	input: { log: useless, send: useless },
+	layers: { log: useless, send: useless },
+	output: {
+		log: useless,
+		/**
+		 * @param {boolean} bool
+		 * @param {neuron} obj
+		 * @return {boolean}
+		 */
+		send: (bool, obj) => {
+			if (obj.store[1] / obj.store[0] > 1.2) {
+				return !bool;
+			}
+			return bool;
+		},
+	},
+});
+attach(language_centre.understand.output, think.input);
+attach(think.output, PFC.input);
+attach(PFC.output, amygdala.input);
+attach(amygdala.output, think.input);
 
 setInterval(() => {
 	update(language_centre.read);

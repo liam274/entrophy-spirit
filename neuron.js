@@ -28,8 +28,6 @@ export class neuron {
 	sensitivity = false;
 	/** @type {boolean} */
 	digestion = false;
-	/** @type {int} */
-	digest_ability = Math.floor(100 * Math.random());
 	/** @type {[zero_store: int,one_store: int]} */
 	store = [0, 0];
 	/** @type {[zero_golgi: int,one_golgi: int]} */
@@ -38,17 +36,34 @@ export class neuron {
 	next = [];
 	/** @type {Function} */
 	handler = useless;
+	/** @type {Function} */
+	send_handler = useless;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
 	 * @param {int} maxes
 	 * @param {Function} handler
+	 * @param {Function} send_handler
+	 * @param {int} least
+	 * @param {int} max
 	 */
-	constructor(sensitivity, digestion, maxes, handler = useless) {
+	constructor(
+		sensitivity,
+		digestion,
+		maxes,
+		handler = useless,
+		send_handler = useless,
+		least = 0,
+		max = 1
+	) {
 		this.sensitivity = sensitivity;
 		this.digestion = digestion;
 		this.golgi = [maxes, maxes];
 		this.handler = handler;
+		this.send_handler = send_handler;
+		/** @type {int} */
+		this.digest_ability =
+			least + Math.floor((100 - least) * max * Math.random());
 	}
 	/** @type {boolean[]} */
 	temp = [];
@@ -96,17 +111,17 @@ export class neuron {
 		for (const neu of this.next) {
 			if (Math.random() > 0.5) {
 				if (zero-- > 0) {
-					neu.receive(false);
+					neu.receive(this.send_handler(false, this));
 				} else if (one-- > 0) {
-					neu.receive(true);
+					neu.receive(this.send_handler(true, this));
 				} else {
 					return;
 				}
 			} else {
 				if (one-- > 0) {
-					neu.receive(true);
+					neu.receive(this.send_handler(true, this));
 				} else if (zero-- > 0) {
-					neu.receive(false);
+					neu.receive(this.send_handler(false, this));
 				} else {
 					return;
 				}
