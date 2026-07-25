@@ -1,25 +1,26 @@
 {
-  "name": "spirit",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liam274/entrophy-spirit.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/liam274/entrophy-spirit/issues"
-  },
-  "homepage": "https://github.com/liam274/entrophy-spirit#readme",
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.5.0",
-    "globals": "^17.6.0"
-  }
+	"name": "spirit",
+	"version": "1.0.0",
+	"description": "",
+	"main": "main.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/liam274/entrophy-spirit.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/liam274/entrophy-spirit/issues"
+	},
+	"homepage": "https://github.com/liam274/entrophy-spirit#readme",
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"eslint": "^10.5.0",
+		"globals": "^17.6.0"
+	},
+	"type": "module"
 }
