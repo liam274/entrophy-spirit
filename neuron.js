@@ -62,12 +62,14 @@ export class neuron {
 		while (this.temp.length) {
 			this.store[this.temp.pop() ? 1 : 0]++;
 		}
+		// 機制:
+		// 過多的神經遞質會與另一種神經遞質發生反應，相互結合
 		if (this.store[0] > this.store[1]) {
-			this.store[0] *= 0.98; // forgetful
-			this.store[1] *= 1.2;
+			this.store[0] *= 0.95;
+			this.store[1] *= 0.99;
 		} else {
-			this.store[0] *= 1.2;
-			this.store[1] *= 0.98;
+			this.store[0] *= 0.99;
+			this.store[1] *= 0.95;
 		}
 		this.store[this.digestion ? 1 : 0] -= Math.min(
 			this.digest_ability,
