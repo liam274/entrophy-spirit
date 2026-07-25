@@ -143,9 +143,10 @@ setInterval(() => {
 	const result = [],
 		/** @type {string[]} */
 		temp = [];
+	global.reverse();
 	while (global.length) {
 		if (temp.length < 8) {
-			temp.push(global.pop() ? "1" : "0");
+			temp.push(global[0] ? "1" : "0");
 		} else {
 			result.push(parseInt(temp.join(""), 2));
 			temp.length = 0;
