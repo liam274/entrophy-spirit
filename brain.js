@@ -22,8 +22,11 @@ function true_or_false() {
 function attach(plugin, socket) {
 	const size = socket.length / 2;
 	for (const plug of plugin) {
-		plug.golgi = [size, size];
-		plug.next = socket;
+		plug.golgi = [
+			plug.next.length / 2 + size,
+			plug.next.length / 2 + size,
+		];
+		plug.next.push(...socket);
 	}
 }
 
