@@ -62,6 +62,8 @@ export class neuron {
 		while (this.temp.length) {
 			this.store[this.temp.pop() ? 1 : 0]++;
 		}
+		this.store[0] *= 0.98; // forgetful
+		this.store[1] *= 0.98;
 		this.store[this.digestion ? 1 : 0] -= Math.min(
 			this.digest_ability,
 			this.store[this.digestion ? 1 : 0]
