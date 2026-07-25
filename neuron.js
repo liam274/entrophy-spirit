@@ -13,8 +13,14 @@ function condition_reverse(num, condition) {
 	}
 	return num;
 }
-
-export function useless() {}
+/**
+ * @template t
+ * @param {t} arg
+ * @returns {t}
+ */
+export function useless(arg) {
+	return arg;
+}
 
 // #意圖
 // 神經元分為零敏型和壹敏型：
