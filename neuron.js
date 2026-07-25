@@ -44,6 +44,8 @@ export class neuron {
 	handler = useless;
 	/** @type {Function} */
 	send_handler = useless;
+	/** @type {int[]} */
+	extra = [];
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -135,7 +137,9 @@ export class neuron {
 		}
 	}
 	update() {
-		this.handler(this.temp);
+		if (this.handler(this.temp, this) === false) {
+			return;
+		}
 		this.do_receive();
 		this.put();
 	}

@@ -204,7 +204,41 @@ attach(language_centre.understand.output, think.input);
 attach(think.output, PFC.input);
 attach(PFC.output, amygdala.input);
 attach(amygdala.output, think.input);
-// TODO: MEMORY
+const hippocampus = make_part(10000, 100, {
+	input: {
+		/**
+		 * @param {boolean[]} data
+		 * @param {neuron} neu
+		 * @return {boolean}
+		 */
+		log(data, neu) {
+			let zero = 0,
+				one = 0;
+			for (const element of data) {
+				if (element) {
+					one++;
+				} else {
+					zero++;
+				}
+			}
+			if (neu.extra.length === 2) {
+				if (neu.extra[0] === zero && neu.extra[1] === one) {
+					return true;
+				}
+			} else {
+				zero += neu.store[0];
+				one += neu.store[1];
+				neu.extra = [zero, one];
+			}
+			return false;
+		},
+		send: useless,
+	},
+	layers: { log: useless, send: useless },
+	output: { log: useless, send: useless },
+});
+attach(think.output, hippocampus.input);
+attach(hippocampus.output, think.input);
 
 setInterval(() => {
 	update(language_centre.read);
