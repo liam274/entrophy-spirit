@@ -65,11 +65,11 @@ export class neuron {
 		// 機制:
 		// 過多的神經遞質會與另一種神經遞質發生反應，相互結合
 		if (this.store[0] > this.store[1]) {
-			this.store[0] *= 0.95;
+			this.store[0] *= 0.9;
 			this.store[1] *= 0.99;
 		} else {
 			this.store[0] *= 0.99;
-			this.store[1] *= 0.95;
+			this.store[1] *= 0.9;
 		}
 		this.store[this.digestion ? 1 : 0] -= Math.min(
 			this.digest_ability,
