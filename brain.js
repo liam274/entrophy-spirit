@@ -204,6 +204,7 @@ attach(language_centre.understand.output, think.input);
 attach(think.output, PFC.input);
 attach(PFC.output, amygdala.input);
 attach(amygdala.output, think.input);
+attach(think.output, language_centre.understand.input);
 const hippocampus = make_part(10000, 100, {
 	input: {
 		/**
@@ -261,6 +262,6 @@ setInterval(() => {
 			temp.length = 0;
 		}
 	}
-	console.log(String.fromCharCode(...result));
+	console.log(`${performance.now()},${String.fromCharCode(...result)}`);
 	result.length = 0;
 }, 10);
