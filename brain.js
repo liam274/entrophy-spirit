@@ -262,6 +262,6 @@ setInterval(() => {
 			temp.length = 0;
 		}
 	}
-	console.log(`${performance.now()},${String.fromCharCode(...result)}`);
+	console.log(`${performance.now()},${result.join(":")}`);
 	result.length = 0;
 }, 10);
