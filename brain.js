@@ -22,10 +22,8 @@ function true_or_false() {
 function attach(plugin, socket) {
 	const size = socket.length / 2;
 	for (const plug of plugin) {
-		plug.golgi = [
-			plug.next.length / 2 + size,
-			plug.next.length / 2 + size,
-		];
+		plug.golgi[0] += size;
+		plug.golgi[1] += size;
 		plug.next.push(...socket);
 	}
 }
@@ -76,7 +74,7 @@ function make_part(
 			new neuron(
 				true_or_false(),
 				true_or_false(),
-				pre_layer,
+				0,
 				handler.input.log,
 				handler.input.send,
 				data.input.least,

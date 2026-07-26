@@ -80,11 +80,10 @@ export class neuron {
 	 */
 	receive(num) {
 		this.temp.push(num);
+		this.store[num ? 1 : 0]++;
 	}
 	do_receive() {
-		while (this.temp.length) {
-			this.store[this.temp.pop() ? 1 : 0]++;
-		}
+		this.temp.length = 0;
 		// 機制:
 		// 過多的神經遞質會與另一種神經遞質發生反應，相互結合
 		if (this.store[0] > this.store[1]) {
