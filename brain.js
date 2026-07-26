@@ -244,6 +244,10 @@ setInterval(() => {
 	update(language_centre.read);
 	update(language_centre.understand);
 	update(language_centre.speak);
+	update(think);
+	update(hippocampus);
+	update(PFC);
+	update(amygdala);
 	/** @type {int[]} */
 	const result = [],
 		/** @type {string[]} */
