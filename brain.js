@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { neuron, useless, random } from "./neuron.js";
-import { between } from "./lib.js";
+import { between, get_audio } from "./lib.js";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -273,9 +273,16 @@ init(think);
 init(PFC);
 init(hippocampus);
 init(amygdala);
+for (const neu of language_centre.read.input) {
+	neu.connected += 160;
+}
 /** @type {string[]} */
 const buffer = [];
 function main() {
+	let index = 0;
+	for (const bool of get_audio()) {
+		language_centre.read.input[index++ % 160].receive(bool);
+	}
 	update(language_centre.read);
 	update(language_centre.understand);
 	update(language_centre.speak);
