@@ -4,6 +4,10 @@ import sys
 from scipy import signal
 import matplotlib.pyplot as plt   # 新增绘图库
 
+# 强制使用系统中文字体
+plt.rcParams['font.sans-serif'] = ['WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'SimHei']
+plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
+
 def read_file_as_series(filename):
     """
     支援三種格式：
@@ -175,6 +179,7 @@ def main():
     plt.tight_layout()
     plt.savefig(imgfile, dpi=150)
     print(f"频谱图已保存至 {imgfile}")
+    plt.show()
     # 如果想在屏幕上显示，取消下面一行的注释
     # plt.show()
     plt.close()
