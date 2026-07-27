@@ -1,4 +1,7 @@
 /* eslint-disable no-magic-numbers */
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -14,7 +17,6 @@ export function between(value, min, max) {
 	return value < max && value > min;
 }
 
-// eslint-disable-next-line no-undef
 const microphone = require("node-microphone");
 
 const mic = new microphone({
