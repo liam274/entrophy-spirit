@@ -60,6 +60,11 @@ export class neuron {
 	sent = 0;
 	/** @type {boolean} */
 	inhibitory = random() >= 0.7;
+	/** @type {{total:int,actual:int}} */
+	doing = {
+		total: 0,
+		actual: 0,
+	};
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -171,6 +176,7 @@ export class neuron {
 		}
 	}
 	update() {
+		this.doing.total++;
 		this.do_receive();
 		if (this.handler(this.temp, this) === false) {
 			return;
@@ -178,9 +184,16 @@ export class neuron {
 		if (this.minium > this.store[0] + this.store[1]) {
 			return;
 		}
+		const hibitat_rate = this.doing.actual / this.doing.total;
+		if (hibitat_rate > 0.8) {
+			this.inhibitory = true;
+		} else if (hibitat_rate < 0.2) {
+			this.inhibitory = false;
+		}
 		if (this.inhibitory && this.sent / this.connected >= 0.8) {
 			return;
 		}
+		this.doing.actual++;
 		this.put();
 		this.temp.length = 0;
 	}
