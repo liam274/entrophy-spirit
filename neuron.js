@@ -178,9 +178,11 @@ export class neuron {
 		this.doing.total++;
 		this.do_receive();
 		if (this.handler(this.temp, this) === false) {
+			this.temp.length = 0;
 			return;
 		}
 		if (this.minium > this.store[0] + this.store[1]) {
+			this.temp.length = 0;
 			return;
 		}
 		const hibitat_rate = this.doing.actual / this.doing.total;
@@ -190,6 +192,7 @@ export class neuron {
 			this.inhibitory = false;
 		}
 		if (this.inhibitory && this.sent / this.connected >= 0.8) {
+			this.temp.length = 0;
 			return;
 		}
 		this.sent = 0;
