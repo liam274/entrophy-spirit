@@ -28,6 +28,8 @@ const micStream = mic.startRecording();
 
 /** @type {boolean[]} */
 const buffer = [];
+const MAX_BUFFER_LENGTH = 16000;
+
 micStream?.on("data", (chunk) => {
 	for (let i = 0; i < chunk.length; i += 2) {
 		let sample = chunk[i] | (chunk[i + 1] << 8);
@@ -35,6 +37,10 @@ micStream?.on("data", (chunk) => {
 			sample -= 0x10000;
 		}
 		buffer.push(sample > 0);
+	}
+	// 超過限制時，移除最早的一半（保留最近的一部分）
+	if (buffer.length > MAX_BUFFER_LENGTH) {
+		buffer.splice(0, buffer.length - MAX_BUFFER_LENGTH);
 	}
 });
 
