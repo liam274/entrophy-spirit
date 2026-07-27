@@ -279,9 +279,10 @@ for (const neu of language_centre.read.input) {
 /** @type {string[]} */
 const buffer = [];
 function main() {
-	let index = 0;
-	for (const bool of get_audio()) {
-		language_centre.read.input[floor(index++ / 64)].receive(bool);
+	const audio = get_audio();
+	const limit = Math.min(audio.length, 6400);
+	for (let i = 0; i < limit; i++) {
+		language_centre.read.input[floor(i / 64)].receive(audio[i]);
 	}
 	update(language_centre.read);
 	update(language_centre.understand);

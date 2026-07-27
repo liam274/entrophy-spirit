@@ -190,7 +190,6 @@ export class neuron {
 			this.inhibitory = false;
 		}
 		if (this.inhibitory && this.sent / this.connected >= 0.8) {
-			this.sent = 0;
 			return;
 		}
 		this.sent = 0;

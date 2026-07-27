@@ -28,7 +28,10 @@ const micStream = mic.startRecording();
 const buffer = [];
 micStream?.on("data", (chunk) => {
 	for (let i = 0; i < chunk.length; i += 2) {
-		const sample = chunk[i] | (chunk[i + 1] << 8);
+		let sample = chunk[i] | (chunk[i + 1] << 8);
+		if (sample >= 0x8000) {
+			sample -= 0x10000;
+		}
 		buffer.push(sample > 0);
 	}
 });
