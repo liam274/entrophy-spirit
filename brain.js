@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { neuron, useless, random } from "./neuron.js";
+import { between } from "./lib.js";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -243,7 +244,10 @@ const hippocampus = make_part(10000, 100, {
 				}
 			}
 			if (neu.extra.length === 2) {
-				if (neu.extra[0] === zero && neu.extra[1] === one) {
+				if (
+					between(neu.extra[0] / (zero ?? 1), 0.8, 1.2) &&
+					between(neu.extra[1] / (one ?? 1), 0.8, 1.2)
+				) {
 					return true;
 				}
 			} else {
