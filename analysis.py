@@ -2,6 +2,7 @@
 import numpy as np
 import sys
 from scipy import signal
+import matplotlib.pyplot as plt   # 新增绘图库
 
 def read_file_as_series(filename):
     """
@@ -159,12 +160,31 @@ def main():
                delimiter=',', header='频率(Hz),功率谱密度', comments='')
     print(f"频谱数据已保存至 {outfile}")
 
+    # --- 新增绘图部分 ---
+    # 生成图片文件名（将 .csv 替换为 .png）
+    imgfile = outfile.rsplit('.', 1)[0] + '.png' if '.' in outfile else outfile + '.png'
+
+    plt.figure(figsize=(12, 6))
+    # 使用对数 y 轴（功率谱通常用对数显示，便于观察低频细节）
+    plt.semilogy(f, Pxx, linewidth=1.5)
+    plt.title(f'功率谱密度估计 (采样率 {fs:.1f} Hz, 总点 {len(values)})')
+    plt.xlabel('频率 (Hz)')
+    plt.ylabel('功率谱密度')
+    plt.grid(True, alpha=0.3, linestyle='--')
+    plt.xlim([0, 20])  # 限制到 20 Hz，符合 EEG 常用范围
+    plt.tight_layout()
+    plt.savefig(imgfile, dpi=150)
+    print(f"频谱图已保存至 {imgfile}")
+    # 如果想在屏幕上显示，取消下面一行的注释
+    # plt.show()
+    plt.close()
+
     # 統計
     peak_idx = np.argmax(Pxx)
     print(f"峰值频率: {f[peak_idx]:.2f} Hz (功率 {Pxx[peak_idx]:.2e})")
     print(f"总功率: {np.sum(Pxx):.2e}")
     print("前5个频率-功率对:")
-    for i in range(5):
+    for i in range(min(5, len(f))):
         print(f"  {f[i]:.2f} Hz, {Pxx[i]:.2e}")
 
 if __name__ == "__main__":
