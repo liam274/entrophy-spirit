@@ -207,7 +207,7 @@ const amygdala = make_part(10000, 100, {
 		 * @return {boolean}
 		 */
 		send: (bool, obj) => {
-			if (obj.store[1] / obj.store[0] > 1.2) {
+			if (obj.store[1] / obj.store[0] > 2) {
 				return !bool;
 			}
 			return bool;
