@@ -58,6 +58,8 @@ export class neuron {
 	connected = 0;
 	/** @type {int} */
 	sent = 0;
+	/** @type {boolean} */
+	inhibitory = random() > 0.7;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -174,6 +176,9 @@ export class neuron {
 			return;
 		}
 		if (this.minium > this.store[0] + this.store[1]) {
+			return;
+		}
+		if (this.inhibitory && this.sent / this.connected > 0.8) {
 			return;
 		}
 		this.put();

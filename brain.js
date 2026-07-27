@@ -269,7 +269,7 @@ init(think);
 init(PFC);
 init(hippocampus);
 init(amygdala);
-setInterval(() => {
+function main() {
 	update(language_centre.read);
 	update(language_centre.understand);
 	update(language_centre.speak);
@@ -292,4 +292,8 @@ setInterval(() => {
 	}
 	console.log(`${performance.now()},${result.join(":")}`);
 	result.length = 0;
-}, 10);
+	// @ts-ignore
+	// eslint-disable-next-line no-undef
+	setImmediate(main); // This is Node.js thing
+}
+main();
