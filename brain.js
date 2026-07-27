@@ -274,15 +274,16 @@ init(PFC);
 init(hippocampus);
 init(amygdala);
 for (const neu of language_centre.read.input) {
-	neu.connected += 64;
+	neu.connected += 25;
 }
 /** @type {string[]} */
 const buffer = [];
+let last = Date.now();
 function main() {
 	const audio = get_audio();
 	const limit = Math.min(audio.length, 6400);
 	for (let i = 0; i < limit; i++) {
-		language_centre.read.input[floor(i / 64)].receive(audio[i]);
+		language_centre.read.input[floor(i / 25)].receive(audio[i]);
 	}
 	update(language_centre.read);
 	update(language_centre.understand);
@@ -307,7 +308,9 @@ function main() {
 		ind++;
 	}
 	global.length = 0;
-	buffer.push(`${performance.now()},${result.join(":")}`);
+	const now = Date.now();
+	buffer.push(`${-(last - now)},${result.join(":")}`);
+	last = now;
 	if (buffer.length > 100) {
 		console.log(buffer.join("\n"));
 		buffer.length = 0;
