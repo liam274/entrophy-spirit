@@ -51,7 +51,7 @@ export class neuron {
 	/** @type {int[]} */
 	extra = [];
 	/** @type {int} */
-	minium = floor(100 * random());
+	minium = floor(30 * random());
 	/** @type {int} */
 	max_super_golgi = 0.5;
 	/**
