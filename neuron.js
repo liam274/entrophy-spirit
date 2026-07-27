@@ -130,9 +130,9 @@ export class neuron {
 				this.golgi[0]++;
 				this.golgi[1]--;
 			}
-			if (this.super_golgi[0] > 0) {
-				this.super_golgi[1]++;
-				this.super_golgi[0]--;
+			if (this.super_golgi[1] > 0) {
+				this.super_golgi[0]++;
+				this.super_golgi[1]--;
 			}
 		}
 		this.store[0] += this.super_golgi[0];

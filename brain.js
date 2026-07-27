@@ -99,7 +99,7 @@ function make_part(
 		);
 	}
 	/** @type {neuron[]} */
-	const layers = []; // 反向的層
+	const layers = [];
 	/** @type {neuron[]} */
 	let last = [];
 	for (let i = layer; i > 0; i--) {
