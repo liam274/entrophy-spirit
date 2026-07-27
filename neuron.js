@@ -111,7 +111,6 @@ export class neuron {
 		this.sent++;
 	}
 	do_receive() {
-		this.sent = 0;
 		// 機制:
 		// 過多的神經遞質會與另一種神經遞質發生反應，相互結合
 		if (this.store[0] > this.store[1]) {
@@ -191,8 +190,10 @@ export class neuron {
 			this.inhibitory = false;
 		}
 		if (this.inhibitory && this.sent / this.connected >= 0.8) {
+			this.sent = 0;
 			return;
 		}
+		this.sent = 0;
 		this.doing.actual++;
 		this.put();
 		this.temp.length = 0;
