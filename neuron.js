@@ -22,6 +22,8 @@ export function useless(arg) {
 	return arg;
 }
 
+export const { random, floor } = Math;
+
 // #意圖
 // 神經元分為零敏型和壹敏型：
 // 1. 零敏型在接收到較多的零時會將生產零的高爾基體轉化為生產壹的高爾基體，反亦言之
@@ -38,6 +40,8 @@ export class neuron {
 	store = [0, 0];
 	/** @type {[zero_golgi: int,one_golgi: int]} */
 	golgi = [0, 0];
+	/** @type {[zero_golgi: int,one_golgi: int]} */
+	super_golgi = [0, 0];
 	/** @type {neuron[]} */
 	next = [];
 	/** @type {Function} */
@@ -46,6 +50,10 @@ export class neuron {
 	send_handler = useless;
 	/** @type {int[]} */
 	extra = [];
+	/** @type {int} */
+	minium = floor(100 * random());
+	/** @type {int} */
+	max_super_golgi = 0.5;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -70,8 +78,13 @@ export class neuron {
 		this.handler = handler;
 		this.send_handler = send_handler;
 		/** @type {int} */
-		this.digest_ability =
-			least + Math.floor((100 - least) * max * Math.random());
+		this.digest_ability = least + floor((100 - least) * max * random());
+	}
+	init() {
+		this.super_golgi = [
+			floor(this.golgi[0] * this.max_super_golgi * random()),
+			floor(this.golgi[1] * this.max_super_golgi * random()),
+		];
 	}
 	/** @type {boolean[]} */
 	temp = [];
@@ -108,15 +121,27 @@ export class neuron {
 				this.golgi[1]++;
 				this.golgi[0]--;
 			}
-		} else if (this.golgi[1] > 0) {
-			this.golgi[0]++;
-			this.golgi[1]--;
+			if (this.super_golgi[0] > 0) {
+				this.super_golgi[1]++;
+				this.super_golgi[0]--;
+			}
+		} else {
+			if (this.golgi[1] > 0) {
+				this.golgi[0]++;
+				this.golgi[1]--;
+			}
+			if (this.super_golgi[0] > 0) {
+				this.super_golgi[1]++;
+				this.super_golgi[0]--;
+			}
 		}
+		this.store[0] += this.super_golgi[0];
+		this.store[1] += this.super_golgi[1];
 	}
 	put() {
 		let [zero, one] = this.golgi;
 		for (const neu of this.next) {
-			if (Math.random() > 0.5) {
+			if (random() > 0.5) {
 				if (zero-- > 0) {
 					neu.receive(this.send_handler(false, this));
 				} else if (one-- > 0) {
@@ -136,10 +161,13 @@ export class neuron {
 		}
 	}
 	update() {
+		this.do_receive();
 		if (this.handler(this.temp, this) === false) {
 			return;
 		}
-		this.do_receive();
+		if (this.minium > this.store[0] && this.minium > this.store[1]) {
+			return;
+		}
 		this.put();
 	}
 }

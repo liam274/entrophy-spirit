@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { neuron, useless } from "./neuron.js";
+import { neuron, useless, random } from "./neuron.js";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -11,7 +11,7 @@ const FACTOR = 1;
  * @returns {boolean}
  */
 function true_or_false() {
-	return Math.random() > 0.5 * FACTOR;
+	return random() > 0.5 * FACTOR;
 }
 
 /**
@@ -41,6 +41,22 @@ function update(neurons) {
 	}
 	for (const neu of neurons.output) {
 		neu.update();
+	}
+}
+
+/**
+ * Update a part of the brain
+ * @param {{input:neuron[],layers:neuron[],output:neuron[]}} neurons
+ */
+function init(neurons) {
+	for (const neu of neurons.input) {
+		neu.init();
+	}
+	for (const neu of neurons.layers) {
+		neu.init();
+	}
+	for (const neu of neurons.output) {
+		neu.init();
 	}
 }
 
@@ -239,6 +255,14 @@ const hippocampus = make_part(10000, 100, {
 attach(think.output, hippocampus.input);
 attach(hippocampus.output, think.input);
 
+// initalize
+init(language_centre.read);
+init(language_centre.understand);
+init(language_centre.speak);
+init(think);
+init(PFC);
+init(hippocampus);
+init(amygdala);
 setInterval(() => {
 	update(language_centre.read);
 	update(language_centre.understand);
