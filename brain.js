@@ -281,7 +281,7 @@ const buffer = [];
 let last = Date.now();
 function main() {
 	const audio = get_audio();
-	const limit = Math.min(audio.length, 6400);
+	const limit = Math.min(audio.length, 2500);
 	for (let i = 0; i < limit; i++) {
 		language_centre.read.input[floor(i / 25)].receive(audio[i]);
 	}
