@@ -54,6 +54,10 @@ export class neuron {
 	minium = floor(30 * random());
 	/** @type {int} */
 	max_super_golgi = 0.5;
+	/** @type {int} */
+	connected = 0;
+	/** @type {int} */
+	sent = 0;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -62,6 +66,7 @@ export class neuron {
 	 * @param {Function} send_handler
 	 * @param {int} least
 	 * @param {int} max
+	 * @param {int} connected
 	 */
 	constructor(
 		sensitivity,
@@ -70,7 +75,8 @@ export class neuron {
 		handler = useless,
 		send_handler = useless,
 		least = 0,
-		max = 1
+		max = 1,
+		connected
 	) {
 		this.sensitivity = sensitivity;
 		this.digestion = digestion;
@@ -79,6 +85,7 @@ export class neuron {
 		this.send_handler = send_handler;
 		/** @type {int} */
 		this.digest_ability = least + floor((100 - least) * max * random());
+		this.connected = connected;
 	}
 	init() {
 		this.super_golgi = [
@@ -94,8 +101,10 @@ export class neuron {
 	receive(num) {
 		this.temp.push(num);
 		this.store[num ? 1 : 0]++;
+		this.sent++;
 	}
 	do_receive() {
+		this.sent = 0;
 		// 機制:
 		// 過多的神經遞質會與另一種神經遞質發生反應，相互結合
 		if (this.store[0] > this.store[1]) {

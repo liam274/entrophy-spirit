@@ -26,6 +26,9 @@ function attach(plugin, socket) {
 		plug.golgi[1] += size;
 		plug.next.push(...socket);
 	}
+	for (const sock of socket) {
+		sock.connected += plugin.length;
+	}
 }
 
 /**
@@ -94,7 +97,8 @@ function make_part(
 				handler.input.log,
 				handler.input.send,
 				data.input.least,
-				data.input.max
+				data.input.max,
+				100
 			)
 		);
 	}
@@ -113,7 +117,8 @@ function make_part(
 					handler.layers.log,
 					handler.layers.send,
 					data.layers.least,
-					data.layers.max
+					data.layers.max,
+					pre_layer * 2
 				)
 			);
 		}
@@ -135,7 +140,8 @@ function make_part(
 				handler.output.log,
 				handler.output.send,
 				data.output.least,
-				data.output.max
+				data.output.max,
+				pre_layer * 2
 			)
 		);
 	}
