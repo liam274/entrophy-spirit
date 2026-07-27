@@ -269,6 +269,8 @@ init(think);
 init(PFC);
 init(hippocampus);
 init(amygdala);
+/** @type {string[]} */
+const buffer = [];
 function main() {
 	update(language_centre.read);
 	update(language_centre.understand);
@@ -281,16 +283,23 @@ function main() {
 	const result = [],
 		/** @type {string[]} */
 		temp = [];
-	global.reverse();
-	while (global.length) {
+	let ind = 0;
+	const { length } = global;
+	while (ind < length) {
 		if (temp.length < 8) {
-			temp.push(global.pop() ? "1" : "0");
+			temp.push(global[ind] ? "1" : "0");
 		} else {
 			result.push(parseInt(temp.join(""), 2));
 			temp.length = 0;
 		}
+		ind++;
 	}
-	console.log(`${performance.now()},${result.join(":")}`);
+	global.length = 0;
+	buffer.push(`${performance.now()},${result.join(":")}`);
+	if (buffer.length > 100) {
+		console.log(buffer.join("\n"));
+		buffer.length = 0;
+	}
 	result.length = 0;
 	// @ts-ignore
 	// eslint-disable-next-line no-undef
