@@ -165,7 +165,7 @@ export class neuron {
 		if (this.handler(this.temp, this) === false) {
 			return;
 		}
-		if (this.minium > this.store[0] && this.minium > this.store[1]) {
+		if (this.minium > this.store[0] + this.store[1]) {
 			return;
 		}
 		this.put();
