@@ -3,6 +3,9 @@
  * @typedef {number} int
  * @typedef {number} float
  */
+
+import { between } from "./lib.js";
+
 /**
  * @param {int} num
  * @param {boolean} condition
@@ -65,6 +68,8 @@ export class neuron {
 		total: 0,
 		actual: 0,
 	};
+	/** @type {int} */
+	fake_antibodies = 0;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -106,6 +111,9 @@ export class neuron {
 	 * @param {boolean} num
 	 */
 	receive(num) {
+		if (this.fake_antibodies-- > 0) {
+			return;
+		}
 		this.temp.push(num);
 		this.store[num ? 1 : 0]++;
 		this.sent++;
@@ -177,6 +185,9 @@ export class neuron {
 	update() {
 		this.doing.total++;
 		this.do_receive();
+		if (!between(this.store[1] / this.store[0], 0.5, 2)) {
+			this.fake_antibodies += 3;
+		}
 		if (this.handler(this.temp, this) === false) {
 			this.temp.length = 0;
 			return;
