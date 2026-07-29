@@ -1,3 +1,4 @@
 node_modules/
-# The following file is way too big for github
+# The following files are way too big for github
 calculus/calculus.mp3
+calculus/calculus.raw
