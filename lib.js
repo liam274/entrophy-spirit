@@ -4,6 +4,7 @@ const require = createRequire(import.meta.url);
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { Buffer } from "buffer";
 
 /**
  * @typedef {number} int
@@ -12,32 +13,36 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ========== 文件播放配置 ==========
-// 在这里填入您要循环播放的 .raw 文件名（例如 'story.raw' 或 'math.raw'）
-const TARGET_FILE = "calculus/calculus.raw"; // 必须填写，否则文件模式会报错
+const TARGET_FILE = "story/story.raw";
 // ==================================
 
 export const { warn, error, log } = console;
 
-// ---------- 加载文件样本（仅当 TARGET_FILE 非空时） ----------
-/** @type {boolean[]} */
-const fileSamples = [];
+// ---------- 加载文件样本（直接存 Buffer，不转布尔数组） ----------
+/** @type {Buffer | null} */
+let fileBuffer = null;
 let fileLoaded = false;
+const CHUNK_SIZE = 2500;
+let cursor = 0; // 字节偏移量（0, 2, 4, ...）
+
 if (TARGET_FILE) {
 	try {
-		const fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
-		for (let i = 0; i < fileBuffer.length; i += 2) {
-			const sample = fileBuffer.readInt16LE(i);
-			fileSamples.push(sample > 0);
+		fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
+		// 确保字节数为偶数（16-bit 采样）
+		if (fileBuffer.length % 2 !== 0) {
+			fileBuffer = fileBuffer.slice(0, fileBuffer.length - 1);
 		}
-		if (fileSamples.length === 0) {
+		if (fileBuffer.length === 0) {
 			warn("⚠️ 文件为空，填充随机噪声");
-			for (let i = 0; i < 16000; i++) {
-				fileSamples.push(Math.random() > 0.5);
+			fileBuffer = Buffer.alloc(32000);
+			for (let i = 0; i < fileBuffer.length; i += 2) {
+				fileBuffer.writeInt16LE(Math.random() > 0.5 ? 1 : -1, i);
 			}
 		}
 		fileLoaded = true;
+		const durationSec = (fileBuffer.length / 32000).toFixed(1); // 16kHz * 2字节 = 32000 字节/秒
 		warn(
-			`✅ 音频文件加载成功！总样本数：${fileSamples.length}，将进入无限循环播放。`
+			`✅ 音频文件加载成功！总大小：${(fileBuffer.length / 1024 / 1024).toFixed(1)} MB（约 ${durationSec} 秒），将进入无限循环播放。`
 		);
 	} catch (e) {
 		// @ts-ignore
@@ -47,9 +52,6 @@ if (TARGET_FILE) {
 } else {
 	warn("ℹ️ TARGET_FILE 未设置，文件模式不可用。");
 }
-
-let cursor = 0;
-const CHUNK_SIZE = 2500;
 
 // ---------- 麦克风部分（保持不变） ----------
 const microphone = require("node-microphone");
@@ -93,18 +95,24 @@ export function between(value, min, max) {
  * @returns {boolean[]}
  */
 export function get_audio(useFile) {
-	// 显式传入 false 且文件加载成功 → 文件模式
-	if (useFile === false && fileLoaded) {
-		warn("Audio mode");
+	// ---------- 文件模式 ----------
+	if (useFile === false && fileLoaded && fileBuffer) {
 		const result = [];
+		const bytesPerSample = 2;
+		const totalBytes = fileBuffer.length;
 		for (let i = 0; i < CHUNK_SIZE; i++) {
-			result.push(fileSamples[cursor]);
-			cursor = (cursor + 1) % fileSamples.length;
+			// 直接从 Buffer 读取 Int16LE，转布尔
+			const sample = fileBuffer.readInt16LE(cursor);
+			result.push(sample > 0);
+			cursor += bytesPerSample;
+			if (cursor >= totalBytes) {
+				cursor = 0; // 循环
+			}
 		}
 		return result;
 	}
 
-	// 否则走麦克风模式（默认）
+	// ---------- 麦克风模式（默认） ----------
 	const _ = [...micBuffer];
 	micBuffer.length = 0;
 	return _;
