@@ -1,0 +1,1 @@
+ffmpeg -i "$1" -ac 1 -ar 16000 -f s16le "${1%.*}.raw"
