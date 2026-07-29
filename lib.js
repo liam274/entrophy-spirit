@@ -18,42 +18,42 @@ const TARGET_FILE = "story/story.raw";
 
 export const { warn, error, log } = console;
 
-// ---------- 加载文件样本（直接存 Buffer，不转布尔数组） ----------
+// ---------- 加載文件樣本（直接存 Buffer，不轉Boolean[]） ----------
 /** @type {Buffer | null} */
 let fileBuffer = null;
 let fileLoaded = false;
 const CHUNK_SIZE = 2500;
-let cursor = 0; // 字节偏移量（0, 2, 4, ...）
+let cursor = 0; // 字節偏移量（0, 2, 4, ...）
 
 if (TARGET_FILE) {
 	try {
 		fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
-		// 确保字节数为偶数（16-bit 采样）
+		// 確保字節數為偶數（16-bit 採樣）
 		if (fileBuffer.length % 2 !== 0) {
 			fileBuffer = fileBuffer.slice(0, fileBuffer.length - 1);
 		}
 		if (fileBuffer.length === 0) {
-			warn("⚠️ 文件为空，填充随机噪声");
+			warn("⚠️ 文件為空，填充隨機噪聲");
 			fileBuffer = Buffer.alloc(32000);
 			for (let i = 0; i < fileBuffer.length; i += 2) {
 				fileBuffer.writeInt16LE(Math.random() > 0.5 ? 1 : -1, i);
 			}
 		}
 		fileLoaded = true;
-		const durationSec = (fileBuffer.length / 32000).toFixed(1); // 16kHz * 2字节 = 32000 字节/秒
+		const durationSec = (fileBuffer.length / 32000).toFixed(1); // 16kHz * 2字節 = 32000 字節/秒
 		warn(
-			`✅ 音频文件加载成功！总大小：${(fileBuffer.length / 1024 / 1024).toFixed(1)} MB（约 ${durationSec} 秒），将进入无限循环播放。`
+			`✅ 音頻文件加載成功！總大小：${(fileBuffer.length / 1024 / 1024).toFixed(1)} MB（約 ${durationSec} 秒），將進入無限循環播放。`
 		);
 	} catch (e) {
 		// @ts-ignore
-		error("❌ 文件读取失败，请检查路径：", e.message);
+		error("❌ 文件讀取失敗：", e.message);
 		fileLoaded = false;
 	}
 } else {
-	warn("ℹ️ TARGET_FILE 未设置，文件模式不可用。");
+	warn("ℹ️ TARGET_FILE 未設置，文件模式不可用。");
 }
 
-// ---------- 麦克风部分（保持不变） ----------
+// ---------- Microphone ----------
 const microphone = require("node-microphone");
 const mic = new microphone({
 	rate: "16000",
@@ -90,29 +90,26 @@ export function between(value, min, max) {
 }
 
 /**
- * 获取音频数据
  * @param {boolean} [useFile]
  * @returns {boolean[]}
  */
 export function get_audio(useFile) {
-	// ---------- 文件模式 ----------
 	if (useFile === false && fileLoaded && fileBuffer) {
 		const result = [];
 		const bytesPerSample = 2;
 		const totalBytes = fileBuffer.length;
 		for (let i = 0; i < CHUNK_SIZE; i++) {
-			// 直接从 Buffer 读取 Int16LE，转布尔
 			const sample = fileBuffer.readInt16LE(cursor);
 			result.push(sample > 0);
 			cursor += bytesPerSample;
 			if (cursor >= totalBytes) {
-				cursor = 0; // 循环
+				cursor = 0;
 			}
 		}
 		return result;
 	}
 
-	// ---------- 麦克风模式（默认） ----------
+	// ---------- Microphone Mode (Default) ----------
 	const _ = [...micBuffer];
 	micBuffer.length = 0;
 	return _;
