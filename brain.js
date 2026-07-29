@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { neuron, useless, random, floor } from "./neuron.js";
-import { between, get_audio } from "./lib.js";
+import { between, get_audio, log } from "./lib.js";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -312,7 +312,7 @@ function main() {
 	buffer.push(`${-(last - now)},${result.join(":")}`);
 	last = now;
 	if (buffer.length > 100) {
-		console.log(buffer.join("\n"));
+		log(buffer.join("\n"));
 		buffer.length = 0;
 	}
 	result.length = 0;

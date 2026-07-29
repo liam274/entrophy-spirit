@@ -16,6 +16,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const TARGET_FILE = ""; // 必须填写，否则文件模式会报错
 // ==================================
 
+export const { warn, error, log } = console;
+
 // ---------- 加载文件样本（仅当 TARGET_FILE 非空时） ----------
 /** @type {boolean[]} */
 const fileSamples = [];
@@ -28,22 +30,22 @@ if (TARGET_FILE) {
 			fileSamples.push(sample > 0);
 		}
 		if (fileSamples.length === 0) {
-			console.warn("⚠️ 文件为空，填充随机噪声");
+			warn("⚠️ 文件为空，填充随机噪声");
 			for (let i = 0; i < 16000; i++) {
 				fileSamples.push(Math.random() > 0.5);
 			}
 		}
 		fileLoaded = true;
-		console.warn(
+		warn(
 			`✅ 音频文件加载成功！总样本数：${fileSamples.length}，将进入无限循环播放。`
 		);
 	} catch (e) {
 		// @ts-ignore
-		console.error("❌ 文件读取失败，请检查路径：", e.message);
+		error("❌ 文件读取失败，请检查路径：", e.message);
 		fileLoaded = false;
 	}
 } else {
-	console.warn("ℹ️ TARGET_FILE 未设置，文件模式不可用。");
+	warn("ℹ️ TARGET_FILE 未设置，文件模式不可用。");
 }
 
 let cursor = 0;
