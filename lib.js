@@ -13,7 +13,7 @@ import { Buffer } from "buffer";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ========== 文件播放配置 ==========
-const TARGET_FILE = "story/story.raw";
+const TARGET_FILE = "";
 // ==================================
 
 export const { warn, error, log } = console;
