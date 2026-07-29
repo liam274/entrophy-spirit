@@ -280,7 +280,7 @@ for (const neu of language_centre.read.input) {
 const buffer = [];
 let last = Date.now();
 function main() {
-	const audio = get_audio();
+	const audio = get_audio(false);
 	const limit = Math.min(audio.length, 2500);
 	for (let i = 0; i < limit; i++) {
 		language_centre.read.input[floor(i / 25)].receive(audio[i]);

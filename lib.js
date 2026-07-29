@@ -13,7 +13,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ========== 文件播放配置 ==========
 // 在这里填入您要循环播放的 .raw 文件名（例如 'story.raw' 或 'math.raw'）
-const TARGET_FILE = ""; // 必须填写，否则文件模式会报错
+const TARGET_FILE = "calculus/calculus.raw"; // 必须填写，否则文件模式会报错
 // ==================================
 
 export const { warn, error, log } = console;
@@ -95,6 +95,7 @@ export function between(value, min, max) {
 export function get_audio(useFile) {
 	// 显式传入 false 且文件加载成功 → 文件模式
 	if (useFile === false && fileLoaded) {
+		warn("Audio mode");
 		const result = [];
 		for (let i = 0; i < CHUNK_SIZE; i++) {
 			result.push(fileSamples[cursor]);
