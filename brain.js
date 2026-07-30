@@ -1,4 +1,4 @@
-import { neuron, useless, floor, min } from "./neuron.js";
+import { neuron, useless, floor } from "./neuron.js";
 import { between, Audio, log, warn, random_float } from "./lib.js";
 /**
  * @typedef {number} int
@@ -63,7 +63,7 @@ function update(neurons) {
 }
 
 /**
- * Update a part of the brain
+ * Init a part of the brain
  * @param {{input:neuron[],layers:neuron[],output:neuron[]}} neurons
  */
 function init(neurons) {
@@ -291,7 +291,7 @@ init(PFC);
 init(hippocampus);
 init(amygdala);
 for (const neu of language_centre.read.input) {
-	neu.connected += 25;
+	neu.connected += 160;
 }
 /** @type {string[]} */
 const buffer = [];
@@ -305,12 +305,13 @@ const audio_instance = new Audio(
 	IS_MICROPHONE,
 	"expirement/silent-sound/silent-sound.raw"
 );
+let time = 0;
 let last = Date.now();
 function main() {
 	const audio = audio_instance.get_audio();
 	const current_frequency =
-		// eslint-disable-next-line no-magic-numbers
-		min(CONFIG.frequency / ((Date.now() - last) / CONFIG.millsecond), 25) /
+		CONFIG.frequency /
+		((Date.now() - last) / CONFIG.millsecond) /
 		CONFIG.layer_size;
 	const limit = Math.min(
 		audio.length,
@@ -350,7 +351,10 @@ function main() {
 	if (buffer.length > CONFIG.hundred) {
 		log(buffer.join("\n"));
 		buffer.length = 0;
-		process.exit(0);
+		time++;
+		if (time === CONFIG.hundred) {
+			process.exit(0);
+		}
 	}
 	result.length = 0;
 	setImmediate(main); // This is Node.js thing

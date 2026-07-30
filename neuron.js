@@ -8,6 +8,7 @@ import { between, random_bit, random_float } from "./lib.js";
 /**
  * @param {int} num
  * @param {boolean} condition
+ * @returns {int}
  */
 function condition_reverse(num, condition) {
 	if (condition) {
