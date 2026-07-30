@@ -1,4 +1,4 @@
-import { neuron, useless, floor } from "./neuron.js";
+import { neuron, useless, floor, min } from "./neuron.js";
 import { between, Audio, log, warn, random_float } from "./lib.js";
 /**
  * @typedef {number} int
@@ -179,16 +179,13 @@ const language_centre = {
 			 * @param {boolean[]} data
 			 */
 			log: (data) => {
-				let zero = 0,
-					one = 0;
+				let one = 0;
 				for (const item of data) {
 					if (item) {
 						one++;
-					} else {
-						zero++;
 					}
 				}
-				global.push(one > zero);
+				global.push(one > data.length >> 1);
 			},
 			send: useless,
 		},
@@ -228,7 +225,7 @@ const amygdala = make_part(CONFIG.hundred_square, CONFIG.hundred, {
 		 * @return {boolean}
 		 */
 		send: (bool, obj) => {
-			if (obj.store[1] / obj.store[0] > CONFIG.twice) {
+			if (obj.store[1] > obj.store[0] * CONFIG.twice) {
 				return !bool;
 			}
 			return bool;
@@ -248,15 +245,13 @@ const hippocampus = make_part(CONFIG.hundred_square, CONFIG.hundred, {
 		 * @return {boolean}
 		 */
 		log(data, neu) {
-			let zero = 0,
+			let zero,
 				one = 0;
 			for (const element of data) {
-				if (element) {
-					one++;
-				} else {
-					zero++;
-				}
+				// @ts-ignore
+				one += element;
 			}
+			zero = data.length - one;
 			if (neu.extra.length === CONFIG.twice) {
 				if (
 					between(
@@ -314,8 +309,8 @@ let last = Date.now();
 function main() {
 	const audio = audio_instance.get_audio();
 	const current_frequency =
-		CONFIG.frequency /
-		((Date.now() - last) / CONFIG.millsecond) /
+		// eslint-disable-next-line no-magic-numbers
+		min(CONFIG.frequency / ((Date.now() - last) / CONFIG.millsecond), 25) /
 		CONFIG.layer_size;
 	const limit = Math.min(
 		audio.length,

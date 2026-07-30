@@ -24,7 +24,7 @@ export function useless(arg) {
 	return arg;
 }
 
-export const { floor } = Math;
+export const { floor, min } = Math;
 
 const CONFIG = {
 	max_thresold: 30,
