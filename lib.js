@@ -10,74 +10,112 @@ import { Buffer } from "buffer";
  * @typedef {number} int
  * @typedef {number} float
  */
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-// ========== 文件播放配置 ==========
-const TARGET_FILE = "";
-// ==================================
 
 export const { warn, error, log } = console;
 
-// ---------- 加載文件樣本（直接存 Buffer，不轉Boolean[]） ----------
-/** @type {Buffer | null} */
-let fileBuffer = null;
-let fileLoaded = false;
 const CHUNK_SIZE = 2500;
-let cursor = 0; // 字節偏移量（0, 2, 4, ...）
+export class Audio {
+	/** @type {boolean[]} */
+	micBuffer = [];
+	/** @type {int} */
+	cursor = 0;
+	/** @type {Buffer | null} */
+	fileBuffer = null;
+	/** @type {boolean} */
+	fileLoaded = false;
+	/** @type {boolean} */
+	is_microphone = true;
+	/**
+	 * @param {boolean} is_microphone
+	 * @param {string} [TARGET_FILE]
+	 */
+	constructor(is_microphone, TARGET_FILE = "") {
+		this.is_microphone = is_microphone;
+		if (is_microphone) {
+			const microphone = require("node-microphone");
+			const mic = new microphone({
+				rate: "16000",
+				channels: "1",
+				fileType: "raw",
+			});
+			const micStream = mic.startRecording();
 
-if (TARGET_FILE) {
-	try {
-		fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
-		// 確保字節數為偶數（16-bit 採樣）
-		if (fileBuffer.length % 2 !== 0) {
-			fileBuffer = fileBuffer.slice(0, fileBuffer.length - 1);
-		}
-		if (fileBuffer.length === 0) {
-			warn("⚠️ 文件為空，填充隨機噪聲");
-			fileBuffer = Buffer.alloc(32000);
-			for (let i = 0; i < fileBuffer.length; i += 2) {
-				fileBuffer.writeInt16LE(Math.random() > 0.5 ? 1 : -1, i);
+			/** @type {int} */
+			const MAX_BUFFER_LENGTH = 16000;
+
+			micStream?.on("data", (chunk) => {
+				for (let i = 0; i < chunk.length; i += 2) {
+					let sample = chunk[i] | (chunk[i + 1] << 8);
+					if (sample >= 0x8000) {
+						sample -= 0x10000;
+					}
+					this.micBuffer.push(sample > 0);
+				}
+				if (this.micBuffer.length > MAX_BUFFER_LENGTH) {
+					this.micBuffer.splice(
+						0,
+						this.micBuffer.length - MAX_BUFFER_LENGTH
+					);
+				}
+			});
+		} else {
+			const __dirname = dirname(fileURLToPath(import.meta.url));
+			try {
+				this.fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
+				if (this.fileBuffer.length % 2 !== 0) {
+					// @ts-ignore
+					this.fileBuffer.length--;
+				}
+				if (this.fileBuffer.length === 0) {
+					warn("⚠️ 文件為空，填充隨機噪聲");
+					this.fileBuffer = Buffer.alloc(32000);
+					for (let i = 0; i < this.fileBuffer.length; i += 2) {
+						this.fileBuffer.writeInt16LE(
+							Math.random() > 0.5 ? 1 : -1,
+							i
+						);
+					}
+				}
+				this.fileLoaded = true;
+				const durationSec = (this.fileBuffer.length / 32000).toFixed(
+					1
+				); // 16kHz * 2字節 = 32000 字節/秒
+				warn(
+					`✅ 音頻文件加載成功！總大小：${(this.fileBuffer.length / 1024 / 1024).toFixed(1)} MB（約 ${durationSec} 秒），將進入無限循環播放。`
+				);
+			} catch (e) {
+				// @ts-ignore
+				error("❌ 文件讀取失敗：", e.message);
 			}
 		}
-		fileLoaded = true;
-		const durationSec = (fileBuffer.length / 32000).toFixed(1); // 16kHz * 2字節 = 32000 字節/秒
-		warn(
-			`✅ 音頻文件加載成功！總大小：${(fileBuffer.length / 1024 / 1024).toFixed(1)} MB（約 ${durationSec} 秒），將進入無限循環播放。`
-		);
-	} catch (e) {
-		// @ts-ignore
-		error("❌ 文件讀取失敗：", e.message);
-		fileLoaded = false;
 	}
-} else {
-	warn("ℹ️ TARGET_FILE 未設置，文件模式不可用。");
-}
-
-// ---------- Microphone ----------
-const microphone = require("node-microphone");
-const mic = new microphone({
-	rate: "16000",
-	channels: "1",
-	fileType: "raw",
-});
-const micStream = mic.startRecording();
-
-/** @type {boolean[]} */
-const micBuffer = [];
-const MAX_BUFFER_LENGTH = 16000;
-
-micStream?.on("data", (chunk) => {
-	for (let i = 0; i < chunk.length; i += 2) {
-		let sample = chunk[i] | (chunk[i + 1] << 8);
-		if (sample >= 0x8000) {
-			sample -= 0x10000;
+	/**
+	 * @returns {boolean[]}
+	 */
+	get_audio() {
+		if (
+			this.is_microphone === false &&
+			this.fileLoaded &&
+			this.fileBuffer
+		) {
+			const result = [];
+			const bytesPerSample = 2;
+			const totalBytes = this.fileBuffer.length;
+			for (let i = 0; i < CHUNK_SIZE; i++) {
+				const sample = this.fileBuffer.readInt16LE(this.cursor);
+				result.push(sample > 0);
+				this.cursor += bytesPerSample;
+				if (this.cursor >= totalBytes) {
+					this.cursor = 0;
+				}
+			}
+			return result;
 		}
-		micBuffer.push(sample > 0);
+		const _ = [...this.micBuffer];
+		this.micBuffer.length = 0;
+		return _;
 	}
-	if (micBuffer.length > MAX_BUFFER_LENGTH) {
-		micBuffer.splice(0, micBuffer.length - MAX_BUFFER_LENGTH);
-	}
-});
+}
 
 /**
  * @param {int} value
@@ -87,30 +125,4 @@ micStream?.on("data", (chunk) => {
  */
 export function between(value, min, max) {
 	return value < max && value > min;
-}
-
-/**
- * @param {boolean} [useFile]
- * @returns {boolean[]}
- */
-export function get_audio(useFile) {
-	if (useFile === false && fileLoaded && fileBuffer) {
-		const result = [];
-		const bytesPerSample = 2;
-		const totalBytes = fileBuffer.length;
-		for (let i = 0; i < CHUNK_SIZE; i++) {
-			const sample = fileBuffer.readInt16LE(cursor);
-			result.push(sample > 0);
-			cursor += bytesPerSample;
-			if (cursor >= totalBytes) {
-				cursor = 0;
-			}
-		}
-		return result;
-	}
-
-	// ---------- Microphone Mode (Default) ----------
-	const _ = [...micBuffer];
-	micBuffer.length = 0;
-	return _;
 }

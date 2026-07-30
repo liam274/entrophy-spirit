@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { neuron, useless, random, floor } from "./neuron.js";
-import { between, get_audio, log, warn } from "./lib.js";
+import { between, Audio, log, warn } from "./lib.js";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -278,15 +278,16 @@ for (const neu of language_centre.read.input) {
 }
 /** @type {string[]} */
 const buffer = [];
-let last = Date.now();
 const IS_MICROPHONE = true;
 if (IS_MICROPHONE) {
 	warn("Microphone mode is: on");
 } else {
 	warn("Audio-file mode is: on");
 }
+const audio_instance = new Audio(IS_MICROPHONE, "");
+let last = Date.now();
 function main() {
-	const audio = get_audio(IS_MICROPHONE);
+	const audio = audio_instance.get_audio();
 	const limit = Math.min(audio.length, 2500);
 	for (let i = 0; i < limit; i++) {
 		language_centre.read.input[floor(i / 25)].receive(audio[i]);
