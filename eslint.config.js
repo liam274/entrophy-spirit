@@ -6,7 +6,7 @@ export default [
 	{
 		languageOptions: {
 			globals: {
-				...globals.browser,
+				...globals.node,
 				...globals.es2026,
 			},
 			ecmaVersion: "latest",

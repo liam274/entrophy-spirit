@@ -14,6 +14,11 @@ const CONFIG = {
 	half_hundred: 50,
 	hundred_square: 10000,
 	pfc_max_digest: 0.3,
+	point8: 0.8,
+	onepoint2: 1.2,
+	frequency: 16000,
+	layer_size: 100,
+	millsecond: 1000,
 };
 
 /**
@@ -251,10 +256,18 @@ const hippocampus = make_part(CONFIG.hundred_square, CONFIG.hundred, {
 					zero++;
 				}
 			}
-			if (neu.extra.length === 2) {
+			if (neu.extra.length === CONFIG.twice) {
 				if (
-					between(neu.extra[0] / (zero ?? 1), 0.8, 1.2) &&
-					between(neu.extra[1] / (one ?? 1), 0.8, 1.2)
+					between(
+						neu.extra[0] / (zero ?? 1),
+						CONFIG.point8,
+						CONFIG.onepoint2
+					) &&
+					between(
+						neu.extra[1] / (one ?? 1),
+						CONFIG.point8,
+						CONFIG.onepoint2
+					)
 				) {
 					return true;
 				}
@@ -299,9 +312,18 @@ const audio_instance = new Audio(
 let last = Date.now();
 function main() {
 	const audio = audio_instance.get_audio();
-	const limit = Math.min(audio.length, 2500);
+	const current_frequency =
+		CONFIG.frequency /
+		((Date.now() - last) / CONFIG.millsecond) /
+		CONFIG.layer_size;
+	const limit = Math.min(
+		audio.length,
+		current_frequency * CONFIG.layer_size
+	);
 	for (let i = 0; i < limit; i++) {
-		language_centre.read.input[floor(i / 25)].receive(audio[i]);
+		language_centre.read.input[floor(i / current_frequency)].receive(
+			audio[i]
+		);
 	}
 	update(language_centre.read);
 	update(language_centre.understand);
@@ -327,15 +349,14 @@ function main() {
 	}
 	global.length = 0;
 	const now = Date.now();
-	buffer.push(`${-(last - now)},${result.join(":")}`);
+	buffer.push(`${now - last},${result.join(":")}`);
 	last = now;
-	if (buffer.length > 100) {
+	if (buffer.length > CONFIG.hundred) {
 		log(buffer.join("\n"));
 		buffer.length = 0;
+		process.exit(0);
 	}
 	result.length = 0;
-	// @ts-ignore
-	// eslint-disable-next-line no-undef
 	setImmediate(main); // This is Node.js thing
 }
 main();

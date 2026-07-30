@@ -1,6 +1,4 @@
 /* eslint-disable no-magic-numbers */
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
