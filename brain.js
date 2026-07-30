@@ -1,6 +1,5 @@
-/* eslint-disable no-magic-numbers */
-import { neuron, useless, random, floor } from "./neuron.js";
-import { between, Audio, log, warn } from "./lib.js";
+import { neuron, useless, floor } from "./neuron.js";
+import { between, Audio, log, warn, random_float } from "./lib.js";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -8,11 +7,20 @@ import { between, Audio, log, warn } from "./lib.js";
 
 const FACTOR = 1;
 
+const CONFIG = {
+	half: 0.5,
+	hundred: 100,
+	twice: 2,
+	half_hundred: 50,
+	hundred_square: 10000,
+	pfc_max_digest: 0.3,
+};
+
 /**
  * @returns {boolean}
  */
 function true_or_false() {
-	return random() > 0.5 * FACTOR;
+	return random_float() > CONFIG.half * FACTOR;
 }
 
 /**
@@ -21,7 +29,7 @@ function true_or_false() {
  * @param {neuron[]} socket
  */
 function attach(plugin, socket) {
-	const size = socket.length / 2;
+	const size = socket.length >> 1; // must be even
 	for (const plug of plugin) {
 		plug.golgi[0] += size;
 		plug.golgi[1] += size;
@@ -88,7 +96,7 @@ function make_part(
 ) {
 	/** @type {neuron[]} */
 	const input = [],
-		pre_layer = total / layer / 2;
+		pre_layer = (total / layer) >> 1; // must be even
 	for (let i = 100; i > 0; i--) {
 		input.push(
 			new neuron(
@@ -99,7 +107,7 @@ function make_part(
 				handler.input.send,
 				data.input.least,
 				data.input.max,
-				100
+				CONFIG.hundred
 			)
 		);
 	}
@@ -109,7 +117,7 @@ function make_part(
 	let last = [];
 	for (let i = layer; i > 0; i--) {
 		const temp = [];
-		for (let count = pre_layer * 2; count > 0; count--) {
+		for (let count = pre_layer << 1; count > 0; count--) {
 			temp.push(
 				new neuron(
 					true_or_false(),
@@ -119,7 +127,7 @@ function make_part(
 					handler.layers.send,
 					data.layers.least,
 					data.layers.max,
-					pre_layer * 2
+					pre_layer << 1
 				)
 			);
 		}
@@ -137,27 +145,27 @@ function make_part(
 			new neuron(
 				true_or_false(),
 				true_or_false(),
-				50,
+				CONFIG.half_hundred,
 				handler.output.log,
 				handler.output.send,
 				data.output.least,
 				data.output.max,
-				pre_layer * 2
+				pre_layer << 1
 			)
 		);
 	}
-	for (let count = pre_layer * 2; count > 0; count--) {
+	for (let count = pre_layer << 1; count > 0; count--) {
 		const temp = /**@type {neuron} */ (layers[count]);
-		temp.golgi = [50, 50];
+		temp.golgi = [CONFIG.half_hundred, CONFIG.half_hundred];
 		temp.next = output;
 	}
-	attach(input, layers.slice(layers.length - pre_layer * 2));
+	attach(input, layers.slice((layers.length - pre_layer) << 1));
 	return { input, layers, output };
 }
 /** @type {boolean[]} */
 const global = [];
 const language_centre = {
-	speak: make_part(10000, 100, {
+	speak: make_part(CONFIG.hundred_square, CONFIG.hundred, {
 		input: { log: useless, send: useless },
 		layers: { log: useless, send: useless },
 		output: {
@@ -179,16 +187,16 @@ const language_centre = {
 			send: useless,
 		},
 	}),
-	understand: make_part(10000, 100),
-	read: make_part(10000, 100),
+	understand: make_part(CONFIG.hundred_square, CONFIG.hundred),
+	read: make_part(CONFIG.hundred_square, CONFIG.hundred),
 };
 attach(language_centre.understand.output, language_centre.speak.input);
 attach(language_centre.read.output, language_centre.understand.input);
 attach(language_centre.speak.output, language_centre.read.input);
-const think = make_part(10000, 100);
+const think = make_part(CONFIG.hundred_square, CONFIG.hundred);
 const PFC = make_part(
-	10000,
-	100,
+	CONFIG.hundred_square,
+	CONFIG.hundred,
 	{
 		input: { log: useless, send: useless },
 		layers: { log: useless, send: useless },
@@ -198,12 +206,12 @@ const PFC = make_part(
 		},
 	},
 	{
-		input: { least: 0, max: 0.3 },
-		layers: { least: 0, max: 0.3 },
-		output: { least: 0, max: 0.3 },
+		input: { least: 0, max: CONFIG.pfc_max_digest },
+		layers: { least: 0, max: CONFIG.pfc_max_digest },
+		output: { least: 0, max: CONFIG.pfc_max_digest },
 	}
 );
-const amygdala = make_part(10000, 100, {
+const amygdala = make_part(CONFIG.hundred_square, CONFIG.hundred, {
 	input: { log: useless, send: useless },
 	layers: { log: useless, send: useless },
 	output: {
@@ -214,7 +222,7 @@ const amygdala = make_part(10000, 100, {
 		 * @return {boolean}
 		 */
 		send: (bool, obj) => {
-			if (obj.store[1] / obj.store[0] > 2) {
+			if (obj.store[1] / obj.store[0] > CONFIG.twice) {
 				return !bool;
 			}
 			return bool;
@@ -226,7 +234,7 @@ attach(think.output, PFC.input);
 attach(PFC.output, amygdala.input);
 attach(amygdala.output, think.input);
 attach(think.output, language_centre.understand.input);
-const hippocampus = make_part(10000, 100, {
+const hippocampus = make_part(CONFIG.hundred_square, CONFIG.hundred, {
 	input: {
 		/**
 		 * @param {boolean[]} data
@@ -278,13 +286,16 @@ for (const neu of language_centre.read.input) {
 }
 /** @type {string[]} */
 const buffer = [];
-const IS_MICROPHONE = true;
+const IS_MICROPHONE = false;
 if (IS_MICROPHONE) {
 	warn("Microphone mode is: on");
 } else {
 	warn("Audio-file mode is: on");
 }
-const audio_instance = new Audio(IS_MICROPHONE, "");
+const audio_instance = new Audio(
+	IS_MICROPHONE,
+	"expirement/silent-sound/silent-sound.raw"
+);
 let last = Date.now();
 function main() {
 	const audio = audio_instance.get_audio();

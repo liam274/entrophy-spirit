@@ -126,3 +126,47 @@ export class Audio {
 export function between(value, min, max) {
 	return value < max && value > min;
 }
+
+// ------------------- Xorshift32 core by Deepseek -------------------
+let state = 1; // non‑zero seed; will be overwritten by seed()
+
+/**
+ * Seed the generator.
+ * @param {number} s – integer seed (will be coerced to unsigned 32‑bit)
+ */
+export function seed(s) {
+	state = s >>> 0;
+	if (state === 0) {
+		state = 1;
+	}
+}
+
+// Auto‑seed with time (comment out for fully deterministic start)
+seed(Date.now());
+/**
+ * @returns {0|1}
+ */
+export function random_bit() {
+	// xorshift32 update (inlined for maximum speed)
+	let x = state;
+	x ^= x << 13;
+	x ^= x >> 17;
+	x ^= x << 5;
+	state = x;
+	// extract lowest bit
+	return /** @type {0|1}*/ (x & 1);
+}
+
+/**
+ * Returns a uniform float in [0, 1).
+ * @returns {float}
+ */
+export function random_float() {
+	let x = state;
+	x ^= x << 13;
+	x ^= x >> 17;
+	x ^= x << 5;
+	state = x;
+	// convert to unsigned int then scale to [0,1)
+	return (x >>> 0) / 4294967296; // 2^32
+}

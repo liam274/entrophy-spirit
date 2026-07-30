@@ -22,5 +22,6 @@ Without help of the following people(or not!), I'm not be able to do this projec
 2. My parents - providing electricity, air cond, and food!
 3. My sister - providing breathing sounds!
 4. Introspection brain - providing patient listenting to those audios!
+5. Audio providers(which has already written in the corresponding folder) - providing audios!
    And last but not the least...
-5. Every star-giver - Your star is my fuel!
+6. Every star-giver - Your star is my fuel!

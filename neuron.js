@@ -1,10 +1,9 @@
-/* eslint-disable no-magic-numbers */
 /**
  * @typedef {number} int
  * @typedef {number} float
  */
 
-import { between } from "./lib.js";
+import { between, random_bit, random_float } from "./lib.js";
 
 /**
  * @param {int} num
@@ -25,7 +24,18 @@ export function useless(arg) {
 	return arg;
 }
 
-export const { random, floor } = Math;
+export const { floor } = Math;
+
+const CONFIG = {
+	max_thresold: 30,
+	max_super_golgi: 0.5,
+	inhibitory_chance: 0.7,
+	hundred: 100,
+	half: 0.5,
+	twice: 2,
+	max_hibitat_rate: 0.8,
+	least_hibitat_rate: 0.2,
+};
 
 // #意圖
 // 神經元分為零敏型和壹敏型：
@@ -54,15 +64,15 @@ export class neuron {
 	/** @type {int[]} */
 	extra = [];
 	/** @type {int} */
-	minium = floor(30 * random());
+	minium = floor(CONFIG.max_thresold * random_float());
 	/** @type {int} */
-	max_super_golgi = 0.5;
+	max_super_golgi = CONFIG.max_super_golgi;
 	/** @type {int} */
 	connected = 0;
 	/** @type {int} */
 	sent = 0;
 	/** @type {boolean} */
-	inhibitory = random() >= 0.7;
+	inhibitory = random_float() >= CONFIG.inhibitory_chance;
 	/** @type {{total:int,actual:int}} */
 	doing = {
 		total: 0,
@@ -96,13 +106,14 @@ export class neuron {
 		this.handler = handler;
 		this.send_handler = send_handler;
 		/** @type {int} */
-		this.digest_ability = least + floor((100 - least) * max * random());
+		this.digest_ability =
+			least + floor((CONFIG.hundred - least) * max * random_float());
 		this.connected = connected;
 	}
 	init() {
 		this.super_golgi = [
-			floor(this.golgi[0] * this.max_super_golgi * random()),
-			floor(this.golgi[1] * this.max_super_golgi * random()),
+			floor(this.golgi[0] * this.max_super_golgi * random_float()),
+			floor(this.golgi[1] * this.max_super_golgi * random_float()),
 		];
 	}
 	/** @type {boolean[]} */
@@ -163,7 +174,7 @@ export class neuron {
 	put() {
 		let [zero, one] = this.golgi;
 		for (const neu of this.next) {
-			if (random() > 0.5) {
+			if (random_bit()) {
 				if (zero-- > 0) {
 					neu.receive(this.send_handler(false, this));
 				} else if (one-- > 0) {
@@ -185,7 +196,9 @@ export class neuron {
 	update() {
 		this.doing.total++;
 		this.do_receive();
-		if (!between(this.store[1] / this.store[0], 0.5, 2)) {
+		if (
+			!between(this.store[1] / this.store[0], CONFIG.half, CONFIG.twice)
+		) {
 			this.fake_antibodies += 3;
 		}
 		if (this.handler(this.temp, this) === false) {
@@ -197,12 +210,15 @@ export class neuron {
 			return;
 		}
 		const hibitat_rate = this.doing.actual / this.doing.total;
-		if (hibitat_rate > 0.8) {
+		if (hibitat_rate > CONFIG.max_hibitat_rate) {
 			this.inhibitory = true;
-		} else if (hibitat_rate < 0.2) {
+		} else if (hibitat_rate < CONFIG.least_hibitat_rate) {
 			this.inhibitory = false;
 		}
-		if (this.inhibitory && this.sent / this.connected >= 0.8) {
+		if (
+			this.inhibitory &&
+			this.sent / this.connected >= CONFIG.max_hibitat_rate
+		) {
 			this.temp.length = 0;
 			return;
 		}
