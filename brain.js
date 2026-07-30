@@ -351,6 +351,7 @@ function main() {
 		buffer.length = 0;
 		time++;
 		if (time === CONFIG.hundred) {
+			warn("Finished");
 			process.exit(0);
 		}
 	}

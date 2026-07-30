@@ -22,6 +22,8 @@ const CONFIG = {
 	twotwenty: 1 << 20,
 };
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 const CHUNK_SIZE = 2500;
 export class Audio {
 	/** @type {boolean[]} */
@@ -68,7 +70,6 @@ export class Audio {
 				}
 			});
 		} else {
-			const __dirname = dirname(fileURLToPath(import.meta.url));
 			try {
 				this.fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
 				if (this.fileBuffer.length & 1) {
@@ -183,19 +184,19 @@ export function random_float() {
 	return (x >>> 0) * 2.328306437e-10; // 2^-32
 }
 
+// Deepseek's job
+
 const destination = {
 	/**
 	 * @param {Buffer | string} chunk
 	 */
 	write: (chunk) => {
 		try {
-			// chunk 可能是 Buffer，也可能已转字符串，确保安全
 			const data = typeof chunk === "string" ? chunk : chunk.toString();
 			const { msg } = JSON.parse(data);
 			if (msg !== undefined) {
 				process.stdout.write(`${msg}\n`);
 			} else {
-				// 如果没有 msg，输出空行或原始内容（按需）
 				process.stdout.write("\n");
 			}
 		} catch (_) {
@@ -207,10 +208,10 @@ const destination = {
 const logger = pino(
 	{
 		level: "info",
-		base: null, // 去掉 pid 和 hostname
-		timestamp: false, // 去掉时间戳
-		// messageKey 默认就是 'msg'
+		base: null,
+		timestamp: false,
 	},
 	destination
 );
-export const { info } = logger;
+
+export const info = logger.info.bind(logger);
