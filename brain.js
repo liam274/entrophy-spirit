@@ -1,5 +1,6 @@
-import { neuron, useless, floor } from "./neuron.js";
-import { between, Audio, log, warn, random_float } from "./lib.js";
+import { neuron, useless, floor, min } from "./neuron.js";
+import { between, Audio, info, warn, random_float } from "./lib.js";
+
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -255,12 +256,12 @@ const hippocampus = make_part(CONFIG.hundred_square, CONFIG.hundred, {
 			if (neu.extra.length === CONFIG.twice) {
 				if (
 					between(
-						neu.extra[0] / (zero ?? 1),
+						neu.extra[0] / min(zero, 1),
 						CONFIG.point8,
 						CONFIG.onepoint2
 					) &&
 					between(
-						neu.extra[1] / (one ?? 1),
+						neu.extra[1] / min(one, 1),
 						CONFIG.point8,
 						CONFIG.onepoint2
 					)
@@ -301,10 +302,7 @@ if (IS_MICROPHONE) {
 } else {
 	warn("Audio-file mode is: on");
 }
-const audio_instance = new Audio(
-	IS_MICROPHONE,
-	"expirement/silent-sound/silent-sound.raw"
-);
+const audio_instance = new Audio(IS_MICROPHONE, "expirement/story/story.raw");
 let time = 0;
 let last = Date.now();
 function main() {
@@ -349,7 +347,7 @@ function main() {
 	buffer.push(`${now - last},${result.join(":")}`);
 	last = now;
 	if (buffer.length > CONFIG.hundred) {
-		log(buffer.join("\n"));
+		info(buffer.join("\n"));
 		buffer.length = 0;
 		time++;
 		if (time === CONFIG.hundred) {

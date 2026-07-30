@@ -198,7 +198,11 @@ export class neuron {
 		this.doing.total++;
 		this.do_receive();
 		if (
-			!between(this.store[1] / this.store[0], CONFIG.half, CONFIG.twice)
+			!between(
+				this.store[1] / min(this.store[0], 1),
+				CONFIG.half,
+				CONFIG.twice
+			)
 		) {
 			this.fake_antibodies += 3;
 		}

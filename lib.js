@@ -3,6 +3,7 @@ import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { Buffer } from "buffer";
+import pino from "pino";
 
 /**
  * @typedef {number} int
@@ -181,3 +182,35 @@ export function random_float() {
 	// convert to unsigned int then scale to [0,1)
 	return (x >>> 0) * 2.328306437e-10; // 2^-32
 }
+
+const destination = {
+	/**
+	 * @param {Buffer | string} chunk
+	 */
+	write: (chunk) => {
+		try {
+			// chunk 可能是 Buffer，也可能已转字符串，确保安全
+			const data = typeof chunk === "string" ? chunk : chunk.toString();
+			const { msg } = JSON.parse(data);
+			if (msg !== undefined) {
+				process.stdout.write(`${msg}\n`);
+			} else {
+				// 如果没有 msg，输出空行或原始内容（按需）
+				process.stdout.write("\n");
+			}
+		} catch (_) {
+			process.stdout.write(chunk);
+		}
+	},
+};
+
+const logger = pino(
+	{
+		level: "info",
+		base: null, // 去掉 pid 和 hostname
+		timestamp: false, // 去掉时间戳
+		// messageKey 默认就是 'msg'
+	},
+	destination
+);
+export const { info } = logger;
