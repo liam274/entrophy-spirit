@@ -179,5 +179,5 @@ export function random_float() {
 	x ^= x << 5;
 	state = x;
 	// convert to unsigned int then scale to [0,1)
-	return (x >>> 0) / 4294967296; // 2^32
+	return (x >>> 0) * 2.328306437e-10; // 2^-32
 }
