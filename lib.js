@@ -11,6 +11,16 @@ import { Buffer } from "buffer";
 
 export const { warn, error, log } = console;
 
+const CONFIG = {
+	half_dig: 0x8000,
+	half_switch: 0x10000,
+	twice: 2,
+	eight: 8,
+	frequency: 16000,
+	double_frequency: 32000,
+	twotwenty: 1 << 20,
+};
+
 const CHUNK_SIZE = 2500;
 export class Audio {
 	/** @type {boolean[]} */
@@ -42,10 +52,10 @@ export class Audio {
 			const MAX_BUFFER_LENGTH = 16000;
 
 			micStream?.on("data", (chunk) => {
-				for (let i = 0; i < chunk.length; i += 2) {
-					let sample = chunk[i] | (chunk[i + 1] << 8);
-					if (sample >= 0x8000) {
-						sample -= 0x10000;
+				for (let i = 0; i < chunk.length; i += CONFIG.twice) {
+					let sample = chunk[i] | (chunk[i + 1] << CONFIG.eight);
+					if (sample >= CONFIG.half_dig) {
+						sample -= CONFIG.half_switch;
 					}
 					this.micBuffer.push(sample > 0);
 				}
@@ -60,26 +70,29 @@ export class Audio {
 			const __dirname = dirname(fileURLToPath(import.meta.url));
 			try {
 				this.fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
-				if (this.fileBuffer.length % 2 !== 0) {
+				if (this.fileBuffer.length & 1) {
 					// @ts-ignore
 					this.fileBuffer.length--;
-				}
-				if (this.fileBuffer.length === 0) {
+				} else if (this.fileBuffer.length === 0) {
 					warn("⚠️ 文件為空，填充隨機噪聲");
-					this.fileBuffer = Buffer.alloc(32000);
-					for (let i = 0; i < this.fileBuffer.length; i += 2) {
+					this.fileBuffer = Buffer.alloc(CONFIG.double_frequency);
+					for (
+						let i = 0;
+						i < this.fileBuffer.length;
+						i += CONFIG.twice
+					) {
 						this.fileBuffer.writeInt16LE(
-							Math.random() > 0.5 ? 1 : -1,
+							(random_bit() << 1) - 1,
 							i
 						);
 					}
 				}
 				this.fileLoaded = true;
-				const durationSec = (this.fileBuffer.length / 32000).toFixed(
-					1
-				); // 16kHz * 2字節 = 32000 字節/秒
+				const durationSec = (
+					this.fileBuffer.length / CONFIG.double_frequency
+				).toFixed(1); // 16kHz * 2字節 = 32000 字節/秒
 				warn(
-					`✅ 音頻文件加載成功！總大小：${(this.fileBuffer.length / 1024 / 1024).toFixed(1)} MB（約 ${durationSec} 秒），將進入無限循環播放。`
+					`✅ 音頻文件加載成功！總大小：${(this.fileBuffer.length / CONFIG.twotwenty).toFixed(1)} MB（約 ${durationSec} 秒），將進入無限循環播放。`
 				);
 			} catch (e) {
 				// @ts-ignore
@@ -92,9 +105,9 @@ export class Audio {
 	 */
 	get_audio() {
 		if (
-			this.is_microphone === false &&
 			this.fileLoaded &&
-			this.fileBuffer
+			this.fileBuffer &&
+			this.is_microphone === false
 		) {
 			const result = [];
 			const bytesPerSample = 2;

@@ -19,6 +19,7 @@ const CONFIG = {
 	frequency: 16000,
 	layer_size: 100,
 	millsecond: 1000,
+	word: 8,
 };
 
 /**
@@ -101,7 +102,7 @@ function make_part(
 ) {
 	/** @type {neuron[]} */
 	const input = [],
-		pre_layer = (total / layer) >> 1; // must be even
+		pre_layer = total / layer; // must be even
 	for (let i = 100; i > 0; i--) {
 		input.push(
 			new neuron(
@@ -122,7 +123,7 @@ function make_part(
 	let last = [];
 	for (let i = layer; i > 0; i--) {
 		const temp = [];
-		for (let count = pre_layer << 1; count > 0; count--) {
+		for (let count = pre_layer; count > 0; count--) {
 			temp.push(
 				new neuron(
 					true_or_false(),
@@ -132,7 +133,7 @@ function make_part(
 					handler.layers.send,
 					data.layers.least,
 					data.layers.max,
-					pre_layer << 1
+					pre_layer
 				)
 			);
 		}
@@ -155,16 +156,16 @@ function make_part(
 				handler.output.send,
 				data.output.least,
 				data.output.max,
-				pre_layer << 1
+				pre_layer
 			)
 		);
 	}
-	for (let count = pre_layer << 1; count > 0; count--) {
+	for (let count = pre_layer; count > 0; count--) {
 		const temp = /**@type {neuron} */ (layers[count]);
 		temp.golgi = [CONFIG.half_hundred, CONFIG.half_hundred];
 		temp.next = output;
 	}
-	attach(input, layers.slice((layers.length - pre_layer) << 1));
+	attach(input, last);
 	return { input, layers, output };
 }
 /** @type {boolean[]} */
@@ -339,7 +340,7 @@ function main() {
 	let ind = 0;
 	const { length } = global;
 	while (ind < length) {
-		if (temp.length < 8) {
+		if (temp.length < CONFIG.word) {
 			temp.push(global[ind] ? "1" : "0");
 		} else {
 			result.push(parseInt(temp.join(""), 2));
