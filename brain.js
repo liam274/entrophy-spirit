@@ -349,10 +349,10 @@ function main() {
 	}
 	global_index = 0;
 	const now = Date.now();
-	buffer.push((now - last).toString() + "," + result.join(":") + "\n");
+	buffer.push((now - last).toString() + "," + result.join(":"));
 	last = now;
 	if (buffer.length > CONFIG.hundred) {
-		info(buffer.join(""));
+		info(buffer.join("\n"));
 		buffer.length = 0;
 		time++;
 		if (time === CONFIG.hundred) {
