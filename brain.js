@@ -78,6 +78,19 @@ function init(neurons) {
 		neu.init();
 	}
 }
+/**
+ * @type {{input:{log:Function,send:Function},layers:{log:Function,send:Function},output:{log:Function,send:Function}}}
+ */
+const useless_handlers = {
+	input: { log: useless, send: useless },
+	layers: { log: useless, send: useless },
+	output: { log: useless, send: useless },
+};
+const useless_data = {
+	input: { least: 0, max: 0 },
+	layers: { least: 0, max: 0 },
+	output: { least: 0, max: 0 },
+};
 
 /**
  * make part of brains
@@ -90,16 +103,8 @@ function init(neurons) {
 function make_part(
 	total,
 	layer,
-	handler = {
-		input: { log: useless, send: useless },
-		layers: { log: useless, send: useless },
-		output: { log: useless, send: useless },
-	},
-	data = {
-		input: { least: 0, max: 0 },
-		layers: { least: 0, max: 0 },
-		output: { least: 0, max: 0 },
-	}
+	handler = useless_handlers,
+	data = useless_data
 ) {
 	/** @type {neuron[]} */
 	const input = [],
@@ -201,88 +206,68 @@ attach(language_centre.understand.output, language_centre.speak.input);
 attach(language_centre.read.output, language_centre.understand.input);
 attach(language_centre.speak.output, language_centre.read.input);
 const think = make_part(CONFIG.hundred_square, CONFIG.hundred);
-const PFC = make_part(
-	CONFIG.hundred_square,
-	CONFIG.hundred,
-	{
-		input: { log: useless, send: useless },
-		layers: { log: useless, send: useless },
-		output: {
-			log: useless,
-			send: useless,
-		},
-	},
-	{
-		input: { least: 0, max: CONFIG.pfc_max_digest },
-		layers: { least: 0, max: CONFIG.pfc_max_digest },
-		output: { least: 0, max: CONFIG.pfc_max_digest },
+useless_data.input.max = CONFIG.pfc_max_digest;
+useless_data.layers.max = CONFIG.pfc_max_digest;
+useless_data.output.max = CONFIG.pfc_max_digest;
+const PFC = make_part(CONFIG.hundred_square, CONFIG.hundred);
+useless_data.input.max = 0;
+useless_data.layers.max = 0;
+useless_data.output.max = 0;
+/**
+ * @param {boolean} bool
+ * @param {neuron} obj
+ * @return {boolean}
+ */
+useless_handlers.output.send = (bool, obj) => {
+	if (obj.store[1] > obj.store[0] * CONFIG.twice) {
+		return !bool;
 	}
-);
-const amygdala = make_part(CONFIG.hundred_square, CONFIG.hundred, {
-	input: { log: useless, send: useless },
-	layers: { log: useless, send: useless },
-	output: {
-		log: useless,
-		/**
-		 * @param {boolean} bool
-		 * @param {neuron} obj
-		 * @return {boolean}
-		 */
-		send: (bool, obj) => {
-			if (obj.store[1] > obj.store[0] * CONFIG.twice) {
-				return !bool;
-			}
-			return bool;
-		},
-	},
-});
+	return bool;
+};
+const amygdala = make_part(CONFIG.hundred_square, CONFIG.hundred);
+useless_handlers.output.send = useless;
 attach(language_centre.understand.output, think.input);
 attach(think.output, PFC.input);
 attach(PFC.output, amygdala.input);
 attach(amygdala.output, think.input);
 attach(think.output, language_centre.understand.input);
-const hippocampus = make_part(CONFIG.hundred_square, CONFIG.hundred, {
-	input: {
-		/**
-		 * @param {boolean[]} data
-		 * @param {neuron} neu
-		 * @return {boolean}
-		 */
-		log(data, neu) {
-			let zero,
-				one = 0;
-			for (const element of data) {
-				// @ts-ignore
-				one += element;
-			}
-			zero = data.length - one;
-			if (neu.extra.length === CONFIG.twice) {
-				if (
-					between(
-						neu.extra[0] / min(zero, 1),
-						CONFIG.point8,
-						CONFIG.onepoint2
-					) &&
-					between(
-						neu.extra[1] / min(one, 1),
-						CONFIG.point8,
-						CONFIG.onepoint2
-					)
-				) {
-					return true;
-				}
-			} else {
-				zero += neu.store[0];
-				one += neu.store[1];
-				neu.extra = [zero, one];
-			}
-			return false;
-		},
-		send: useless,
-	},
-	layers: { log: useless, send: useless },
-	output: { log: useless, send: useless },
-});
+/**
+ * @param {boolean[]} data
+ * @param {neuron} neu
+ * @return {boolean}
+ */
+useless_handlers.input.log = (data, neu) => {
+	let zero,
+		one = 0;
+	for (const element of data) {
+		// @ts-ignore
+		one += element;
+	}
+	zero = data.length - one;
+	if (neu.extra.length === CONFIG.twice) {
+		if (
+			between(
+				neu.extra[0] / min(zero, 1),
+				CONFIG.point8,
+				CONFIG.onepoint2
+			) &&
+			between(
+				neu.extra[1] / min(one, 1),
+				CONFIG.point8,
+				CONFIG.onepoint2
+			)
+		) {
+			return true;
+		}
+	} else {
+		zero += neu.store[0];
+		one += neu.store[1];
+		neu.extra = [zero, one];
+	}
+	return false;
+};
+const hippocampus = make_part(CONFIG.hundred_square, CONFIG.hundred);
+useless_handlers.input.log = useless;
 attach(think.output, hippocampus.input);
 attach(hippocampus.output, think.input);
 

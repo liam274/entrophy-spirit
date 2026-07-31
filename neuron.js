@@ -81,6 +81,10 @@ export class neuron {
 	};
 	/** @type {int} */
 	fake_antibodies = 0;
+	/** @type {Function[]} */
+	varients = [];
+	/** @type {int} */
+	hibitat_rate = 0;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -214,7 +218,9 @@ export class neuron {
 			this.temp.length = 0;
 			return;
 		}
-		const hibitat_rate = this.doing.actual / this.doing.total;
+		const hibitat_rate = (this.hibitat_rate = /** @type {int}*/ (
+			this.doing.actual / this.doing.total
+		));
 		if (hibitat_rate > CONFIG.max_hibitat_rate) {
 			this.inhibitory = true;
 		} else if (hibitat_rate < CONFIG.least_hibitat_rate) {
@@ -226,6 +232,9 @@ export class neuron {
 		) {
 			this.temp.length = 0;
 			return;
+		}
+		for (const func of this.varients) {
+			func(this);
 		}
 		this.sent = 0;
 		this.doing.actual++;
