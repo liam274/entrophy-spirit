@@ -302,7 +302,10 @@ if (IS_MICROPHONE) {
 } else {
 	warn("Audio-file mode is: on");
 }
-const audio_instance = new Audio(IS_MICROPHONE, "expirement/story/story.raw");
+const audio_instance = new Audio(
+	IS_MICROPHONE,
+	"expirement/mozart-piano-work/Mozart - Sonata for Two Pianos in D, K. 448 [complete].raw"
+);
 let time = 0;
 let last = Date.now();
 function main() {
