@@ -169,8 +169,9 @@ function make_part(
 	attach(input, last);
 	return { input, layers, output };
 }
-/** @type {boolean[]} */
-const global = [];
+/** @type {Uint8Array} */
+const global = new Uint8Array(CONFIG.hundred_square);
+let global_index = 0;
 const language_centre = {
 	speak: make_part(CONFIG.hundred_square, CONFIG.hundred, {
 		input: { log: useless, send: useless },
@@ -186,7 +187,8 @@ const language_centre = {
 						one++;
 					}
 				}
-				global.push(one > data.length >> 1);
+				// @ts-ignore
+				global[global_index++] = one > data.length >> 1;
 			},
 			send: useless,
 		},
@@ -335,7 +337,7 @@ function main() {
 		/** @type {string[]} */
 		temp = [];
 	let ind = 0;
-	const { length } = global;
+	const length = global_index;
 	while (ind < length) {
 		if (temp.length < CONFIG.word) {
 			temp.push(global[ind] ? "1" : "0");
@@ -345,7 +347,7 @@ function main() {
 		}
 		ind++;
 	}
-	global.length = 0;
+	global_index = 0;
 	const now = Date.now();
 	buffer.push((now - last).toString() + "," + result.join(":"));
 	last = now;
