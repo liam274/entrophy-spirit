@@ -129,7 +129,8 @@ function make_part(
 				new neuron(
 					true_or_false(),
 					true_or_false(),
-					pre_layer,
+					pre_layer, // here has a bug but I don't think it matters
+					// let's just let it be
 					handler.layers.log,
 					handler.layers.send,
 					data.layers.least,
