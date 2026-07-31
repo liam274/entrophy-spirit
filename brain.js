@@ -347,7 +347,7 @@ function main() {
 	}
 	global.length = 0;
 	const now = Date.now();
-	buffer.push(`${now - last},${result.join(":")}`);
+	buffer.push((now - last).toString() + "," + result.join(":"));
 	last = now;
 	if (buffer.length > CONFIG.hundred) {
 		info(buffer.join("\n"));

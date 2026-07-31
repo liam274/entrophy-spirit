@@ -42,7 +42,7 @@ export default [
 			"no-duplicate-imports": "error", // 禁止重複 import
 			"prefer-destructuring": ["error", { object: true, array: false }],
 			"object-shorthand": ["error", "always"],
-			"prefer-template": "error",
+			// "prefer-template": "error", // template string is very slow
 			"no-param-reassign": ["error", { props: false }],
 			"no-useless-constructor": "error",
 			"no-useless-escape": "error",
