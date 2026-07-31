@@ -195,9 +195,7 @@ const destination = {
 			const data = typeof chunk === "string" ? chunk : chunk.toString();
 			const { msg } = JSON.parse(data);
 			if (msg !== undefined) {
-				process.stdout.write(msg + "\n");
-			} else {
-				process.stdout.write("\n");
+				process.stdout.write(msg);
 			}
 		} catch (_) {
 			process.stdout.write(chunk);
