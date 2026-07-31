@@ -349,7 +349,7 @@ function main() {
 	}
 	global_index = 0;
 	const now = Date.now();
-	buffer.push((now - last).toString() + "," + result.join(":"));
+	buffer.push(`${now - last},` + result.join(":"));
 	last = now;
 	if (buffer.length > CONFIG.hundred) {
 		info(buffer.join("\n"));
