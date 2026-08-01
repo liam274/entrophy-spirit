@@ -78,11 +78,14 @@ function update(neurons) {
 			oks++;
 		}
 	}
-	special_chemicals.amyloid_beta +=
+	special_chemicals.amyloid_beta += min(
+		// eslint-disable-next-line no-magic-numbers
+		100,
 		(neurons.input.length +
 			neurons.output.length +
 			neurons.layers.length) /
-		oks;
+			oks
+	);
 }
 
 /**
