@@ -1,7 +1,7 @@
 node_modules/
 # The following files are way too big for github
-expirement/calculus/calculus.mp3
-expirement/calculus/calculus.raw
-expirement/story/story.mp3
-expirement/story/story.raw
+experiment/calculus/calculus.mp3
+experiment/calculus/calculus.raw
+experiment/story/story.mp3
+experiment/story/story.raw
 .vscode/

@@ -309,7 +309,7 @@ if (IS_MICROPHONE) {
 }
 const audio_instance = new Audio(
 	IS_MICROPHONE,
-	"expirement/mozart-piano-work/Mozart - Sonata for Two Pianos in D, K. 448 [complete].raw"
+	"experiment/mozart-piano-work/Mozart - Sonata for Two Pianos in D, K. 448 [complete].raw"
 );
 let time = 0;
 let last = Date.now();
