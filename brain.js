@@ -23,7 +23,7 @@ const CONFIG = {
 	millisecond: 1000,
 	word: 8,
 	part_size: 10200,
-	max_amyloid_beta: 1020000,
+	max_amyloid_beta: 1000,
 };
 
 const MAX_TEST_TIME = 200;
@@ -257,6 +257,7 @@ attach_func(think, [
 		if (special_chemicals.amyloid_beta > CONFIG.max_amyloid_beta) {
 			neu.lock_on = true;
 		}
+		special_chemicals.amyloid_beta *= 0.98;
 	},
 ]);
 useless_data.input.max = CONFIG.pfc_max_digest;
