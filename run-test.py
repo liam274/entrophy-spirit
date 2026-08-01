@@ -66,7 +66,7 @@ def run_task(task: Task) -> None:
     raw_path, run_index = task
 
     subdir: Path = raw_path.parent
-    out_csv: Path = subdir / f"{subdir.name}.{run_index}.csv"
+    out_csv: Path = subdir / f"{subdir.name}.sample.{run_index}"
 
     print(f"🚀 開始 {subdir.name} 第 {run_index} 次執行 ...")
 
