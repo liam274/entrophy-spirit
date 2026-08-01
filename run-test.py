@@ -5,8 +5,8 @@
 功能:
     1. 清空 experiment/ 下各子目錄的舊輸出 (*.1|2.csv, *.1|2.png, *.sample.1|2)
     2. 對每個子目錄中的 .raw 檔案，分別以 run_index=1 和 2 執行 node brain.js
-    3. 將 stdout 儲存為 <子目錄名>.<run_index>.csv
-    4. 使用 10 個行程並行執行
+    3. 將 stdout 儲存為 <子目錄名>.sample.<run_index>
+    4. 使用 10 個行程並行執行，並顯示 tqdm 進度條
 """
 
 import subprocess
@@ -15,11 +15,14 @@ from multiprocessing import Pool
 from pathlib import Path
 from typing import List, Tuple
 
+# ---- 新增 tqdm ----
+from tqdm import tqdm
+
 # ---- 常數設定 ----
 EXPERIMENT_DIR: Path = Path("./experiment")
 NODE_CMD: str = "node"
 BRAIN_JS: Path = Path("./brain.js")  # 請確保 brain.js 位於專案根目錄
-MAX_WORKERS: int = 10  # 並行數量
+MAX_WORKERS: int = 10                # 並行數量
 
 
 # ---- 類型別名（方便閱讀） ----
@@ -66,28 +69,24 @@ def run_task(task: Task) -> None:
     raw_path, run_index = task
 
     subdir: Path = raw_path.parent
-    out_csv: Path = subdir / f"{subdir.name}.sample.{run_index}"
-
-    print(f"🚀 開始 {subdir.name} 第 {run_index} 次執行 ...")
+    out_sample: Path = subdir / f"{subdir.name}.sample.{run_index}"
 
     # 執行 node，捕獲 stdout，stderr 直接顯示（便於除錯）
     proc = subprocess.run(
         [NODE_CMD, str(BRAIN_JS), str(raw_path)],
-        cwd=Path.cwd(),  # 確保在專案根目錄執行
+        cwd=Path.cwd(),
         capture_output=True,
         text=True,
         encoding="utf-8",
     )
 
-    # 寫入 CSV（僅 stdout）
-    with open(out_csv, "w", encoding="utf-8") as f:
+    # 寫入 sample 檔案（僅 stdout）
+    with open(out_sample, "w", encoding="utf-8") as f:
         f.write(proc.stdout)
 
     # 若有錯誤訊息，印出但不中斷流程
     if proc.stderr:
         print(f"⚠️  {subdir.name} 第 {run_index} 次有 stderr：\n{proc.stderr}")
-
-    print(f"✅ 完成 {subdir.name} 第 {run_index} 次，輸出 => {out_csv}")
 
 
 def main() -> None:
@@ -116,9 +115,17 @@ def main() -> None:
 
     print(f"📦 總共 {len(tasks)} 個任務，將使用 {MAX_WORKERS} 個行程並行執行")
 
-    # 3. 以行程池執行
+    # 3. 以行程池執行，並顯示 tqdm 進度條
     with Pool(processes=MAX_WORKERS) as pool:
-        pool.map(run_task, tasks)
+        # imap_unordered 會在各任務完成後立即回傳結果（此處為 None）
+        # 用 tqdm 包裹，每完成一個就更新一次進度
+        for _ in tqdm(
+            pool.imap_unordered(run_task, tasks),
+            total=len(tasks),
+            desc="執行進度",
+            unit="任務",
+        ):
+            pass  # 不需要處理返回值，單純為了進度條更新
 
     print("🎉 所有測試完成！")
 
