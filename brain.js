@@ -64,6 +64,23 @@ function update(neurons) {
 }
 
 /**
+ * Append func to a part of the brain
+ * @param {{input:neuron[],layers:neuron[],output:neuron[]}} neurons
+ * @param {((v: neuron)=>void)[]} callbacks
+ */
+function append_func(neurons, callbacks) {
+	for (const neu of neurons.input) {
+		neu.varients.push(...callbacks);
+	}
+	for (const neu of neurons.layers) {
+		neu.varients.push(...callbacks);
+	}
+	for (const neu of neurons.output) {
+		neu.varients.push(...callbacks);
+	}
+}
+
+/**
  * Init a part of the brain
  * @param {{input:neuron[],layers:neuron[],output:neuron[]}} neurons
  */

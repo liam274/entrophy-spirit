@@ -218,9 +218,7 @@ export class neuron {
 			this.temp.length = 0;
 			return;
 		}
-		const hibitat_rate = (this.hibitat_rate = /** @type {int}*/ (
-			this.doing.actual / this.doing.total
-		));
+		const hibitat_rate = this.doing.actual / this.doing.total;
 		if (hibitat_rate > CONFIG.max_hibitat_rate) {
 			this.inhibitory = true;
 		} else if (hibitat_rate < CONFIG.least_hibitat_rate) {
@@ -228,7 +226,9 @@ export class neuron {
 		}
 		if (
 			this.inhibitory &&
-			this.sent / this.connected >= CONFIG.max_hibitat_rate
+			(this.hibitat_rate = /** @type {int}*/ (
+				this.sent / this.connected
+			)) >= CONFIG.max_hibitat_rate
 		) {
 			this.temp.length = 0;
 			return;
