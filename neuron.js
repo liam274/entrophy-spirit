@@ -85,6 +85,8 @@ export class neuron {
 	varients = [];
 	/** @type {int} */
 	habitat_rate = 0;
+	/** @type {boolean} */
+	lock_on = false;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -206,35 +208,40 @@ export class neuron {
 		this.sent = 0;
 		this.doing.total++;
 		this.do_receive();
-		if (
-			!between(
-				this.store[1] / min(this.store[0], 1),
-				CONFIG.half,
-				CONFIG.twice
-			)
-		) {
-			this.fake_antibodies += 3;
-		}
-		if (this.handler(this.temp, this) === false) {
-			this.temp.length = 0;
-			return false;
-		}
-		if (this.minium > this.store[0] + this.store[1]) {
-			this.temp.length = 0;
-			return false;
-		}
-		const habitat_rate = this.doing.actual / this.doing.total;
-		if (habitat_rate > CONFIG.max_habitat_rate) {
-			this.inhibitory = true;
-		} else if (habitat_rate < CONFIG.least_habitat_rate) {
-			this.inhibitory = false;
-		}
-		if (this.inhibitory && this.habitat_rate >= CONFIG.max_habitat_rate) {
-			this.temp.length = 0;
-			return false;
-		}
 		for (const func of this.varients) {
 			func(this);
+		}
+		if (this.lock_on) {
+			if (
+				!between(
+					this.store[1] / min(this.store[0], 1),
+					CONFIG.half,
+					CONFIG.twice
+				)
+			) {
+				this.fake_antibodies += 3;
+			}
+			if (this.handler(this.temp, this) === false) {
+				this.temp.length = 0;
+				return false;
+			}
+			if (this.minium > this.store[0] + this.store[1]) {
+				this.temp.length = 0;
+				return false;
+			}
+			const habitat_rate = this.doing.actual / this.doing.total;
+			if (habitat_rate > CONFIG.max_habitat_rate) {
+				this.inhibitory = true;
+			} else if (habitat_rate < CONFIG.least_habitat_rate) {
+				this.inhibitory = false;
+			}
+			if (
+				this.inhibitory &&
+				this.habitat_rate >= CONFIG.max_habitat_rate
+			) {
+				this.temp.length = 0;
+				return false;
+			}
 		}
 		this.doing.actual++;
 		this.put();

@@ -8,6 +8,7 @@ import { between, Audio, info, warn, random_float } from "./lib.js";
 
 const FACTOR = 1;
 
+// CONFIG
 const CONFIG = {
 	half: 0.5,
 	hundred: 100,
@@ -21,8 +22,13 @@ const CONFIG = {
 	layer_size: 100,
 	millisecond: 1000,
 	word: 8,
+	part_size: 10200,
+	max_amyloid_beta: 1020000,
 };
 
+const MAX_TEST_TIME = 200;
+
+// FUNCS
 /**
  * @returns {boolean}
  */
@@ -88,7 +94,7 @@ function update(neurons) {
  * @param {{input:neuron[],layers:neuron[],output:neuron[]}} neurons
  * @param {((v: neuron)=>void)[]} callbacks
  */
-function append_func(neurons, callbacks) {
+function attach_func(neurons, callbacks) {
 	for (const neu of neurons.input) {
 		neu.varients.push(...callbacks);
 	}
@@ -243,6 +249,16 @@ attach(language_centre.understand.output, language_centre.speak.input);
 attach(language_centre.read.output, language_centre.understand.input);
 attach(language_centre.speak.output, language_centre.read.input);
 const think = make_part(CONFIG.hundred_square, CONFIG.hundred);
+attach_func(think, [
+	/**
+	 * @param {neuron} neu
+	 */
+	(neu) => {
+		if (special_chemicals.amyloid_beta > CONFIG.max_amyloid_beta) {
+			neu.lock_on = true;
+		}
+	},
+]);
 useless_data.input.max = CONFIG.pfc_max_digest;
 useless_data.layers.max = CONFIG.pfc_max_digest;
 useless_data.output.max = CONFIG.pfc_max_digest;
@@ -378,7 +394,7 @@ function main() {
 		info(buffer.join("\n"));
 		buffer.length = 0;
 		time++;
-		if (time === CONFIG.hundred) {
+		if (time === MAX_TEST_TIME) {
 			warn("Finished");
 			process.exit(0);
 		}
