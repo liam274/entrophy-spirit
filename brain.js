@@ -59,7 +59,6 @@ const special_chemicals = {
 /**
  * Update a part of the brain
  * @param {{input:neuron[],layers:neuron[],output:neuron[]}} neurons
- * @returns {[count:int,rate:float]}
  */
 function update(neurons) {
 	/** @type {int} */
@@ -79,14 +78,11 @@ function update(neurons) {
 			oks++;
 		}
 	}
-	return [
-		oks,
-		(special_chemicals.amyloid_beta +=
-			oks /
-			(neurons.input.length +
-				neurons.output.length +
-				neurons.layers.length)),
-	];
+	special_chemicals.amyloid_beta +=
+		(neurons.input.length +
+			neurons.output.length +
+			neurons.layers.length) /
+		oks;
 }
 
 /**
@@ -256,8 +252,8 @@ attach_func(think, [
 	(neu) => {
 		if (special_chemicals.amyloid_beta > CONFIG.max_amyloid_beta) {
 			neu.lock_on = true;
+			special_chemicals.amyloid_beta *= 0.98;
 		}
-		special_chemicals.amyloid_beta *= 0.98;
 	},
 ]);
 useless_data.input.max = CONFIG.pfc_max_digest;
