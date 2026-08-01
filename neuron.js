@@ -34,8 +34,8 @@ const CONFIG = {
 	hundred: 100,
 	half: 0.5,
 	twice: 2,
-	max_hibitat_rate: 0.8,
-	least_hibitat_rate: 0.2,
+	max_habitat_rate: 0.8,
+	least_habitat_rate: 0.2,
 };
 
 // #意圖
@@ -84,7 +84,7 @@ export class neuron {
 	/** @type {Function[]} */
 	varients = [];
 	/** @type {int} */
-	hibitat_rate = 0;
+	habitat_rate = 0;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -198,8 +198,11 @@ export class neuron {
 			}
 		}
 	}
+	/**
+	 * @returns {boolean}
+	 */
 	update() {
-		this.hibitat_rate = /** @type {int}*/ (this.sent / this.connected);
+		this.habitat_rate = /** @type {int}*/ (this.sent / this.connected);
 		this.sent = 0;
 		this.doing.total++;
 		this.do_receive();
@@ -214,21 +217,21 @@ export class neuron {
 		}
 		if (this.handler(this.temp, this) === false) {
 			this.temp.length = 0;
-			return;
+			return false;
 		}
 		if (this.minium > this.store[0] + this.store[1]) {
 			this.temp.length = 0;
-			return;
+			return false;
 		}
-		const hibitat_rate = this.doing.actual / this.doing.total;
-		if (hibitat_rate > CONFIG.max_hibitat_rate) {
+		const habitat_rate = this.doing.actual / this.doing.total;
+		if (habitat_rate > CONFIG.max_habitat_rate) {
 			this.inhibitory = true;
-		} else if (hibitat_rate < CONFIG.least_hibitat_rate) {
+		} else if (habitat_rate < CONFIG.least_habitat_rate) {
 			this.inhibitory = false;
 		}
-		if (this.inhibitory && this.hibitat_rate >= CONFIG.max_hibitat_rate) {
+		if (this.inhibitory && this.habitat_rate >= CONFIG.max_habitat_rate) {
 			this.temp.length = 0;
-			return;
+			return false;
 		}
 		for (const func of this.varients) {
 			func(this);
@@ -236,5 +239,6 @@ export class neuron {
 		this.doing.actual++;
 		this.put();
 		this.temp.length = 0;
+		return true;
 	}
 }

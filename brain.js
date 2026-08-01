@@ -19,7 +19,7 @@ const CONFIG = {
 	onepoint2: 1.2,
 	frequency: 16000,
 	layer_size: 100,
-	millsecond: 1000,
+	millisecond: 1000,
 	word: 8,
 };
 
@@ -47,20 +47,40 @@ function attach(plugin, socket) {
 	}
 }
 
+const special_chemicals = {
+	amyloid_beta: 0,
+};
 /**
  * Update a part of the brain
  * @param {{input:neuron[],layers:neuron[],output:neuron[]}} neurons
+ * @returns {[count:int,rate:float]}
  */
 function update(neurons) {
+	/** @type {int} */
+	let oks = 0;
 	for (const neu of neurons.input) {
-		neu.update();
+		if (neu.update()) {
+			oks++;
+		}
 	}
 	for (const neu of neurons.layers) {
-		neu.update();
+		if (neu.update()) {
+			oks++;
+		}
 	}
 	for (const neu of neurons.output) {
-		neu.update();
+		if (neu.update()) {
+			oks++;
+		}
 	}
+	return [
+		oks,
+		(special_chemicals.amyloid_beta +=
+			oks /
+			(neurons.input.length +
+				neurons.output.length +
+				neurons.layers.length)),
+	];
 }
 
 /**
@@ -288,7 +308,7 @@ useless_handlers.input.log = useless;
 attach(think.output, hippocampus.input);
 attach(hippocampus.output, think.input);
 
-// initalize
+// initialize
 init(language_centre.read);
 init(language_centre.understand);
 init(language_centre.speak);
@@ -317,7 +337,7 @@ function main() {
 	const audio = audio_instance.get_audio();
 	const current_frequency =
 		CONFIG.frequency /
-		((Date.now() - last) / CONFIG.millsecond) /
+		((Date.now() - last) / CONFIG.millisecond) /
 		CONFIG.layer_size;
 	const limit = Math.min(
 		audio.length,
