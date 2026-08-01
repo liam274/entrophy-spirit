@@ -22,7 +22,7 @@ from tqdm import tqdm
 EXPERIMENT_DIR: Path = Path("./experiment")
 NODE_CMD: str = "node"
 BRAIN_JS: Path = Path("./brain.js")      # 請確保 brain.js 位於專案根目錄
-MAX_WORKERS: int = 10                    # 並行數量
+MAX_WORKERS: int = 1                    # 並行數量
 TOTAL_LINES: int = 20200                 # 預期總行數（可依實際調整）
 
 
