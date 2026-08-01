@@ -199,8 +199,6 @@ export class neuron {
 		}
 	}
 	update() {
-		this.hibitat_rate = /** @type {int}*/ (this.sent / this.connected);
-		this.sent = 0;
 		this.doing.total++;
 		this.do_receive();
 		if (
@@ -226,13 +224,19 @@ export class neuron {
 		} else if (hibitat_rate < CONFIG.least_hibitat_rate) {
 			this.inhibitory = false;
 		}
-		if (this.inhibitory && this.hibitat_rate >= CONFIG.max_hibitat_rate) {
+		if (
+			this.inhibitory &&
+			(this.hibitat_rate = /** @type {int}*/ (
+				this.sent / this.connected
+			)) >= CONFIG.max_hibitat_rate
+		) {
 			this.temp.length = 0;
 			return;
 		}
 		for (const func of this.varients) {
 			func(this);
 		}
+		this.sent = 0;
 		this.doing.actual++;
 		this.put();
 		this.temp.length = 0;
