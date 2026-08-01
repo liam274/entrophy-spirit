@@ -252,7 +252,6 @@ attach_func(think, [
 	(neu) => {
 		if (special_chemicals.amyloid_beta > CONFIG.max_amyloid_beta) {
 			neu.lock_on = true;
-			special_chemicals.amyloid_beta *= 0.98;
 		}
 	},
 ]);
@@ -365,6 +364,7 @@ function main() {
 	update(language_centre.understand);
 	update(language_centre.speak);
 	update(think);
+	special_chemicals.amyloid_beta *= 0.98;
 	update(hippocampus);
 	update(PFC);
 	update(amygdala);
