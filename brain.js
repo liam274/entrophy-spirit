@@ -23,7 +23,7 @@ const CONFIG = {
 	millisecond: 1000,
 	word: 8,
 	part_size: 10200,
-	max_amyloid_beta: 1000,
+	max_amyloid_beta: 100000,
 };
 
 const MAX_TEST_TIME = 200;
@@ -364,7 +364,7 @@ function main() {
 	update(language_centre.understand);
 	update(language_centre.speak);
 	update(think);
-	special_chemicals.amyloid_beta *= 0.98;
+	special_chemicals.amyloid_beta *= 0.9;
 	update(hippocampus);
 	update(PFC);
 	update(amygdala);
