@@ -86,7 +86,7 @@ export class neuron {
 	/** @type {int} */
 	habitat_rate = 0;
 	/** @type {boolean} */
-	lock_on = false;
+	not_locked = true;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -211,7 +211,7 @@ export class neuron {
 		for (const func of this.varients) {
 			func(this);
 		}
-		if (this.lock_on) {
+		if (this.not_locked) {
 			if (
 				!between(
 					this.store[1] / min(this.store[0], 1),

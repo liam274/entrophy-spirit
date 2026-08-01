@@ -200,6 +200,7 @@ const destination = {
 				process.stdout.write("\n");
 			}
 		} catch (_) {
+			error(_);
 			process.stdout.write(chunk);
 		}
 	},

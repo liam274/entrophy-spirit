@@ -253,9 +253,8 @@ attach_func(think, [
 	 * @param {neuron} neu
 	 */
 	(neu) => {
-		if (special_chemicals.amyloid_beta > CONFIG.max_amyloid_beta) {
-			neu.lock_on = true;
-		}
+		neu.not_locked =
+			special_chemicals.amyloid_beta < CONFIG.max_amyloid_beta;
 	},
 ]);
 useless_data.input.max = CONFIG.pfc_max_digest;
