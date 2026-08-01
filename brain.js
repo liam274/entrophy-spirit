@@ -342,10 +342,8 @@ if (IS_MICROPHONE) {
 } else {
 	warn("Audio-file mode is: on");
 }
-const audio_instance = new Audio(
-	IS_MICROPHONE,
-	"experiment/mozart-piano-work/Mozart - Sonata for Two Pianos in D, K. 448 [complete].raw"
-);
+// eslint-disable-next-line no-magic-numbers
+const audio_instance = new Audio(IS_MICROPHONE, process.argv[2]);
 let time = 0;
 let last = Date.now();
 function main() {
