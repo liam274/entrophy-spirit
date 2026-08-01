@@ -42,7 +42,7 @@ function true_or_false() {
  * @param {neuron[]} socket
  */
 function attach(plugin, socket) {
-	const size = socket.length >> 1; // must be even
+	const size = socket.length; // must be even
 	for (const plug of plugin) {
 		plug.golgi[0] += size;
 		plug.golgi[1] += size;
@@ -176,8 +176,7 @@ function make_part(
 				new neuron(
 					true_or_false(),
 					true_or_false(),
-					pre_layer, // here has a bug but I don't think it matters
-					// let's just let it be
+					pre_layer,
 					handler.layers.log,
 					handler.layers.send,
 					data.layers.least,
@@ -200,7 +199,7 @@ function make_part(
 			new neuron(
 				true_or_false(),
 				true_or_false(),
-				CONFIG.half_hundred,
+				CONFIG.hundred,
 				handler.output.log,
 				handler.output.send,
 				data.output.least,
@@ -211,7 +210,7 @@ function make_part(
 	}
 	for (let count = pre_layer; count > 0; count--) {
 		const temp = /**@type {neuron} */ (layers[count]);
-		temp.golgi = [CONFIG.half_hundred, CONFIG.half_hundred];
+		temp.golgi = [CONFIG.hundred, CONFIG.hundred];
 		temp.next = output;
 	}
 	attach(input, last);

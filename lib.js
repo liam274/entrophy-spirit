@@ -216,3 +216,20 @@ const logger = pino(
 );
 
 export const info = logger.info.bind(logger);
+
+/**
+ * @template t
+ * @template T
+ * @param {t[]} arr1
+ * @param {T[]} arr2
+ * @returns {[t,T][]}
+ */
+export function zip(arr1, arr2) {
+	const len = arr1.length;
+	/** @type {[t,T][]} */
+	const result = new Array(len);
+	for (let i = 0; i < len; i++) {
+		result[i] = [arr1[i], arr2[i]];
+	}
+	return result;
+}

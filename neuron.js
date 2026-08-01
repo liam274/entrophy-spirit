@@ -3,7 +3,7 @@
  * @typedef {number} float
  */
 
-import { between, random_bit, random_float } from "./lib.js";
+import { between, random_bit, random_float, zip } from "./lib.js";
 
 /**
  * @param {int} num
@@ -36,6 +36,7 @@ const CONFIG = {
 	twice: 2,
 	max_habitat_rate: 0.8,
 	least_habitat_rate: 0.2,
+	initial_weigh: 2,
 };
 
 // #意圖
@@ -85,8 +86,8 @@ export class neuron {
 	varients = [];
 	/** @type {int} */
 	habitat_rate = 0;
-	/** @type {boolean} */
-	not_locked = true;
+	/** @type {int[]} */
+	weigh = [];
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -122,19 +123,22 @@ export class neuron {
 			floor(this.golgi[0] * this.max_super_golgi * random_float()),
 			floor(this.golgi[1] * this.max_super_golgi * random_float()),
 		];
+		this.weigh = new Array(this.next.length).fill(CONFIG.initial_weigh);
 	}
 	/** @type {boolean[]} */
 	temp = [];
 	/**
 	 * @param {boolean} num
+	 * @returns {int}
 	 */
 	receive(num) {
 		if (this.fake_antibodies-- > 0) {
-			return;
+			return 0;
 		}
 		this.temp.push(num);
 		this.store[num ? 1 : 0]++;
 		this.sent++;
+		return 1;
 	}
 	do_receive() {
 		// 機制:
@@ -180,25 +184,52 @@ export class neuron {
 	}
 	put() {
 		let [zero, one] = this.golgi;
-		for (const neu of this.next) {
-			if (random_bit()) {
-				if (zero-- > 0) {
-					neu.receive(this.send_handler(false, this));
-				} else if (one-- > 0) {
-					neu.receive(this.send_handler(true, this));
+		let max_active = -Infinity,
+			min_active = Infinity;
+		let max_ind = 0,
+			min_ind = 0,
+			ind = 0;
+		for (const [neu, time] of zip(this.next, this.weigh)) {
+			let too_active = 0;
+			for (let i = time; i > 0; i--) {
+				if (random_bit()) {
+					if (zero-- > 0) {
+						too_active += neu.receive(
+							this.send_handler(false, this)
+						);
+					} else if (one-- > 0) {
+						too_active += neu.receive(
+							this.send_handler(true, this)
+						);
+					} else {
+						return;
+					}
 				} else {
-					return;
-				}
-			} else {
-				if (one-- > 0) {
-					neu.receive(this.send_handler(true, this));
-				} else if (zero-- > 0) {
-					neu.receive(this.send_handler(false, this));
-				} else {
-					return;
+					if (one-- > 0) {
+						too_active += neu.receive(
+							this.send_handler(true, this)
+						);
+					} else if (zero-- > 0) {
+						too_active += neu.receive(
+							this.send_handler(false, this)
+						);
+					} else {
+						return;
+					}
 				}
 			}
+			if (too_active > max_active) {
+				max_active = too_active;
+				max_ind = ind;
+			}
+			if (too_active < min_active) {
+				min_active = too_active;
+				min_ind = ind;
+			}
+			ind++;
 		}
+		this.weigh[max_ind]--; // weigh re-put
+		this.weigh[min_ind]++;
 	}
 	/**
 	 * @returns {boolean}
