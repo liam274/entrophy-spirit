@@ -27,3 +27,7 @@ Without help of the following people(or not!), I'm not be able to do this projec
 5. Audio providers(which has already written in the corresponding folder) - providing audios!
    And last but not the least...
 6. Every star-giver - Your star is my fuel!
+
+## License
+
+This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details.
