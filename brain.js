@@ -253,7 +253,7 @@ attach_func(think, [
 	 */
 	(neu) => {
 		if (special_chemicals.amyloid_beta < CONFIG.max_amyloid_beta) {
-			neu.inhibitory = true;
+			neu.inhibitory = false;
 		}
 	},
 ]);
