@@ -28,7 +28,7 @@ export function useless(arg) {
 export const { floor, min } = Math;
 
 const CONFIG = {
-	max_thresold: 30,
+	max_threshold: 30,
 	max_super_golgi: 0.5,
 	inhibitory_chance: 0.7,
 	hundred: 100,
@@ -66,7 +66,7 @@ export class neuron {
 	/** @type {int[]} */
 	extra = [];
 	/** @type {int} */
-	minium = floor(CONFIG.max_thresold * random_float());
+	minium = floor(CONFIG.max_threshold * random_float());
 	/** @type {int} */
 	max_super_golgi = CONFIG.max_super_golgi;
 	/** @type {int} */
@@ -83,7 +83,7 @@ export class neuron {
 	/** @type {int} */
 	fake_antibodies = 0;
 	/** @type {Function[]} */
-	varients = [];
+	variants = [];
 	/** @type {int} */
 	habitat_rate = 0;
 	/** @type {int[]} */
@@ -239,7 +239,7 @@ export class neuron {
 		this.sent = 0;
 		this.doing.total++;
 		this.do_receive();
-		for (const func of this.varients) {
+		for (const func of this.variants) {
 			func(this);
 		}
 		if (

@@ -95,13 +95,13 @@ function update(neurons) {
  */
 function attach_func(neurons, callbacks) {
 	for (const neu of neurons.input) {
-		neu.varients.push(...callbacks);
+		neu.variants.push(...callbacks);
 	}
 	for (const neu of neurons.layers) {
-		neu.varients.push(...callbacks);
+		neu.variants.push(...callbacks);
 	}
 	for (const neu of neurons.output) {
-		neu.varients.push(...callbacks);
+		neu.variants.push(...callbacks);
 	}
 }
 
