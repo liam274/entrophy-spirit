@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-批量執行 brain.js 測試腳本
-用法: python3 run_tests.py
+批量執行 brain.js 測試腳本（含每任務獨立進度條）
+用法: python3 run-test.py
 功能:
     1. 清空 experiment/ 下各子目錄的舊輸出 (*.1|2.csv, *.1|2.png, *.sample.1|2)
     2. 對每個子目錄中的 .raw 檔案，分別以 run_index=1 和 2 執行 node brain.js
-    3. 將 stdout 儲存為 <子目錄名>.sample.<run_index>
-    4. 使用 10 個行程並行執行，並顯示 tqdm 進度條
+    3. 將 stdout 即時寫入 <子目錄名>.sample.<run_index>
+    4. 使用 10 個行程並行執行，每個行程顯示自己的 tqdm 進度條（總行數固定 20200）
 """
 
 import subprocess
@@ -21,25 +21,21 @@ from tqdm import tqdm
 # ---- 常數設定 ----
 EXPERIMENT_DIR: Path = Path("./experiment")
 NODE_CMD: str = "node"
-BRAIN_JS: Path = Path("./brain.js")  # 請確保 brain.js 位於專案根目錄
-MAX_WORKERS: int = 10                # 並行數量
+BRAIN_JS: Path = Path("./brain.js")      # 請確保 brain.js 位於專案根目錄
+MAX_WORKERS: int = 10                    # 並行數量
+TOTAL_LINES: int = 20200                 # 預期總行數（可依實際調整）
 
 
-# ---- 類型別名（方便閱讀） ----
-Task = Tuple[Path, int]  # (raw_file_path, run_index)
+# ---- 類型別名 ----
+Task = Tuple[Path, int, int]  # (raw_file_path, run_index, task_id)
 
 
 def clean_old_files(subdir: Path) -> None:
-    """
-    刪除子目錄下所有符合輸出模式的舊檔案
-    """
+    """刪除子目錄下所有符合輸出模式的舊檔案"""
     patterns: List[str] = [
-        "*.1.csv",
-        "*.2.csv",
-        "*.1.png",
-        "*.2.png",
-        "*.sample.1",
-        "*.sample.2",
+        "*.1.csv", "*.2.csv",
+        "*.1.png", "*.2.png",
+        "*.sample.1", "*.sample.2",
     ]
     for pattern in patterns:
         for file_path in subdir.glob(pattern):
@@ -48,9 +44,7 @@ def clean_old_files(subdir: Path) -> None:
 
 
 def find_raw_file(subdir: Path) -> Path:
-    """
-    在子目錄中尋找第一個 .raw 檔案，若找不到則拋出錯誤
-    """
+    """在子目錄中尋找第一個 .raw 檔案"""
     raw_files: List[Path] = list(subdir.glob("*.raw"))
     if not raw_files:
         raise FileNotFoundError(f"❌ 在 {subdir} 中找不到任何 .raw 檔案")
@@ -61,71 +55,82 @@ def find_raw_file(subdir: Path) -> Path:
 
 def run_task(task: Task) -> None:
     """
-    執行單一測試任務（由 multiprocessing Pool 呼叫）
-    task: (raw_path, run_index)
+    執行單一測試任務，並顯示該任務的即時行數進度條
+    task: (raw_path, run_index, task_id)
     """
     raw_path: Path
     run_index: int
-    raw_path, run_index = task
+    task_id: int
+    raw_path, run_index, task_id = task
 
     subdir: Path = raw_path.parent
     out_sample: Path = subdir / f"{subdir.name}.sample.{run_index}"
 
-    # 執行 node，捕獲 stdout，stderr 直接顯示（便於除錯）
-    proc = subprocess.run(
+    # 開一個 tqdm 進度條，指定 position 讓它固定在一行
+    desc = f"{subdir.name}-{run_index}"
+    pbar = tqdm(
+        total=TOTAL_LINES,
+        position=task_id + 1,          # 從第 1 行開始（第 0 行保留給總體訊息）
+        desc=desc,
+        leave=False,                   # 完成後不殘留佔用行
+        unit="行",
+        file=sys.stdout,
+    )
+
+    # 啟動 node 並逐行讀取 stdout
+    proc = subprocess.Popen(
         [NODE_CMD, str(BRAIN_JS), str(raw_path)],
         cwd=Path.cwd(),
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
         encoding="utf-8",
     )
 
-    # 寫入 sample 檔案（僅 stdout）
+    # 同時寫入輸出檔案和更新進度條
     with open(out_sample, "w", encoding="utf-8") as f:
-        f.write(proc.stdout)
+        for line in proc.stdout:
+            f.write(line)
+            pbar.update(1)        # 每讀一行，進度條前進一格
 
-    # 若有錯誤訊息，印出但不中斷流程
-    if proc.stderr:
-        print(f"⚠️  {subdir.name} 第 {run_index} 次有 stderr：\n{proc.stderr}")
+    # 等待程序結束，順便印出 stderr（若有）
+    stderr_output = proc.stderr.read()
+    if stderr_output:
+        print(f"⚠️  {desc} 有 stderr：\n{stderr_output}")
+
+    # 關閉進度條
+    pbar.close()
 
 
 def main() -> None:
-    # 檢查實驗目錄是否存在
+    # 檢查實驗目錄
     if not EXPERIMENT_DIR.exists():
-        print("❌ 找不到 experiment/ 目錄，請確認路徑正確")
+        print("❌ 找不到 experiment/ 目錄")
         sys.exit(1)
 
-    # 收集所有子目錄（僅一層）
     subdirs: List[Path] = [d for d in EXPERIMENT_DIR.iterdir() if d.is_dir()]
     if not subdirs:
-        print("⚠️  experiment/ 下沒有任何子目錄")
+        print("⚠️  沒有子目錄")
         return
 
-    # 1. 清理舊檔案
+    # 清理舊檔案
     print("🧹 開始清理舊檔案...")
     for sd in subdirs:
         clean_old_files(sd)
 
-    # 2. 建立任務清單（每個子目錄執行兩次）
+    # 建立任務清單，並分配 task_id（0 ~ 總數-1）
     tasks: List[Task] = []
     for sd in subdirs:
-        raw_file: Path = find_raw_file(sd)
-        tasks.append((raw_file, 1))
-        tasks.append((raw_file, 2))
+        raw_file = find_raw_file(sd)
+        tasks.append((raw_file, 1, len(tasks)))
+        tasks.append((raw_file, 2, len(tasks)))
 
-    print(f"📦 總共 {len(tasks)} 個任務，將使用 {MAX_WORKERS} 個行程並行執行")
+    print(f"📦 總共 {len(tasks)} 個任務，使用 {MAX_WORKERS} 個並行行程")
+    print(f"📊 每個進度條目標行數：{TOTAL_LINES} 行")
 
-    # 3. 以行程池執行，並顯示 tqdm 進度條
+    # 並行執行（以任務清單長度作為行程數，但限制為 MAX_WORKERS）
     with Pool(processes=MAX_WORKERS) as pool:
-        # imap_unordered 會在各任務完成後立即回傳結果（此處為 None）
-        # 用 tqdm 包裹，每完成一個就更新一次進度
-        for _ in tqdm(
-            pool.imap_unordered(run_task, tasks),
-            total=len(tasks),
-            desc="執行進度",
-            unit="任務",
-        ):
-            pass  # 不需要處理返回值，單純為了進度條更新
+        pool.map(run_task, tasks)
 
     print("🎉 所有測試完成！")
 
