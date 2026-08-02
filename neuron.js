@@ -6,17 +6,6 @@
 import { between, random_bit, random_float } from "./lib.js";
 
 /**
- * @param {int} num
- * @param {boolean} condition
- * @returns {int}
- */
-function condition_reverse(num, condition) {
-	if (condition) {
-		return -num;
-	}
-	return num;
-}
-/**
  * @template t
  * @param {t} arg
  * @returns {t}
@@ -177,10 +166,8 @@ export class neuron {
 		} else {
 			zero_store -= Math.min(this.digest_ability, zero_store);
 		}
-		if (
-			condition_reverse(zero_store - one_store, this.digestion) >
-			this.digest_ability
-		) {
+		const diff = zero_store - one_store;
+		if (this.digestion ? -diff : diff > this.digest_ability) {
 			this.sensitivity = !this.sensitivity;
 		}
 		if (zero_store < one_store === this.sensitivity) {
