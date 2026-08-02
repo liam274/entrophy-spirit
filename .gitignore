@@ -1,4 +1,5 @@
 node_modules/
+secret/
 # The following files are way too big for github
 experiment/calculus/calculus.mp3
 experiment/calculus/calculus.raw
