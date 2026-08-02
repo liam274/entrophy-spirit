@@ -207,10 +207,9 @@ export class neuron {
 			min_ind = 0,
 			ind = 0;
 		for (let t = this.next.length; t > 0; t--) {
-			const time = this.weigh[t];
 			const neu = this.next[t];
 			let too_active = 0;
-			for (let i = time; i > 0; i--) {
+			for (let i = this.weigh[t]; i > 0; i--) {
 				if (random_bit()) {
 					if (zero-- > 0) {
 						too_active += neu.receive(
