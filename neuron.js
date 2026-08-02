@@ -3,7 +3,7 @@
  * @typedef {number} float
  */
 
-import { between, random_bit, random_float, zip } from "./lib.js";
+import { between, random_bit, random_float } from "./lib.js";
 
 /**
  * @param {int} num
@@ -206,7 +206,9 @@ export class neuron {
 		let max_ind = 0,
 			min_ind = 0,
 			ind = 0;
-		for (const [neu, time] of zip(this.next, this.weigh)) {
+		for (let t = this.next.length; t > 0; t--) {
+			const time = this.weigh[t];
+			const neu = this.next[t];
 			let too_active = 0;
 			for (let i = time; i > 0; i--) {
 				if (random_bit()) {
