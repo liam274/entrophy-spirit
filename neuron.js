@@ -138,20 +138,21 @@ export class neuron {
 	temp = [];
 	/**
 	 * @param {boolean} num
+	 * @param {int} weigh`
 	 * @returns {int}
 	 */
-	receive(num) {
+	receive(num, weigh) {
 		if (this.fake_antibodies-- > 0) {
 			return 0;
 		}
 		this.temp.push(num);
 		if (num) {
-			this.one_store++;
+			this.one_store += weigh;
 		} else {
-			this.zero_store++;
+			this.zero_store += weigh;
 		}
 		this.sent++;
-		return 1;
+		return weigh;
 	}
 	do_receive() {
 		// 機制:
@@ -221,31 +222,33 @@ export class neuron {
 		for (let t = this.next.length; t > 0; t--) {
 			const neu = this.next[t];
 			let too_active = 0;
-			for (let i = this.weigh[t]; i > 0; i--) {
-				if (random_bit()) {
-					if (zero-- > 0) {
-						too_active += neu.receive(
-							this.send_handler(false, this)
-						);
-					} else if (one-- > 0) {
-						too_active += neu.receive(
-							this.send_handler(true, this)
-						);
-					} else {
-						return;
-					}
+			if (random_bit()) {
+				if (zero-- > 0) {
+					too_active += neu.receive(
+						this.send_handler(false, this),
+						this.weigh[t]
+					);
+				} else if (one-- > 0) {
+					too_active += neu.receive(
+						this.send_handler(true, this),
+						this.weigh[t]
+					);
 				} else {
-					if (one-- > 0) {
-						too_active += neu.receive(
-							this.send_handler(true, this)
-						);
-					} else if (zero-- > 0) {
-						too_active += neu.receive(
-							this.send_handler(false, this)
-						);
-					} else {
-						return;
-					}
+					return;
+				}
+			} else {
+				if (one-- > 0) {
+					too_active += neu.receive(
+						this.send_handler(true, this),
+						this.weigh[t]
+					);
+				} else if (zero-- > 0) {
+					too_active += neu.receive(
+						this.send_handler(false, this),
+						this.weigh[t]
+					);
+				} else {
+					return;
 				}
 			}
 			if (too_active > max_active) {
