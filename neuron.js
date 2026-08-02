@@ -141,7 +141,7 @@ export class neuron {
 	 * @param {int} weigh`
 	 * @returns {int}
 	 */
-	receive(num, weigh) {
+	receive(num, weigh = 1) {
 		if (this.fake_antibodies-- > 0) {
 			return 0;
 		}
