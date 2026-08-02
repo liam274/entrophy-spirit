@@ -219,8 +219,8 @@ export class neuron {
 		let max_ind = 0,
 			min_ind = 0,
 			ind = 0;
-		for (let t = this.next.length; t > 0; t--) {
-			const neu = this.next[t];
+		for (let t = this.next.length; t > 0; ) {
+			const neu = this.next[--t];
 			let too_active = 0;
 			if (random_bit()) {
 				if (zero-- > 0) {
