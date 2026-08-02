@@ -44,8 +44,8 @@ function true_or_false() {
 function attach(plugin, socket) {
 	const size = socket.length; // must be even
 	for (const plug of plugin) {
-		plug.golgi[0] += size;
-		plug.golgi[1] += size;
+		plug.zero_golgi += size;
+		plug.one_golgi += size;
 		plug.next.push(...socket);
 	}
 	for (const sock of socket) {
@@ -210,7 +210,8 @@ function make_part(
 	}
 	for (let count = pre_layer; count > 0; count--) {
 		const temp = /**@type {neuron} */ (layers[count]);
-		temp.golgi = [CONFIG.hundred, CONFIG.hundred];
+		temp.zero_golgi = CONFIG.hundred;
+		temp.one_golgi = CONFIG.hundred;
 		temp.next = output;
 	}
 	attach(input, last);
@@ -270,7 +271,7 @@ useless_data.output.max = 0;
  * @return {boolean}
  */
 useless_handlers.output.send = (bool, obj) => {
-	if (obj.store[1] > obj.store[0] * CONFIG.twice) {
+	if (obj.one_store > obj.zero_store * CONFIG.twice) {
 		return !bool;
 	}
 	return bool;
@@ -311,8 +312,8 @@ useless_handlers.input.log = (data, neu) => {
 			return true;
 		}
 	} else {
-		zero += neu.store[0];
-		one += neu.store[1];
+		zero += neu.zero_store;
+		one += neu.one_store;
 		neu.extra = [zero, one];
 	}
 	return false;

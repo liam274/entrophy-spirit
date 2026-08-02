@@ -51,12 +51,18 @@ export class neuron {
 	sensitivity = false;
 	/** @type {boolean} */
 	digestion = false;
-	/** @type {[zero_store: int,one_store: int]} */
-	store = [0, 0];
-	/** @type {[zero_golgi: int,one_golgi: int]} */
-	golgi = [0, 0];
-	/** @type {[zero_golgi: int,one_golgi: int]} */
-	super_golgi = [0, 0];
+	/** @type {int} */
+	zero_store = 0;
+	/** @type {int} */
+	one_store = 0;
+	/** @type {int} */
+	zero_golgi = 0;
+	/** @type {int} */
+	one_golgi = 0;
+	/** @type {int} */
+	super_golgi_zero = 0;
+	/** @type {int} */
+	super_golgi_one = 0;
 	/** @type {neuron[]} */
 	next = [];
 	/** @type {Function} */
@@ -110,7 +116,8 @@ export class neuron {
 	) {
 		this.sensitivity = sensitivity;
 		this.digestion = digestion;
-		this.golgi = [maxes, maxes];
+		this.zero_golgi = maxes;
+		this.one_golgi = maxes;
 		this.handler = handler;
 		this.send_handler = send_handler;
 		/** @type {int} */
@@ -119,10 +126,12 @@ export class neuron {
 		this.connected = connected;
 	}
 	init() {
-		this.super_golgi = [
-			floor(this.golgi[0] * this.max_super_golgi * random_float()),
-			floor(this.golgi[1] * this.max_super_golgi * random_float()),
-		];
+		this.super_golgi_zero = floor(
+			this.zero_golgi * this.max_super_golgi * random_float()
+		);
+		this.super_golgi_one = floor(
+			this.one_golgi * this.max_super_golgi * random_float()
+		);
 		this.weigh = new Array(this.next.length).fill(CONFIG.initial_weigh);
 	}
 	/** @type {boolean[]} */
@@ -136,54 +145,62 @@ export class neuron {
 			return 0;
 		}
 		this.temp.push(num);
-		this.store[num ? 1 : 0]++;
+		if (num) {
+			this.one_store++;
+		} else {
+			this.zero_store++;
+		}
 		this.sent++;
 		return 1;
 	}
 	do_receive() {
 		// 機制:
 		// 過多的神經遞質會與另一種神經遞質發生反應，相互結合
-		if (this.store[0] > this.store[1]) {
-			this.store[0] *= 0.9;
-			this.store[1] *= 0.99;
+		if (this.one_store > this.zero_store) {
+			this.zero_store *= 0.9;
+			this.one_store *= 0.99;
 		} else {
-			this.store[0] *= 0.99;
-			this.store[1] *= 0.9;
+			this.zero_store *= 0.99;
+			this.one_store *= 0.9;
 		}
-		this.store[this.digestion ? 1 : 0] -= Math.min(
-			this.digest_ability,
-			this.store[this.digestion ? 1 : 0]
-		);
+		if (this.digestion) {
+			this.one_store -= Math.min(this.digest_ability, this.one_store);
+		} else {
+			this.zero_store -= Math.min(this.digest_ability, this.zero_store);
+		}
 		if (
-			condition_reverse(this.store[0] - this.store[1], this.digestion) >
-			this.digest_ability
+			condition_reverse(
+				this.zero_store - this.one_store,
+				this.digestion
+			) > this.digest_ability
 		) {
 			this.sensitivity = !this.sensitivity;
 		}
-		if (this.store[0] < this.store[1] === this.sensitivity) {
-			if (this.golgi[0] > 0) {
-				this.golgi[1]++;
-				this.golgi[0]--;
+		if (this.zero_store < this.one_store === this.sensitivity) {
+			if (this.zero_golgi > 0) {
+				this.one_golgi++;
+				this.zero_golgi--;
 			}
-			if (this.super_golgi[0] > 0) {
-				this.super_golgi[1]++;
-				this.super_golgi[0]--;
+			if (this.super_golgi_zero > 0) {
+				this.super_golgi_one++;
+				this.super_golgi_zero--;
 			}
 		} else {
-			if (this.golgi[1] > 0) {
-				this.golgi[0]++;
-				this.golgi[1]--;
+			if (this.one_golgi > 0) {
+				this.zero_golgi++;
+				this.one_golgi--;
 			}
-			if (this.super_golgi[1] > 0) {
-				this.super_golgi[0]++;
-				this.super_golgi[1]--;
+			if (this.super_golgi_one > 0) {
+				this.super_golgi_zero++;
+				this.super_golgi_one--;
 			}
 		}
-		this.store[0] += this.super_golgi[0];
-		this.store[1] += this.super_golgi[1];
+		this.zero_store += this.super_golgi_zero;
+		this.one_store += this.super_golgi_one;
 	}
 	put() {
-		let [zero, one] = this.golgi;
+		let zero = this.zero_golgi;
+		let one = this.one_golgi;
 		let max_active = -Infinity,
 			min_active = Infinity;
 		let max_ind = 0,
@@ -244,7 +261,7 @@ export class neuron {
 		}
 		if (
 			!between(
-				this.store[1] / min(this.store[0], 1),
+				this.one_store / min(this.zero_store, 1),
 				CONFIG.half,
 				CONFIG.twice
 			)
@@ -255,7 +272,7 @@ export class neuron {
 			this.temp.length = 0;
 			return false;
 		}
-		if (this.minium > this.store[0] + this.store[1]) {
+		if (this.minium > this.zero_store + this.one_store) {
 			this.temp.length = 0;
 			return false;
 		}
