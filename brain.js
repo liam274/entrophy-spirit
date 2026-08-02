@@ -26,7 +26,7 @@ const CONFIG = {
 	max_amyloid_beta: 100000,
 };
 
-const MAX_TEST_TIME = 200;
+const MAX_TEST_TIME = 100;
 
 // FUNCS
 /**
