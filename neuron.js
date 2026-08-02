@@ -156,47 +156,59 @@ export class neuron {
 	do_receive() {
 		// 機制:
 		// 過多的神經遞質會與另一種神經遞質發生反應，相互結合
-		if (this.one_store > this.zero_store) {
-			this.zero_store *= 0.9;
-			this.one_store *= 0.99;
+		let {
+			one_store,
+			zero_store,
+			zero_golgi,
+			one_golgi,
+			super_golgi_zero,
+			super_golgi_one,
+		} = this;
+		if (one_store > zero_store) {
+			zero_store *= 0.9;
+			one_store *= 0.99;
 		} else {
-			this.zero_store *= 0.99;
-			this.one_store *= 0.9;
+			zero_store *= 0.99;
+			one_store *= 0.9;
 		}
 		if (this.digestion) {
-			this.one_store -= Math.min(this.digest_ability, this.one_store);
+			one_store -= Math.min(this.digest_ability, one_store);
 		} else {
-			this.zero_store -= Math.min(this.digest_ability, this.zero_store);
+			zero_store -= Math.min(this.digest_ability, zero_store);
 		}
 		if (
-			condition_reverse(
-				this.zero_store - this.one_store,
-				this.digestion
-			) > this.digest_ability
+			condition_reverse(zero_store - one_store, this.digestion) >
+			this.digest_ability
 		) {
 			this.sensitivity = !this.sensitivity;
 		}
-		if (this.zero_store < this.one_store === this.sensitivity) {
-			if (this.zero_golgi > 0) {
-				this.one_golgi++;
-				this.zero_golgi--;
+		if (zero_store < one_store === this.sensitivity) {
+			if (zero_golgi > 0) {
+				one_golgi++;
+				zero_golgi--;
 			}
-			if (this.super_golgi_zero > 0) {
-				this.super_golgi_one++;
-				this.super_golgi_zero--;
+			if (super_golgi_zero > 0) {
+				super_golgi_one++;
+				super_golgi_zero--;
 			}
 		} else {
-			if (this.one_golgi > 0) {
-				this.zero_golgi++;
-				this.one_golgi--;
+			if (one_golgi > 0) {
+				zero_golgi++;
+				one_golgi--;
 			}
-			if (this.super_golgi_one > 0) {
-				this.super_golgi_zero++;
-				this.super_golgi_one--;
+			if (super_golgi_one > 0) {
+				super_golgi_zero++;
+				super_golgi_one--;
 			}
 		}
-		this.zero_store += this.super_golgi_zero;
-		this.one_store += this.super_golgi_one;
+		zero_store += super_golgi_zero;
+		one_store += super_golgi_one;
+		this.one_store = one_store;
+		this.zero_store = zero_store;
+		this.one_golgi = one_golgi;
+		this.zero_golgi = zero_golgi;
+		this.super_golgi_one = super_golgi_one;
+		this.super_golgi_zero = super_golgi_zero;
 	}
 	put() {
 		let zero = this.zero_golgi;
