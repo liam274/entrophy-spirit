@@ -371,13 +371,13 @@ function main() {
 	update(amygdala);
 	/** @type {int[]} */
 	const result = [],
-		/** @type {string[]} */
+		/** @type {int[]} */
 		temp = [];
 	let ind = 0;
 	const length = global_index;
 	while (ind < length) {
 		if (temp.length < CONFIG.word) {
-			temp.push(global[ind] ? "1" : "0");
+			temp.push(global[ind]);
 		} else {
 			result.push(parseInt(temp.join(""), 2));
 			temp.length = 0;
