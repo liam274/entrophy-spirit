@@ -21,26 +21,13 @@ from tqdm import tqdm
 # ---- 常數設定 ----
 EXPERIMENT_DIR: Path = Path("./experiment")
 NODE_CMD: str = "node"
-BRAIN_JS: Path = Path("./brain.js")      # 請確保 brain.js 位於專案根目錄
-MAX_WORKERS: int = 1                    # 並行數量
-TOTAL_LINES: int = 20200                 # 預期總行數（可依實際調整）
+BRAIN_JS: Path = Path("./brain.js")  # 請確保 brain.js 位於專案根目錄
+MAX_WORKERS: int = 1  # 並行數量
+TOTAL_LINES: int = 20200  # 預期總行數（可依實際調整）
 
 
 # ---- 類型別名 ----
 Task = Tuple[Path, int, int]  # (raw_file_path, run_index, task_id)
-
-
-def clean_old_files(subdir: Path) -> None:
-    """刪除子目錄下所有符合輸出模式的舊檔案"""
-    patterns: List[str] = [
-        "*.1.csv", "*.2.csv",
-        "*.1.png", "*.2.png",
-        "*.sample.1", "*.sample.2",
-    ]
-    for pattern in patterns:
-        for file_path in subdir.glob(pattern):
-            print(f"🗑️  刪除 {file_path}")
-            file_path.unlink()
 
 
 def find_raw_file(subdir: Path) -> Path:
@@ -70,9 +57,9 @@ def run_task(task: Task) -> None:
     desc = f"{subdir.name}-{run_index}"
     pbar = tqdm(
         total=TOTAL_LINES,
-        position=task_id + 1,          # 從第 1 行開始（第 0 行保留給總體訊息）
+        position=task_id + 1,  # 從第 1 行開始（第 0 行保留給總體訊息）
         desc=desc,
-        leave=False,                   # 完成後不殘留佔用行
+        leave=False,  # 完成後不殘留佔用行
         unit="行",
         file=sys.stdout,
     )
@@ -91,7 +78,7 @@ def run_task(task: Task) -> None:
     with open(out_sample, "w", encoding="utf-8") as f:
         for line in proc.stdout:
             f.write(line)
-            pbar.update(1)        # 每讀一行，進度條前進一格
+            pbar.update(1)  # 每讀一行，進度條前進一格
 
     # 等待程序結束，順便印出 stderr（若有）
     stderr_output = proc.stderr.read()
@@ -114,9 +101,6 @@ def main() -> None:
         return
 
     # 清理舊檔案
-    print("🧹 開始清理舊檔案...")
-    for sd in subdirs:
-        clean_old_files(sd)
 
     # 建立任務清單，並分配 task_id（0 ~ 總數-1）
     tasks: List[Task] = []

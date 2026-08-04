@@ -12,7 +12,7 @@ import pino from "pino";
 
 export const { warn, error, log } = console;
 
-const CONFIG = Object.freeze({
+const CONFIG = {
 	half_dig: 0x8000,
 	half_switch: 0x10000,
 	twice: 2,
@@ -20,14 +20,17 @@ const CONFIG = Object.freeze({
 	frequency: 16000,
 	double_frequency: 32000,
 	twotwenty: 1 << 20,
-});
+};
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const CHUNK_SIZE = 2500;
+/** @type {int} */
+const MAX_BUFFER_LENGTH = 16000;
+
 export class Audio {
-	/** @type {boolean[]} */
-	micBuffer = [];
+	/** @type {Uint8Array} */
+	micBuffer = new Uint8Array(MAX_BUFFER_LENGTH);
 	/** @type {int} */
 	cursor = 0;
 	/** @type {Buffer | null} */
@@ -36,6 +39,8 @@ export class Audio {
 	fileLoaded = false;
 	/** @type {boolean} */
 	is_microphone = true;
+	/** @type {Function} */
+	func = () => {};
 	/**
 	 * @param {boolean} is_microphone
 	 * @param {string} [TARGET_FILE]
@@ -50,52 +55,46 @@ export class Audio {
 				fileType: "raw",
 			});
 			const micStream = mic.startRecording();
-
-			/** @type {int} */
-			const MAX_BUFFER_LENGTH = 16000;
-
+			let cursor = 0;
 			micStream?.on("data", (chunk) => {
+				/** @type {Uint8Array} */
+				const micBuffer = new Uint8Array();
 				for (let i = 0; i < chunk.length; i += CONFIG.twice) {
 					let sample = chunk[i] | (chunk[i + 1] << CONFIG.eight);
 					if (sample >= CONFIG.half_dig) {
 						sample -= CONFIG.half_switch;
 					}
-					this.micBuffer.push(sample > 0);
+					micBuffer[cursor++] = +(sample > 0);
 				}
-				if (this.micBuffer.length > MAX_BUFFER_LENGTH) {
-					this.micBuffer.splice(
-						0,
-						this.micBuffer.length - MAX_BUFFER_LENGTH
-					);
+				if (cursor >= MAX_BUFFER_LENGTH) {
+					cursor = 0;
 				}
+				this.micBuffer = micBuffer;
 			});
+			this.func = () => {
+				cursor = 0;
+			};
 		} else {
 			try {
-				this.fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
-				if (this.fileBuffer.length & 1) {
+				let fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
+				if (fileBuffer.length & 1) {
 					// @ts-ignore
-					this.fileBuffer.length--;
-				} else if (this.fileBuffer.length === 0) {
+					fileBuffer.length--;
+				} else if (fileBuffer.length === 0) {
 					warn("⚠️ 文件為空，填充隨機噪聲");
-					this.fileBuffer = Buffer.alloc(CONFIG.double_frequency);
-					for (
-						let i = 0;
-						i < this.fileBuffer.length;
-						i += CONFIG.twice
-					) {
-						this.fileBuffer.writeInt16LE(
-							(random_bit() << 1) - 1,
-							i
-						);
+					fileBuffer = Buffer.alloc(CONFIG.double_frequency);
+					for (let i = 0; i < fileBuffer.length; i += CONFIG.twice) {
+						fileBuffer.writeInt16LE((random_bit() << 1) - 1, i);
 					}
 				}
 				this.fileLoaded = true;
 				const durationSec = (
-					this.fileBuffer.length / CONFIG.double_frequency
+					fileBuffer.length / CONFIG.double_frequency
 				).toFixed(1); // 16kHz * 2字節 = 32000 字節/秒
 				warn(
-					`✅ 音頻文件加載成功！總大小：${(this.fileBuffer.length / CONFIG.twotwenty).toFixed(1)} MB（約 ${durationSec} 秒），將進入無限循環播放。`
+					`✅ 音頻文件加載成功！總大小：${(fileBuffer.length / CONFIG.twotwenty).toFixed(1)} MB（約 ${durationSec} 秒），將進入無限循環播放。`
 				);
+				this.fileBuffer = fileBuffer;
 			} catch (e) {
 				// @ts-ignore
 				error("❌ 文件讀取失敗：", e.message);
@@ -103,7 +102,7 @@ export class Audio {
 		}
 	}
 	/**
-	 * @returns {boolean[]}
+	 * @returns {Uint8Array}
 	 */
 	get_audio() {
 		if (
@@ -111,22 +110,23 @@ export class Audio {
 			this.fileBuffer &&
 			this.is_microphone === false
 		) {
-			const result = [];
+			const result = new Uint8Array();
 			const bytesPerSample = 2;
 			const totalBytes = this.fileBuffer.length;
+			let { cursor } = this;
 			for (let i = 0; i < CHUNK_SIZE; i++) {
-				const sample = this.fileBuffer.readInt16LE(this.cursor);
-				result.push(sample > 0);
-				this.cursor += bytesPerSample;
-				if (this.cursor >= totalBytes) {
-					this.cursor = 0;
+				const sample = this.fileBuffer.readInt16LE(cursor);
+				result[i] = +(sample > 0);
+				cursor += bytesPerSample;
+				if (cursor >= totalBytes) {
+					cursor = 0;
 				}
 			}
+			this.cursor = cursor;
 			return result;
 		}
-		const _ = [...this.micBuffer];
-		this.micBuffer.length = 0;
-		return _;
+		this.func();
+		return this.micBuffer;
 	}
 }
 

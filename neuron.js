@@ -16,7 +16,7 @@ export function useless(arg) {
 
 export const { floor, min } = Math;
 
-const CONFIG = Object.freeze({
+const CONFIG = {
 	max_threshold: 30,
 	max_super_golgi: 0.5,
 	inhibitory_chance: 0.7,
@@ -26,7 +26,7 @@ const CONFIG = Object.freeze({
 	max_habitat_rate: 0.8,
 	least_habitat_rate: 0.2,
 	initial_weigh: 2,
-});
+};
 
 // #意圖
 // 神經元分為零敏型和壹敏型：
