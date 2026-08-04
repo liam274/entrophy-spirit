@@ -387,17 +387,17 @@ function main() {
 	global_index = 0;
 	const now = Date.now();
 	buffer.push(`${now - last},` + result.join(":"));
+	result.length = 0; // move the delete statement to the front
+	// allows V8 to have more time to choose to gc
 	last = now;
 	if (buffer.length > CONFIG.hundred) {
 		info(buffer.join("\n"));
 		buffer.length = 0;
-		time++;
-		if (time === MAX_TEST_TIME) {
+		if (++time === MAX_TEST_TIME) {
 			warn("Finished");
 			process.exit(0);
 		}
 	}
-	result.length = 0;
 	setImmediate(main); // This is Node.js thing
 }
 main();
