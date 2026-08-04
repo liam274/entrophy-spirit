@@ -58,6 +58,10 @@ export default [
 				"error",
 				{ allowShortCircuit: true, allowTernary: true },
 			],
+			"no-restricted-syntax": [
+				"error",
+				"UnaryExpression[operator='delete']",
+			],
 		},
 	},
 ];

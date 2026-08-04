@@ -9,7 +9,7 @@ import { between, Audio, info, warn, random_float } from "./lib.js";
 const FACTOR = 1;
 
 // CONFIG
-const CONFIG = {
+const CONFIG = Object.freeze({
 	half: 0.5,
 	hundred: 100,
 	twice: 2,
@@ -24,7 +24,7 @@ const CONFIG = {
 	word: 8,
 	part_size: 10200,
 	max_amyloid_beta: 100000,
-};
+});
 
 const MAX_TEST_TIME = 100;
 

@@ -12,7 +12,7 @@ import pino from "pino";
 
 export const { warn, error, log } = console;
 
-const CONFIG = {
+const CONFIG = Object.freeze({
 	half_dig: 0x8000,
 	half_switch: 0x10000,
 	twice: 2,
@@ -20,7 +20,7 @@ const CONFIG = {
 	frequency: 16000,
 	double_frequency: 32000,
 	twotwenty: 1 << 20,
-};
+});
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
