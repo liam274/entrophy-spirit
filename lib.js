@@ -79,12 +79,8 @@ export class Audio {
 					cursor = 0;
 				}
 			});
-			this.micBuffer = () => {
-				return micBuffer;
-			};
-			this.func = () => {
-				cursor = 0;
-			};
+			this.micBuffer = () => micBuffer;
+			this.func = () => (cursor = 0);
 		} else {
 			try {
 				let fileBuffer = readFileSync(join(__dirname, TARGET_FILE));
