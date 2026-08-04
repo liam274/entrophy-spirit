@@ -20,6 +20,7 @@ export function useless(arg) {
  */
 
 export const { warn, error, log } = console;
+export const { floor, min } = Math;
 
 const CONFIG = {
 	half_dig: 0x8000,
@@ -137,12 +138,12 @@ export class Audio {
 
 /**
  * @param {int} value
- * @param {int} min
+ * @param {int} min_
  * @param {int} max
  * @returns {boolean}
  */
-export function between(value, min, max) {
-	return value < max && value > min;
+export function between(value, min_, max) {
+	return value < max && value > min_;
 }
 
 // ------------------- XorShift32 core by Deepseek -------------------
@@ -187,6 +188,19 @@ export function random_float() {
 	state = x;
 	// convert to unsigned int then scale to [0,1)
 	return (x >>> 0) * 2.328306437e-10; // 2^-32
+}
+
+/**
+ * @template t
+ * @param {t[]} arr
+ * @returns {t[]}
+ */
+export function shuffle(arr) {
+	for (let i = arr.length - 1; i > 0; i--) {
+		const j = floor(random_float() * (i + 1));
+		[arr[i], arr[j]] = [arr[j], arr[i]];
+	}
+	return arr;
 }
 
 // Deepseek's job

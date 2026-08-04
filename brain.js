@@ -1,5 +1,14 @@
-import { neuron, floor, min } from "./neuron.js";
-import { between, Audio, info, warn, random_float, useless } from "./lib.js";
+import { neuron } from "./neuron.js";
+import {
+	between,
+	Audio,
+	info,
+	warn,
+	random_float,
+	useless,
+	floor,
+	min,
+} from "./lib.js";
 
 /**
  * @typedef {number} int

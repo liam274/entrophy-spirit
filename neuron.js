@@ -3,9 +3,14 @@
  * @typedef {number} float
  */
 
-import { between, random_bit, random_float, useless } from "./lib.js";
-
-export const { floor, min } = Math;
+import {
+	between,
+	random_bit,
+	random_float,
+	useless,
+	floor,
+	min,
+} from "./lib.js";
 
 const CONFIG = {
 	max_threshold: 30,
