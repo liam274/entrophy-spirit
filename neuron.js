@@ -83,6 +83,8 @@ export class neuron {
 	habitat_rate = 0;
 	/** @type {int[]} */
 	weigh = [];
+	/** @type {float} */
+	digest_ability = 0;
 	/**
 	 * @param {boolean} sensitivity - sensitive to zero or one
 	 * @param {boolean} digestion - digest zero or one
@@ -109,7 +111,6 @@ export class neuron {
 		this.one_golgi = maxes;
 		this.handler = handler;
 		this.send_handler = send_handler;
-		/** @type {int} */
 		this.digest_ability =
 			least + floor((CONFIG.hundred - least) * max * random_float());
 		this.connected = connected;
