@@ -94,7 +94,6 @@ export class Audio {
 						fileBuffer.writeInt16LE((random_bit() << 1) - 1, i);
 					}
 				}
-				this.fileLoaded = true;
 				const durationSec = (
 					fileBuffer.length / CONFIG.double_frequency
 				).toFixed(1); // 16kHz * 2字節 = 32000 字節/秒
@@ -102,6 +101,7 @@ export class Audio {
 					`✅ 音頻文件加載成功！總大小：${(fileBuffer.length / CONFIG.twotwenty).toFixed(1)} MB（約 ${durationSec} 秒），將進入無限循環播放。`
 				);
 				this.fileBuffer = fileBuffer;
+				this.fileLoaded = true;
 			} catch (e) {
 				// @ts-ignore
 				error("❌ 文件讀取失敗：", e.message);
@@ -112,17 +112,15 @@ export class Audio {
 	 * @returns {Uint8Array}
 	 */
 	get_audio() {
-		if (
-			this.fileLoaded &&
-			this.fileBuffer &&
-			this.is_microphone === false
-		) {
+		if (this.fileLoaded && this.is_microphone === false) {
 			const result = new Uint8Array();
 			const bytesPerSample = 2;
-			const totalBytes = this.fileBuffer.length;
+			const totalBytes = /** @type {Buffer}*/ (this.fileBuffer).length;
 			let { cursor } = this;
 			for (let i = 0; i < CHUNK_SIZE; i++) {
-				const sample = this.fileBuffer.readInt16LE(cursor);
+				const sample = /** @type {Buffer}*/ (
+					this.fileBuffer
+				).readInt16LE(cursor);
 				result[i] = +(sample > 0);
 				cursor += bytesPerSample;
 				if (cursor >= totalBytes) {
@@ -147,7 +145,7 @@ export function between(value, min, max) {
 	return value < max && value > min;
 }
 
-// ------------------- Xorshift32 core by Deepseek -------------------
+// ------------------- XorShift32 core by Deepseek -------------------
 let state = 1; // non‑zero seed; will be overwritten by seed()
 
 /**
@@ -167,7 +165,7 @@ seed(Date.now());
  * @returns {0|1}
  */
 export function random_bit() {
-	// xorshift32 update (inlined for maximum speed)
+	// XorShift32 update (inlined for maximum speed)
 	let x = state;
 	x ^= x << 13;
 	x ^= x >> 17;
