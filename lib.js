@@ -38,8 +38,8 @@ const CHUNK_SIZE = 2500;
 const MAX_BUFFER_LENGTH = 16000;
 
 export class Audio {
-	/** @type {Uint8Array} */
-	micBuffer = new Uint8Array(MAX_BUFFER_LENGTH);
+	/** @type {Function} */
+	micBuffer = useless;
 	/** @type {int} */
 	cursor = 0;
 	/** @type {Buffer | null} */
@@ -65,9 +65,9 @@ export class Audio {
 			});
 			const micStream = mic.startRecording();
 			let cursor = 0;
+			/** @type {Uint8Array} */
+			const micBuffer = new Uint8Array(MAX_BUFFER_LENGTH);
 			micStream?.on("data", (chunk) => {
-				/** @type {Uint8Array} */
-				const micBuffer = new Uint8Array();
 				for (let i = 0; i < chunk.length; i += CONFIG.twice) {
 					let sample = chunk[i] | (chunk[i + 1] << CONFIG.eight);
 					if (sample >= CONFIG.half_dig) {
@@ -78,8 +78,10 @@ export class Audio {
 				if (cursor >= MAX_BUFFER_LENGTH) {
 					cursor = 0;
 				}
-				this.micBuffer = micBuffer;
 			});
+			this.micBuffer = () => {
+				return micBuffer;
+			};
 			this.func = () => {
 				cursor = 0;
 			};
@@ -135,7 +137,7 @@ export class Audio {
 			return result;
 		}
 		this.func();
-		return this.micBuffer;
+		return this.micBuffer();
 	}
 }
 
