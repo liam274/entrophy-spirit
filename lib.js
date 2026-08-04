@@ -6,6 +6,15 @@ import { Buffer } from "buffer";
 import pino from "pino";
 
 /**
+ * @template t
+ * @param {t} arg
+ * @returns {t}
+ */
+export function useless(arg) {
+	return arg;
+}
+
+/**
  * @typedef {number} int
  * @typedef {number} float
  */
@@ -40,7 +49,7 @@ export class Audio {
 	/** @type {boolean} */
 	is_microphone = true;
 	/** @type {Function} */
-	func = () => {};
+	func = useless;
 	/**
 	 * @param {boolean} is_microphone
 	 * @param {string} [TARGET_FILE]

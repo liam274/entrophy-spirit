@@ -3,16 +3,7 @@
  * @typedef {number} float
  */
 
-import { between, random_bit, random_float } from "./lib.js";
-
-/**
- * @template t
- * @param {t} arg
- * @returns {t}
- */
-export function useless(arg) {
-	return arg;
-}
+import { between, random_bit, random_float, useless } from "./lib.js";
 
 export const { floor, min } = Math;
 
