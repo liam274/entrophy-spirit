@@ -14,7 +14,7 @@ We aim to simulate a brain that is similar to a human brain. Thus, to test our t
 | Calculus lessons via file                                                                   | [`expirement/calculus/`](expirement/calculus/)                   |
 | Harry Potter Book 1 via file                                                                | [`expirement/story/`](expirement/story/)                         |
 
-We have figured out that, surprisingly, its analysis result given is very similar to humans' EEG in the specific occasion!(In the old version, v0.0.1. The current version will not output the correct EEG)
+We have figured out that, surprisingly, its analysis result given is very similar to humans' EEG in the specific occasion!(In both the old version, v0.0.1. and the current version will output the correct EEG)
 
 ## Acknowledgements
 
