@@ -12,7 +12,7 @@ const TIME = 10000;
  * @typedef {Object} template
  * @property {number} avg
  * @property {number} total
- * @property {number} time
+ * @property {number} iteration
  */
 
 /**
@@ -28,17 +28,31 @@ function isPromise(value) {
 }
 
 /**
+ * Test function shall be no-side-effect functions
  * @param {Object<string,Function>} funcs
  * @param {()=>any} generator
- * @param {int} time
+ * @param {int} iteration
  * @returns {Object<string, template>}
  */
-export function test(funcs, generator, time = TIME) {
+export function test(funcs, generator, iteration = TIME) {
 	const data = generator();
 	/** @type {Object<string, float>} */
 	const temp = {};
-	for (let k = time; k > 0; k--) {
-		for (const name in funcs) {
+	/** @type {string[]} */
+	const keys = [];
+	// warm up
+	for (const name in funcs) {
+		if (!Object.hasOwn(funcs, name)) {
+			continue;
+		}
+		keys.push(name);
+		funcs[name](data);
+		funcs[name](data);
+		funcs[name](data);
+	}
+	// real test
+	for (let k = iteration; k > 0; k--) {
+		for (const name of keys) {
 			gc_func();
 			const start = performance.now();
 			const a = funcs[name](data);
@@ -49,13 +63,18 @@ export function test(funcs, generator, time = TIME) {
 						"Promise-like function is not recommended to do benchmark test," +
 						" since network or other external source may have unstable performance."
 				);
+				process.exit(1);
 			}
 		}
 	}
 	/** @type {Object<string, template>} */
 	const result = {};
 	for (const key in temp) {
-		result[key] = { avg: temp[key] / time, total: temp[key], time };
+		result[key] = {
+			avg: temp[key] / iteration,
+			total: temp[key],
+			iteration,
+		};
 	}
 	return result;
 }
