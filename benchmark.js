@@ -119,9 +119,10 @@ export function chain(funcs, initial) {
 }
 
 /**
- * @template t
- * @param {(...x:any)=>t} handler
+ * @template {Function} t
+ * @param {t} handler
  * @param {Object<string,any>} environment
+ * @returns {t}
  */
 export function packager(handler, environment) {
 	const env = Object.setPrototypeOf(environment, null);
