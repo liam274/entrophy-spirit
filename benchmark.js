@@ -3,6 +3,7 @@
  * @typedef {number} float
  */
 const { floor } = Math;
+const { log } = console;
 if (!global.gc) {
 	throw new Error("Error: gc is not exposed");
 }
@@ -64,6 +65,7 @@ export function test(funcs, generator, iteration = TIME, heat = HALF) {
 			);
 		}
 	}
+	log("Pre-heat: start");
 	for (const name of keys) {
 		for (let k = heat; k > 0; k--) {
 			funcs[name](data);
@@ -78,15 +80,19 @@ export function test(funcs, generator, iteration = TIME, heat = HALF) {
 			funcs[name](data);
 		}
 	}
+	log("Pre-heat: end");
+	log("Test: start");
 	// real test
-	for (let k = iteration; k > 0; k--) {
-		for (const name of keys) {
-			gc_func();
-			const start = performance.now();
+	for (const name of keys) {
+		log("Test:", name);
+		gc_func();
+		const start = performance.now();
+		for (let k = iteration; k > 0; k--) {
 			funcs[name](data);
-			temp[name] = (temp[name] ?? 0) + performance.now() - start;
 		}
+		temp[name] = performance.now() - start;
 	}
+	log("Test: end");
 	/** @type {Object<string, template>} */
 	const result = {};
 	for (const key in temp) {
