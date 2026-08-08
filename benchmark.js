@@ -2,10 +2,12 @@
  * @typedef {number} int
  * @typedef {number} float
  */
-const { error } = console;
+const { floor } = Math;
+if (!global.gc) {
+	throw new Error("Error: gc is not exposed");
+}
 /** @type {NodeJS.GCFunction} */
-const gc_func =
-	global.gc ?? (error("Error: gc is not exposed"), process.exit(1));
+const gc_func = global.gc;
 
 const TIME = 10000;
 /**
@@ -35,6 +37,11 @@ function isPromise(value) {
  * @returns {Object<string, template>}
  */
 export function test(funcs, generator, iteration = TIME) {
+	if (iteration < 1) {
+		throw new Error(`Error: Bad iteration count ${iteration}`);
+	}
+	// eslint-disable-next-line no-param-reassign
+	iteration = floor(iteration);
 	const data = generator();
 	/** @type {Object<string, float>} */
 	const temp = {};
@@ -58,12 +65,11 @@ export function test(funcs, generator, iteration = TIME) {
 			const a = funcs[name](data);
 			temp[name] = (temp[name] ?? 0) + performance.now() - start;
 			if (isPromise(a)) {
-				error(
+				throw new Error(
 					"Error: Bad function return value (promise-like) " +
 						"Promise-like function is not recommended to do benchmark test," +
 						" since network or other external source may have unstable performance."
 				);
-				process.exit(1);
 			}
 		}
 	}
