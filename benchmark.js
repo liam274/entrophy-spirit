@@ -128,3 +128,13 @@ export function packager(handler, environment) {
 	const env = Object.setPrototypeOf(environment, null);
 	return handler.bind(env);
 }
+
+/**
+ * @template {Object} t
+ * @param {t} obj
+ * @param {Object} prototype
+ * @returns {t}
+ */
+export function resign_prototype(obj, prototype) {
+	return Object.setPrototypeOf(obj, Object.setPrototypeOf(prototype, null));
+}
