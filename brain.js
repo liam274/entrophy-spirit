@@ -393,7 +393,8 @@ function main() {
 		}
 		ind++;
 	}
-	global_index = 0;
+	// eslint-disable-next-line no-magic-numbers
+	global_index = length & 7;
 	const now = Date.now();
 	buffer.push(`${now - last},` + result.join(":"));
 	result.length = 0; // move the delete statement to the front
