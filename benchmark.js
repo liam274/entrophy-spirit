@@ -118,7 +118,5 @@ export function packager(handler, environment) {
 	/**
 	 * @param {any[]} x
 	 */
-	return (...x) => {
-		handler(environment, ...x);
-	};
+	return (...x) => handler(environment, ...x);
 }
