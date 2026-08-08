@@ -117,6 +117,6 @@ export function chain(funcs, initial) {
 export function packager(handler, environment) {
 	return () => {
 		const env = environment;
-		handler();
+		handler(env);
 	};
 }
