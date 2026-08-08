@@ -108,3 +108,15 @@ export function chain(funcs, initial) {
 	}
 	return res;
 }
+
+/**
+ * @template t
+ * @param {(...x:any)=>t} handler
+ * @param {Object<string,any>} environment
+ */
+export function packager(handler, environment) {
+	return () => {
+		const env = environment;
+		handler();
+	};
+}
