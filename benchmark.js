@@ -55,15 +55,18 @@ export function test(funcs, generator, iteration = TIME, heat = HALF) {
 			continue;
 		}
 		keys.push(name);
+		const a = funcs[name](data);
+		if (isPromise(a)) {
+			throw new Error(
+				"Error: Bad function return value (promise-like) " +
+					"Promise-like function is not recommended to do benchmark test," +
+					" since network or other external source may have unstable performance."
+			);
+		}
+	}
+	for (const name of keys) {
 		for (let k = heat; k > 0; k--) {
-			const a = funcs[name](data);
-			if (isPromise(a)) {
-				throw new Error(
-					"Error: Bad function return value (promise-like) " +
-						"Promise-like function is not recommended to do benchmark test," +
-						" since network or other external source may have unstable performance."
-				);
-			}
+			funcs[name](data);
 			funcs[name](data);
 			funcs[name](data);
 			funcs[name](data);
