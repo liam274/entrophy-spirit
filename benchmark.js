@@ -115,8 +115,10 @@ export function chain(funcs, initial) {
  * @param {Object<string,any>} environment
  */
 export function packager(handler, environment) {
-	return () => {
-		const env = environment;
-		handler(env);
+	/**
+	 * @param {any[]} x
+	 */
+	return (...x) => {
+		handler(...x, environment);
 	};
 }
