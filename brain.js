@@ -382,8 +382,9 @@ function main() {
 	const result = [],
 		/** @type {int[]} */
 		temp = [];
-	let ind = 0;
 	const length = global_index;
+	// eslint-disable-next-line no-magic-numbers
+	let ind = length & 7;
 	while (ind < length) {
 		if (temp.length < CONFIG.word) {
 			temp.push(global[ind]);
