@@ -115,8 +115,6 @@ export function chain(funcs, initial) {
  * @param {Object<string,any>} environment
  */
 export function packager(handler, environment) {
-	/**
-	 * @param {any[]} x
-	 */
-	return (...x) => handler(environment, ...x);
+	const env = Object.setPrototypeOf(environment, null);
+	return handler.bind(env);
 }
