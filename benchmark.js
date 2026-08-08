@@ -10,6 +10,7 @@ if (!global.gc) {
 const gc_func = global.gc;
 
 const TIME = 10000;
+const HALF = 100;
 /**
  * @typedef {Object} template
  * @property {number} avg
@@ -34,9 +35,10 @@ function isPromise(value) {
  * @param {Object<string,Function>} funcs
  * @param {()=>any} generator
  * @param {int} iteration
+ * @param {int} heat
  * @returns {Object<string, template>}
  */
-export function test(funcs, generator, iteration = TIME) {
+export function test(funcs, generator, iteration = TIME, heat = HALF) {
 	if (iteration < 1) {
 		throw new Error(`Error: Bad iteration count ${iteration}`);
 	}
@@ -53,9 +55,18 @@ export function test(funcs, generator, iteration = TIME) {
 			continue;
 		}
 		keys.push(name);
-		funcs[name](data);
-		funcs[name](data);
-		funcs[name](data);
+		for (let k = heat; k > 0; k--) {
+			funcs[name](data);
+			funcs[name](data);
+			funcs[name](data);
+			funcs[name](data);
+			funcs[name](data);
+			funcs[name](data);
+			funcs[name](data);
+			funcs[name](data);
+			funcs[name](data);
+			funcs[name](data);
+		}
 	}
 	// real test
 	for (let k = iteration; k > 0; k--) {
