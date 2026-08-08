@@ -1,3 +1,4 @@
+import _ from "lodash";
 /**
  * @typedef {number} int
  * @typedef {number} float
@@ -136,5 +137,8 @@ export function packager(handler, environment) {
  * @returns {t}
  */
 export function resign_prototype(obj, prototype) {
-	return Object.setPrototypeOf(obj, Object.setPrototypeOf(prototype, null));
+	return Object.setPrototypeOf(
+		obj,
+		Object.setPrototypeOf(_.cloneDeep(prototype), null)
+	);
 }
