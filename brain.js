@@ -37,6 +37,15 @@ const CONFIG = {
 
 const MAX_TEST_TIME = 100;
 
+// Events
+process.on("SIGINT", () => {
+	warn("\nCaught Ctrl+C! Performing cleanup...");
+	warn(
+		"Please don't do that next time, since the program will stop the iteration itself, automatically."
+	);
+	process.exit(-1);
+});
+
 // FUNCS
 /**
  * @returns {boolean}
