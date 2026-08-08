@@ -42,7 +42,7 @@ export function test(funcs, generator, time = TIME) {
 			gc_func();
 			const start = performance.now();
 			const a = funcs[name](data);
-			temp[name] += performance.now() - start;
+			temp[name] = (temp[name] ?? 0) + performance.now() - start;
 			if (isPromise(a)) {
 				error(
 					"Error: Bad function return value (promise-like) " +
