@@ -149,9 +149,11 @@ export function resign_prototype(obj, prototype) {
  * @this {Object}
  */
 export function if_func(callback, predicate) {
-	if (predicate(this)) {
-		callback.call(this);
-	}
+	return () => {
+		if (predicate(this)) {
+			callback.call(this);
+		}
+	};
 }
 
 /**
