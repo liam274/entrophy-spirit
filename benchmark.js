@@ -123,7 +123,7 @@ export function* _chain() {
 			funcs.splice(t + 1, 0, return_value);
 		}
 		if (this.iterable === true) {
-			yield;
+			yield that;
 		}
 		t++;
 	}
