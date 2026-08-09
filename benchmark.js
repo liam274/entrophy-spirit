@@ -110,14 +110,18 @@ export function test(funcs, generator, iteration = TIME, heat = HALF) {
  * @param {(()=>any)[]} funcs
  * @param {Object} [initial]
  * @returns {any}
+ * @this {Object<string,any>}
  */
-export function chain(funcs, initial = {}) {
+export function* chain(funcs, initial = {}) {
 	const that = initial;
 	let t = 0;
 	for (const func of funcs) {
 		const return_value = func.call(that);
 		if (is_callable(return_value)) {
 			funcs.splice(t + 1, 0, return_value);
+		}
+		if (this.iterable === true) {
+			yield;
 		}
 		t++;
 	}
