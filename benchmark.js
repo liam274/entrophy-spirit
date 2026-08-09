@@ -112,11 +112,11 @@ export function test(funcs, generator, iteration = TIME, heat = HALF) {
  * @returns {any}
  */
 export function chain(funcs, initial = {}) {
-	const res = initial;
+	const that = initial;
 	for (const func of funcs) {
-		func.call(res);
+		func.call(that);
 	}
-	return res;
+	return that;
 }
 
 /**
@@ -141,4 +141,27 @@ export function resign_prototype(obj, prototype) {
 		obj,
 		Object.setPrototypeOf(_.cloneDeep(prototype), null)
 	);
+}
+
+/**
+ * @param {Function} callback
+ * @param {(x:Object)=>boolean} predicate
+ * @this {Object}
+ */
+export function if_func(callback, predicate) {
+	if (predicate(this)) {
+		callback.call(this);
+	}
+}
+
+/**
+ * @param {any} value
+ * @returns {boolean}
+ */
+function is_callable(value) {
+	if (typeof value === "function") {
+		const str = /** @type {Function} */ (value).toString();
+		return !/^class\s/.test(str);
+	}
+	return false;
 }
