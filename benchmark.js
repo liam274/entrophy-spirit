@@ -113,8 +113,13 @@ export function test(funcs, generator, iteration = TIME, heat = HALF) {
  */
 export function chain(funcs, initial = {}) {
 	const that = initial;
+	let t = 0;
 	for (const func of funcs) {
-		func.call(that);
+		const return_value = func.call(that);
+		if (is_callable(return_value)) {
+			funcs.splice(t + 1, 0, return_value);
+		}
+		t++;
 	}
 	return that;
 }
