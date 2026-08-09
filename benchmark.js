@@ -107,14 +107,14 @@ export function test(funcs, generator, iteration = TIME, heat = HALF) {
 }
 
 /**
- * @param {((x: any)=>any)[]} funcs
- * @param {any} [initial]
+ * @param {(()=>any)[]} funcs
+ * @param {Object} [initial]
  * @returns {any}
  */
-export function chain(funcs, initial) {
-	let res = initial;
+export function chain(funcs, initial = {}) {
+	const res = initial;
 	for (const func of funcs) {
-		res = func(res);
+		func.call(res);
 	}
 	return res;
 }
