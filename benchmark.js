@@ -107,13 +107,15 @@ export function test(funcs, generator, iteration = TIME, heat = HALF) {
 }
 
 /**
- * @param {(()=>any)[]} funcs
- * @param {Object} [initial]
- * @returns {any}
+ * @returns {Object<string,any>}
  * @this {Object<string,any>}
  */
-export function* chain(funcs, initial = {}) {
-	const that = initial;
+export function* _chain() {
+	if (this === undefined || typeof this !== "object" || this === null) {
+		return Object.create(null);
+	}
+	const that = this.initial ?? {};
+	const { funcs } = /** @type {{funcs: (()=>any)[]}} */ (this);
 	let t = 0;
 	for (const func of funcs) {
 		const return_value = func.call(that);
@@ -126,6 +128,21 @@ export function* chain(funcs, initial = {}) {
 		t++;
 	}
 	return that;
+}
+
+/**
+ * @param {(()=>any)[]} funcs
+ * @param {Object} [initial]
+ * @param {boolean} iterable
+ * @returns {Object<string,any>}
+ */
+export function chain(funcs, initial = {}, iterable = false) {
+	const obj = Object.setPrototypeOf({ funcs, initial, iterable }, null);
+	const iterator = _chain.call(obj);
+	if (iterable) {
+		return iterator.next().value;
+	}
+	return iterator;
 }
 
 /**
