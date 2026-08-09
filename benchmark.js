@@ -146,10 +146,12 @@ export function resign_prototype(obj, prototype) {
 /**
  * @param {Function} callback
  * @param {(x:Object)=>boolean} predicate
- * @this {Object}
  */
 export function if_func(callback, predicate) {
-	return () => {
+	/**
+	 * @this {Object}
+	 */
+	return function () {
 		if (predicate(this)) {
 			callback.call(this);
 		}
