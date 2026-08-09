@@ -139,7 +139,7 @@ export function* _chain() {
 export function chain(funcs, initial = {}, iterable = false) {
 	const obj = Object.setPrototypeOf({ funcs, initial, iterable }, null);
 	const iterator = _chain.call(obj);
-	if (iterable) {
+	if (!iterable) {
 		return iterator.next().value;
 	}
 	return iterator;
